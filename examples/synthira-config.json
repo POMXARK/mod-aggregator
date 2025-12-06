@@ -1,0 +1,15 @@
+{
+  "name": "Synthira.ru",
+  "url": "https://synthira.ru",
+  "parser_config": {
+    "list_url": "https://synthira.ru/sims4",
+    "base_url": "https://synthira.ru",
+    "list_selector": ".mod-item, .article-item, article, .post",
+    "title_selector": "h2 a, h3 a, .title a, .post-title a",
+    "url_selector": "h2 a, h3 a, .title a, .post-title a",
+    "version_selector": ".version, .ver, [class*='version']",
+    "author_selector": ".author, .by-author, [class*='author']",
+    "image_selector": "img, .thumbnail img, .post-thumbnail img"
+  }
+}
+
