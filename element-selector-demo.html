@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Демо выделения элементов</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #334155;
+    }
+
+    h1 {
+      color: #0ea5e9;
+      margin-bottom: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #0284c7;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.active {
+      background: #34a853;
+    }
+
+    button.active:hover {
+      background: #2d8f47;
+    }
+
+    .status {
+      padding: 0.5rem 1rem;
+      background: #334155;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .status.active {
+      background: #34a853;
+      color: white;
+    }
+
+    .demo-content {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      border: 1px solid #334155;
+      min-height: 500px;
+    }
+
+    .demo-content h2 {
+      color: #0ea5e9;
+      margin-bottom: 1rem;
+    }
+
+    .demo-content p {
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+
+    .card {
+      background: #334155;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+      border: 1px solid #475569;
+    }
+
+    .card h3 {
+      color: #60a5fa;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: #94a3b8;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .button-group button {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .info-panel {
+      position: fixed;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      border: 1px solid #4285f4;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      z-index: 2147483646;
+      display: none;
+      line-height: 1.4;
+      max-width: 300px;
+      word-wrap: break-word;
+    }
+
+    .info-panel .tag {
+      color: #569cd6;
+      font-weight: bold;
+    }
+
+    .info-panel .text {
+      color: #ce9178;
+      margin-top: 4px;
+    }
+
+    .selected-info {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-top: 2rem;
+      border: 1px solid #334155;
+      display: none;
+    }
+
+    .selected-info.visible {
+      display: block;
+    }
+
+    .selected-info h3 {
+      color: #34a853;
+      margin-bottom: 1rem;
+    }
+
+    .selected-info pre {
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      color: #60a5fa;
+      font-size: 0.9rem;
+    }
+
+    .selected-info .details {
+      margin-top: 1rem;
+    }
+
+    .selected-info .details div {
+      margin: 0.5rem 0;
+      color: #cbd5e1;
+    }
+
+    .selected-info .details strong {
+      color: #0ea5e9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Демо выделения элементов</h1>
+      <div class="controls">
+        <button id="toggleBtn">Включить выделение</button>
+        <div class="status" id="status">Неактивно</div>
+      </div>
+    </div>
+
+    <div class="demo-content" id="demoContent">
+      <h2>Пример контента для выделения</h2>
+      <p>Нажмите кнопку "Включить выделение" и наведите курсор на элементы ниже. Кликните на элемент, чтобы выбрать его.</p>
+
+      <div class="card">
+        <h3>Карточка 1</h3>
+        <p>Это первая карточка с некоторым текстом. Попробуйте выделить её или отдельные элементы внутри.</p>
+        <div class="button-group">
+          <button>Кнопка 1</button>
+          <button>Кнопка 2</button>
+          <button>Кнопка 3</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Карточка 2</h3>
+        <p>Вторая карточка с другим содержимым. Здесь тоже можно выделять элементы.</p>
+        <ul style="margin-left: 2rem; color: #94a3b8;">
+          <li>Элемент списка 1</li>
+          <li>Элемент списка 2</li>
+          <li>Элемент списка 3</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Карточка 3</h3>
+        <p>Третья карточка для демонстрации. Выделяйте любые элементы на странице!</p>
+        <div style="background: #0f172a; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+          <p style="color: #60a5fa;">Вложенный контент</p>
+          <span style="color: #34a853;">Текст в span</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Форма</h3>
+        <form style="margin-top: 1rem;">
+          <input type="text" placeholder="Имя" style="padding: 0.5rem; width: 100%; margin-bottom: 0.5rem; background: #0f172a; border: 1px solid #334155; border-radius: 0.25rem; color: #e2e8f0;">
+          <input type="email" placeholder="Email" style="padding: 0.5rem; width: 100%; margin-bottom: 0.5rem; background: #0f172a; border: 1px solid #334155; border-radius: 0.25rem; color: #e2e8f0;">
+          <button type="submit" style="width: 100%;">Отправить</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="selected-info" id="selectedInfo">
+      <h3>✓ Выбранный элемент</h3>
+      <div class="details" id="selectedDetails"></div>
+      <pre id="selectorOutput"></pre>
+    </div>
+  </div>
+
+  <div class="info-panel" id="infoPanel"></div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      let isSelectionMode = false;
+      let selectedElement = null;
+      let hoverBox = null;
+      let infoPanel = null;
+      let borderWidth = 2;
+
+      const toggleBtn = document.getElementById('toggleBtn');
+      const status = document.getElementById('status');
+      const selectedInfo = document.getElementById('selectedInfo');
+      const selectedDetails = document.getElementById('selectedDetails');
+      const selectorOutput = document.getElementById('selectorOutput');
+
+      function initElements() {
+        if (!hoverBox) {
+          hoverBox = document.createElement('div');
+          hoverBox.id = 'hover-box';
+          hoverBox.style.cssText = 'position: absolute; pointer-events: none; z-index: 2147483647; border: ' + borderWidth + 'px solid #4285f4; background: rgba(66, 133, 244, 0.15); box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3); transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1); display: none; box-sizing: border-box; margin: 0; padding: 0;';
+          document.body.appendChild(hoverBox);
+        }
+
+        if (!infoPanel) {
+          infoPanel = document.getElementById('infoPanel');
+        }
+      }
+
+      function updateHoverBox(element) {
+        if (!hoverBox || !element) return;
+        const rect = element.getBoundingClientRect();
+        const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+        hoverBox.style.display = 'block';
+        hoverBox.style.left = (rect.left + scrollX) + 'px';
+        hoverBox.style.top = (rect.top + scrollY) + 'px';
+        hoverBox.style.width = rect.width + 'px';
+        hoverBox.style.height = rect.height + 'px';
+      }
+
+      function hideHoverBox() {
+        if (hoverBox) {
+          hoverBox.style.display = 'none';
+        }
+      }
+
+      function showElementInfo(element, x, y) {
+        if (!infoPanel) return;
+        const tagName = element.tagName.toLowerCase();
+        const id = element.id ? '#' + element.id : '';
+        const classes = element.className && typeof element.className === 'string' 
+          ? '.' + element.className.split(' ').filter(c => c && !c.includes('hover-box') && !c.includes('info-panel')).slice(0, 3).join('.') 
+          : '';
+        const text = (element.textContent || '').trim().substring(0, 40);
+
+        let infoHTML = '<div class="tag">' + tagName + id + classes + '</div>';
+        if (text) {
+          infoHTML += '<div class="text">"' + text + (element.textContent && element.textContent.trim().length > 40 ? '...' : '') + '"</div>';
+        }
+
+        infoPanel.innerHTML = infoHTML;
+        infoPanel.style.display = 'block';
+        infoPanel.style.left = (x + 10) + 'px';
+        infoPanel.style.top = (y + 10) + 'px';
+      }
+
+      function hideElementInfo() {
+        if (infoPanel) {
+          infoPanel.style.display = 'none';
+        }
+      }
+
+      function generateSelector(element) {
+        if (element.id) {
+          return '#' + element.id;
+        }
+
+        if (element.className && typeof element.className === 'string') {
+          const classes = element.className.split(' ').filter(c => c && !c.includes('hover-box') && !c.includes('info-panel')).map(c => '.' + c).join('');
+          if (classes) {
+            return element.tagName.toLowerCase() + classes;
+          }
+        }
+
+        const path = [];
+        let current = element;
+
+        while (current && current !== document.body) {
+          let selector = current.tagName.toLowerCase();
+
+          if (current.id) {
+            selector = '#' + current.id;
+            path.unshift(selector);
+            break;
+          }
+
+          if (current.className && typeof current.className === 'string') {
+            const classes = current.className.split(' ').filter(c => c).map(c => '.' + c).join('');
+            if (classes) {
+              selector += classes;
+            }
+          }
+
+          const parent = current.parentElement;
+          if (parent) {
+            const siblings = Array.from(parent.children).filter(el => el.tagName === current.tagName);
+            if (siblings.length > 1) {
+              const index = siblings.indexOf(current) + 1;
+              selector += ':nth-of-type(' + index + ')';
+            }
+          }
+
+          path.unshift(selector);
+          current = current.parentElement;
+        }
+
+        return path.join(' > ');
+      }
+
+      function handleMouseMove(e) {
+        if (!isSelectionMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const target = e.target;
+        if (!target || 
+            target === document.body || 
+            target === document.documentElement || 
+            target === hoverBox || 
+            target === infoPanel ||
+            target.id === 'hover-box' ||
+            target.id === 'infoPanel') {
+          return;
+        }
+
+        updateHoverBox(target);
+        showElementInfo(target, e.clientX, e.clientY);
+      }
+
+      function handleMouseOut(e) {
+        if (!isSelectionMode) return;
+        const target = e.target;
+        if (target && 
+            target !== selectedElement && 
+            target !== hoverBox && 
+            target !== infoPanel &&
+            target.id !== 'hover-box' &&
+            target.id !== 'infoPanel') {
+          if (e.relatedTarget === document.body || e.relatedTarget === document.documentElement || !e.relatedTarget) {
+            hideHoverBox();
+            hideElementInfo();
+          }
+        }
+      }
+
+      function handleClick(e) {
+        if (!isSelectionMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const target = e.target;
+        if (!target || 
+            target === document.body || 
+            target === document.documentElement || 
+            target === hoverBox || 
+            target === infoPanel ||
+            target.id === 'hover-box' ||
+            target.id === 'infoPanel') {
+          return;
+        }
+
+        selectedElement = target;
+
+        if (hoverBox) {
+          hoverBox.style.borderColor = '#34a853';
+          hoverBox.style.background = 'rgba(52, 168, 83, 0.25)';
+          hoverBox.style.boxShadow = '0 0 0 2px rgba(52, 168, 83, 0.5), 0 0 15px rgba(52, 168, 83, 0.4)';
+        }
+
+        const selector = generateSelector(target);
+        const similarCount = document.querySelectorAll(selector).length;
+        const attributes = {};
+        if (target.attributes) {
+          for (let i = 0; i < target.attributes.length; i++) {
+            const attr = target.attributes[i];
+            attributes[attr.name] = attr.value;
+          }
+        }
+
+        console.log('Element selected:', {
+          selector: selector,
+          tagName: target.tagName,
+          text: (target.textContent || '').trim().substring(0, 100),
+          attributes: attributes,
+          similarElements: similarCount
+        });
+
+        selectedDetails.innerHTML = `
+          <div><strong>Тег:</strong> ${target.tagName}</div>
+          <div><strong>ID:</strong> ${target.id || 'нет'}</div>
+          <div><strong>Классы:</strong> ${target.className || 'нет'}</div>
+          <div><strong>Текст:</strong> ${(target.textContent || '').trim().substring(0, 100)}</div>
+          <div><strong>Похожих элементов:</strong> ${similarCount}</div>
+          <div><strong>Атрибуты:</strong> ${Object.keys(attributes).length > 0 ? JSON.stringify(attributes, null, 2) : 'нет'}</div>
+        `;
+
+        selectorOutput.textContent = selector;
+        selectedInfo.classList.add('visible');
+
+        hideElementInfo();
+
+        disableSelection();
+      }
+
+      function enableSelection() {
+        if (isSelectionMode) {
+          console.log('Selection mode already enabled');
+          return;
+        }
+
+        console.log('Enabling selection mode');
+        isSelectionMode = true;
+        initElements();
+
+        if (document.body) {
+          document.body.style.cursor = 'crosshair';
+          document.addEventListener('mousemove', handleMouseMove, { capture: true, passive: false });
+          document.addEventListener('click', handleClick, { capture: true, passive: false });
+          document.addEventListener('mouseout', handleMouseOut, { capture: true, passive: false });
+          document.addEventListener('mouseover', handleMouseMove, { capture: true, passive: false });
+          console.log('Selection event listeners attached');
+        }
+
+        toggleBtn.textContent = 'Отменить выделение';
+        toggleBtn.classList.add('active');
+        status.textContent = 'Активно';
+        status.classList.add('active');
+      }
+
+      function disableSelection() {
+        if (!isSelectionMode) {
+          return;
+        }
+
+        console.log('Disabling selection mode');
+        isSelectionMode = false;
+
+        if (document.body) {
+          document.body.style.cursor = '';
+        }
+
+        document.removeEventListener('mousemove', handleMouseMove, { capture: true });
+        document.removeEventListener('click', handleClick, { capture: true });
+        document.removeEventListener('mouseout', handleMouseOut, { capture: true });
+        document.removeEventListener('mouseover', handleMouseMove, { capture: true });
+
+        selectedElement = null;
+        hideHoverBox();
+        hideElementInfo();
+
+        if (hoverBox) {
+          hoverBox.style.borderColor = '#4285f4';
+          hoverBox.style.background = 'rgba(66, 133, 244, 0.15)';
+          hoverBox.style.boxShadow = '0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3)';
+        }
+
+        toggleBtn.textContent = 'Включить выделение';
+        toggleBtn.classList.remove('active');
+        status.textContent = 'Неактивно';
+        status.classList.remove('active');
+
+        console.log('Selection disabled and event listeners removed');
+      }
+
+      toggleBtn.addEventListener('click', function() {
+        if (isSelectionMode) {
+          disableSelection();
+        } else {
+          enableSelection();
+        }
+      });
+
+      console.log('Element selector demo initialized');
+    })();
+  </script>
+</body>
+</html>
+
+

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from './tauri-wrapper';
 
 export interface Site {
   id: number;

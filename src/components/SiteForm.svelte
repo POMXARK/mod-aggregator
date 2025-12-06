@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from '@tauri-apps/api/core';
+  import { invoke } from '../lib/tauri-wrapper';
   import XMarkIcon from './icons/XMarkIcon.svelte';
   
   interface Props {

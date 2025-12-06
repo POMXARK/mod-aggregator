@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { invoke } from '@tauri-apps/api/core';
+  import { invoke } from '../lib/tauri-wrapper';
   import BellIcon from './icons/BellIcon.svelte';
   import CheckIcon from './icons/CheckIcon.svelte';
   import { format } from 'date-fns';

@@ -1,0 +1,5 @@
+# Ignore saved pages directory to prevent app restart on file changes
+saved_pages/
+*.html
+
+

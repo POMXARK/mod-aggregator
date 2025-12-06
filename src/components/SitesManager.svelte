@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { invoke } from '@tauri-apps/api/core';
+  import { invoke } from '../lib/tauri-wrapper';
   import PlusIcon from './icons/PlusIcon.svelte';
   import TrashIcon from './icons/TrashIcon.svelte';
   import PencilIcon from './icons/PencilIcon.svelte';

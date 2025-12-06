@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { invoke } from '@tauri-apps/api/core';
+  import { invoke } from '../lib/tauri-wrapper';
   import { format } from 'date-fns';
   import { ru } from 'date-fns/locale';
   import ModCard from './ModCard.svelte';

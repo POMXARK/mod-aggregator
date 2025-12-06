@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест помех для выделения элементов</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; }
+    h2 { color: #666; margin-top: 0; }
+    .button {
+      padding: 10px 20px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .button:hover {
+      background: #357ae8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Тест помех для выделения элементов</h1>
+  
+  <div class="test-section">
+    <h2>1. Обычные элементы (должны работать)</h2>
+    <p>Это обычный параграф текста.</p>
+    <button class="button">Кнопка 1</button>
+    <button class="button">Кнопка 2</button>
+    <div style="padding: 20px; background: #e8f0fe; margin: 10px 0;">
+      <p>Вложенный контент</p>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>2. Элементы с перехватом событий (могут мешать)</h2>
+    <div id="interceptor" style="padding: 20px; background: #fff3cd; border: 2px dashed #ffc107;">
+      <p>Эта область перехватывает события мыши</p>
+      <button class="button">Кнопка внутри перехватчика</button>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>3. Элементы с высоким z-index</h2>
+    <div style="position: relative; padding: 20px; background: #f0f0f0;">
+      <div style="position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
+        Высокий z-index
+      </div>
+      <p>Контент под элементом с высоким z-index</p>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>4. Динамически создаваемые элементы</h2>
+    <button class="button" onclick="createDynamicElement()">Создать динамический элемент</button>
+    <div id="dynamic-container"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>5. Элементы с pointer-events</h2>
+    <div style="padding: 20px; background: #e8f5e9; pointer-events: none;">
+      <p>Элемент с pointer-events: none</p>
+      <button class="button" style="pointer-events: auto;">Кнопка с pointer-events: auto</button>
+    </div>
+  </div>
+
+  <!-- Скрипт, который перехватывает события (имитация мешающего скрипта) -->
+  <script>
+    // Имитация мешающего скрипта, который перехватывает события
+    const interceptor = document.getElementById('interceptor');
+    if (interceptor) {
+      interceptor.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.log('Перехвачено событие click');
+        alert('Событие перехвачено! Это может мешать выделению.');
+      }, true); // Используем capture phase
+      
+      interceptor.addEventListener('mousemove', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Перехвачено событие mousemove');
+      }, true);
+    }
+    
+    // Функция для создания динамических элементов
+    function createDynamicElement() {
+      const container = document.getElementById('dynamic-container');
+      const newDiv = document.createElement('div');
+      newDiv.className = 'test-section';
+      newDiv.innerHTML = '<h3>Динамически созданный элемент</h3><p>Этот элемент был создан после загрузки страницы</p>';
+      container.appendChild(newDiv);
+    }
+    
+    // Имитация скрипта, который может скрывать элементы
+    setTimeout(function() {
+      console.log('Тестовая страница загружена. Проверьте, работает ли выделение элементов.');
+    }, 1000);
+  </script>
+</body>
+</html>
+
