@@ -23,6 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Cursor AI configuration (keep in repo)
+!.cursorrules
+!.cursor/
+!.cursor/**/*
+
 # Tauri
 src-tauri/target
 src-tauri/Cargo.lock

@@ -1,0 +1,21 @@
+/**
+ * Стили для компонента PageViewer
+ * Используется BEM методология
+ */
+
+.page-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0f172a;
+}
+
+.page-viewer__error {
+  padding: 1rem;
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-bottom: 1px solid #334155;
+}
+
+
+

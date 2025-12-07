@@ -1,3 +1,4 @@
+
 {
   "name": "mod-aggregator",
   "version": "1.0.0",
@@ -10,6 +11,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:test": "cypress run --spec 'cypress/e2e/refresh-button.cy.ts'",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:dev:verbose": "RUST_LOG=debug tauri dev",

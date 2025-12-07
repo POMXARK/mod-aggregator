@@ -86,3 +86,9 @@ npm run tauri:dev
    - Проверьте, что `onElementSelect` вызывается
 
 
+
+
+
+
+
+

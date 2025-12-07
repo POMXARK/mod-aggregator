@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0284c7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Main puzzle/module pieces -->
+  <!-- Top-left piece -->
+  <path d="M 30 30 L 50 30 L 50 50 L 30 50 Z" fill="url(#grad1)" opacity="0.9"/>
+  <path d="M 30 30 L 50 30 L 50 50 L 30 50" stroke="#1e293b" stroke-width="1.5" fill="none"/>
+  
+  <!-- Top-right piece -->
+  <path d="M 78 30 L 98 30 L 98 50 L 78 50 Z" fill="url(#grad1)" opacity="0.9"/>
+  <path d="M 78 30 L 98 30 L 98 50 L 78 50" stroke="#1e293b" stroke-width="1.5" fill="none"/>
+  
+  <!-- Center piece (larger, main) -->
+  <path d="M 40 50 L 88 50 L 88 78 L 40 78 Z" fill="url(#grad2)" opacity="0.95"/>
+  <path d="M 40 50 L 88 50 L 88 78 L 40 78" stroke="#1e293b" stroke-width="2" fill="none"/>
+  
+  <!-- Bottom-left piece -->
+  <path d="M 30 78 L 50 78 L 50 98 L 30 98 Z" fill="url(#grad1)" opacity="0.9"/>
+  <path d="M 30 78 L 50 78 L 50 98 L 30 98" stroke="#1e293b" stroke-width="1.5" fill="none"/>
+  
+  <!-- Bottom-right piece -->
+  <path d="M 78 78 L 98 78 L 98 98 L 78 98 Z" fill="url(#grad1)" opacity="0.9"/>
+  <path d="M 78 78 L 98 78 L 98 98 L 78 98" stroke="#1e293b" stroke-width="1.5" fill="none"/>
+  
+  <!-- Connection lines between pieces -->
+  <line x1="50" y1="40" x2="40" y2="50" stroke="#0ea5e9" stroke-width="1.5" opacity="0.6"/>
+  <line x1="78" y1="40" x2="88" y2="50" stroke="#0ea5e9" stroke-width="1.5" opacity="0.6"/>
+  <line x1="50" y1="88" x2="40" y2="78" stroke="#0ea5e9" stroke-width="1.5" opacity="0.6"/>
+  <line x1="78" y1="88" x2="88" y2="78" stroke="#0ea5e9" stroke-width="1.5" opacity="0.6"/>
+  
+  <!-- Small decorative dots -->
+  <circle cx="45" cy="45" r="2" fill="#0ea5e9" opacity="0.8"/>
+  <circle cx="83" cy="45" r="2" fill="#0ea5e9" opacity="0.8"/>
+  <circle cx="45" cy="93" r="2" fill="#0ea5e9" opacity="0.8"/>
+  <circle cx="83" cy="93" r="2" fill="#0ea5e9" opacity="0.8"/>
+  <circle cx="64" cy="64" r="3" fill="#ffffff" opacity="0.9"/>
+</svg>
+
+
+
+
+
+

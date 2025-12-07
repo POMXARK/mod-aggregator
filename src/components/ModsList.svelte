@@ -75,63 +75,85 @@
 
 <style>
   .mods-list-container {
-    max-width: 1400px;
+    max-width: min(1400px, 95vw);
     margin: 0 auto;
+    width: 100%;
   }
   
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: clamp(1.5rem, 2.5vh, 2rem);
+    flex-wrap: wrap;
+    gap: clamp(1rem, 1.5vw, 1.5rem);
   }
   
   .header h2 {
     margin: 0;
-    font-size: 2rem;
+    font-size: clamp(1.75rem, 3vw, 2rem);
     font-weight: 700;
     color: #e2e8f0;
+    line-height: 1.2;
   }
   
   .btn-primary {
-    padding: 0.75rem 1.5rem;
-    background: #0ea5e9;
+    padding: clamp(0.625rem, 1vw, 0.75rem) clamp(1.25rem, 2vw, 1.5rem);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     color: white;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: clamp(0.375rem, 0.5vw, 0.5rem);
     font-weight: 600;
+    font-size: clamp(0.875rem, 1vw, 0.95rem);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    white-space: nowrap;
   }
   
   .btn-primary:hover:not(:disabled) {
-    background: #0284c7;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.5);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
   }
   
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
   }
   
   .error {
-    padding: 1rem;
-    background: #7f1d1d;
+    padding: clamp(0.875rem, 1.25vw, 1rem);
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
     color: #fca5a5;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
+    border-radius: clamp(0.375rem, 0.5vw, 0.5rem);
+    margin-bottom: clamp(0.875rem, 1.25vw, 1rem);
+    font-size: clamp(0.875rem, 1vw, 0.95rem);
+    border-left: 3px solid #ef4444;
   }
   
   .loading, .empty {
     text-align: center;
-    padding: 3rem;
+    padding: clamp(2rem, 4vh, 3rem);
     color: #64748b;
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
   }
   
   .mods-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(280px, 25vw, 320px), 1fr));
+    gap: clamp(1rem, 1.5vw, 1.5rem);
+  }
+
+  @media (max-width: 768px) {
+    .mods-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 

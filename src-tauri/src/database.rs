@@ -2,11 +2,22 @@ use sqlx::{sqlite::SqlitePool, Row};
 use chrono::Utc;
 use crate::models::{Site, Mod, Notification};
 
+/// Структура для работы с базой данных SQLite
+/// 
+/// Предоставляет методы для работы с сайтами, модами, уведомлениями и сохраненными страницами.
+/// Автоматически создает таблицы и индексы при инициализации.
 pub struct Database {
     pool: SqlitePool,
 }
 
 impl Database {
+    /// Создать новое подключение к базе данных
+    /// 
+    /// Инициализирует подключение к SQLite базе данных, создает необходимые таблицы
+    /// и индексы, если они не существуют.
+    /// 
+    /// # Возвращает
+    /// Экземпляр Database или ошибку подключения
     pub async fn new() -> Result<Self, sqlx::Error> {
         // Use current directory for database (will be in app directory when running)
         let db_dir = std::env::current_dir()
@@ -24,6 +35,13 @@ impl Database {
         Ok(db)
     }
 
+    /// Инициализировать схему базы данных
+    /// 
+    /// Создает все необходимые таблицы (sites, mods, notifications, saved_pages)
+    /// и индексы, если они не существуют.
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     async fn init(&self) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
@@ -81,9 +99,28 @@ impl Database {
 
         sqlx::query(
             r#"
+            CREATE TABLE IF NOT EXISTS saved_pages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                site_id INTEGER NOT NULL,
+                url TEXT NOT NULL,
+                folder_path TEXT NOT NULL,
+                version_timestamp TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (site_id) REFERENCES sites(id)
+            )
+            "#,
+        )
+        .execute(&self.pool)
+        .await?;
+
+        sqlx::query(
+            r#"
             CREATE INDEX IF NOT EXISTS idx_mods_site_id ON mods(site_id);
             CREATE INDEX IF NOT EXISTS idx_mods_url ON mods(url);
             CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
+            CREATE INDEX IF NOT EXISTS idx_saved_pages_site_id ON saved_pages(site_id);
+            CREATE INDEX IF NOT EXISTS idx_saved_pages_url ON saved_pages(url);
             "#,
         )
         .execute(&self.pool)
@@ -92,6 +129,12 @@ impl Database {
         Ok(())
     }
 
+    /// Получить список всех сайтов из базы данных
+    /// 
+    /// Возвращает все сайты, отсортированные по имени.
+    /// 
+    /// # Возвращает
+    /// Вектор сайтов или ошибку базы данных
     pub async fn get_sites(&self) -> Result<Vec<Site>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM sites ORDER BY name")
             .fetch_all(&self.pool)
@@ -111,6 +154,13 @@ impl Database {
             .collect())
     }
 
+    /// Получить сайт по ID
+    /// 
+    /// # Параметры
+    /// * `id` - идентификатор сайта
+    /// 
+    /// # Возвращает
+    /// Сайт или ошибку, если не найден
     pub async fn get_site(&self, id: i64) -> Result<Site, sqlx::Error> {
         let row = sqlx::query("SELECT * FROM sites WHERE id = ?")
             .bind(id)
@@ -128,6 +178,15 @@ impl Database {
         })
     }
 
+    /// Добавить новый сайт в базу данных
+    /// 
+    /// # Параметры
+    /// * `name` - название сайта
+    /// * `url` - URL сайта
+    /// * `parser_config` - конфигурация парсера в формате JSON
+    /// 
+    /// # Возвращает
+    /// Созданный сайт с присвоенным ID или ошибку
     pub async fn add_site(
         &self,
         name: &str,
@@ -163,6 +222,16 @@ impl Database {
         })
     }
 
+    /// Обновить существующий сайт в базе данных
+    /// 
+    /// # Параметры
+    /// * `id` - идентификатор сайта для обновления
+    /// * `name` - новое название сайта
+    /// * `url` - новый URL сайта
+    /// * `parser_config` - новая конфигурация парсера в формате JSON
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     pub async fn update_site(
         &self,
         id: i64,
@@ -187,6 +256,13 @@ impl Database {
         Ok(())
     }
 
+    /// Удалить сайт из базы данных
+    /// 
+    /// # Параметры
+    /// * `id` - идентификатор сайта для удаления
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     pub async fn delete_site(&self, id: i64) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM sites WHERE id = ?")
             .bind(id)
@@ -195,6 +271,13 @@ impl Database {
         Ok(())
     }
 
+    /// Получить список модов из базы данных
+    /// 
+    /// # Параметры
+    /// * `site_id` - ID сайта для фильтрации (None = все сайты)
+    /// 
+    /// # Возвращает
+    /// Вектор модов, отсортированных по дате обновления, или ошибку
     pub async fn get_mods(&self, site_id: Option<i64>) -> Result<Vec<Mod>, sqlx::Error> {
         let rows = if let Some(id) = site_id {
             sqlx::query("SELECT * FROM mods WHERE site_id = ? ORDER BY updated_at DESC")
@@ -225,6 +308,13 @@ impl Database {
             .collect())
     }
 
+    /// Получить мод по URL
+    /// 
+    /// # Параметры
+    /// * `url` - URL мода для поиска
+    /// 
+    /// # Возвращает
+    /// Мод, если найден, или None
     pub async fn get_mod_by_url(&self, url: &str) -> Result<Option<Mod>, sqlx::Error> {
         let row = sqlx::query("SELECT * FROM mods WHERE url = ?")
             .bind(url)
@@ -246,6 +336,13 @@ impl Database {
         }))
     }
 
+    /// Добавить новый мод в базу данных
+    /// 
+    /// # Параметры
+    /// * `mod_item` - объект мода для добавления
+    /// 
+    /// # Возвращает
+    /// Созданный мод с присвоенным ID или ошибку
     pub async fn add_mod(&self, mod_item: &Mod) -> Result<Mod, sqlx::Error> {
         let now = Utc::now().to_rfc3339();
         sqlx::query(
@@ -275,6 +372,14 @@ impl Database {
         })
     }
 
+    /// Обновить существующий мод в базе данных
+    /// 
+    /// # Параметры
+    /// * `id` - идентификатор мода для обновления
+    /// * `mod_item` - объект мода с новыми данными
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     pub async fn update_mod(&self, id: i64, mod_item: &Mod) -> Result<(), sqlx::Error> {
         let now = Utc::now().to_rfc3339();
         sqlx::query(
@@ -293,6 +398,12 @@ impl Database {
         Ok(())
     }
 
+    /// Получить список всех уведомлений
+    /// 
+    /// Возвращает последние 100 уведомлений, отсортированных по дате создания (новые первыми).
+    /// 
+    /// # Возвращает
+    /// Вектор уведомлений или ошибку
     pub async fn get_notifications(&self) -> Result<Vec<Notification>, sqlx::Error> {
         let rows = sqlx::query("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100")
             .fetch_all(&self.pool)
@@ -312,6 +423,13 @@ impl Database {
             .collect())
     }
 
+    /// Добавить новое уведомление в базу данных
+    /// 
+    /// # Параметры
+    /// * `notification` - объект уведомления для добавления
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     pub async fn add_notification(&self, notification: &Notification) -> Result<(), sqlx::Error> {
         let now = Utc::now().to_rfc3339();
         sqlx::query(
@@ -328,9 +446,142 @@ impl Database {
         Ok(())
     }
 
+    /// Отметить уведомление как прочитанное
+    /// 
+    /// # Параметры
+    /// * `id` - идентификатор уведомления для отметки
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
     pub async fn mark_notification_read(&self, id: i64) -> Result<(), sqlx::Error> {
         sqlx::query("UPDATE notifications SET read = 1 WHERE id = ?")
             .bind(id)
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
+
+    /// Сохранить ссылку на сохраненную страницу для сайта
+    /// 
+    /// Создает запись в базе данных, связывающую сохраненную страницу с сайтом.
+    /// 
+    /// # Параметры
+    /// * `site_id` - ID сайта для привязки
+    /// * `url` - URL страницы
+    /// * `folder_path` - путь к папке с сохраненной страницей
+    /// * `version_timestamp` - временная метка версии страницы
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
+    pub async fn save_page_for_site(
+        &self,
+        site_id: i64,
+        url: &str,
+        folder_path: &str,
+        version_timestamp: &str,
+    ) -> Result<(), sqlx::Error> {
+        let now = Utc::now().to_rfc3339();
+        sqlx::query(
+            "INSERT INTO saved_pages (site_id, url, folder_path, version_timestamp, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+        )
+        .bind(site_id)
+        .bind(url)
+        .bind(folder_path)
+        .bind(version_timestamp)
+        .bind(&now)
+        .bind(&now)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
+    /// Получить последнюю сохраненную страницу для сайта по URL
+    /// 
+    /// Сначала ищет точное совпадение URL, затем ищет частичное совпадение
+    /// (если запрашиваемый URL начинается с сохраненного URL или наоборот)
+    pub async fn get_saved_page(&self, site_id: i64, url: &str) -> Result<Option<String>, sqlx::Error> {
+        // Сначала пытаемся найти точное совпадение
+        let row = sqlx::query(
+            "SELECT folder_path FROM saved_pages WHERE site_id = ? AND url = ? ORDER BY version_timestamp DESC LIMIT 1"
+        )
+        .bind(site_id)
+        .bind(url)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        if let Some(folder_path) = row.map(|r| r.get::<String, _>(0)) {
+            return Ok(Some(folder_path));
+        }
+
+        // Если точного совпадения нет, ищем частичное совпадение
+        // Ищем сохраненные URL, которые начинаются с запрашиваемого URL или наоборот
+        let rows = sqlx::query(
+            "SELECT folder_path, url FROM saved_pages WHERE site_id = ? ORDER BY version_timestamp DESC"
+        )
+        .bind(site_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        for row in rows {
+            let saved_url: String = row.get(1);
+            let folder_path: String = row.get(0);
+            
+            // Проверяем, является ли один URL префиксом другого
+            if url.starts_with(&saved_url) || saved_url.starts_with(url) {
+                return Ok(Some(folder_path));
+            }
+        }
+
+        Ok(None)
+    }
+
+    /// Получить все версии сохраненной страницы для сайта
+    /// 
+    /// Возвращает список всех версий сохраненной страницы с их метаданными.
+    /// 
+    /// # Параметры
+    /// * `site_id` - ID сайта для поиска
+    /// * `url` - URL страницы для поиска
+    /// 
+    /// # Возвращает
+    /// Вектор кортежей (id, folder_path, timestamp) или ошибку
+    pub async fn get_saved_page_versions(
+        &self,
+        site_id: i64,
+        url: &str,
+    ) -> Result<Vec<(i64, String, String)>, sqlx::Error> {
+        let rows = sqlx::query(
+            "SELECT id, folder_path, version_timestamp FROM saved_pages WHERE site_id = ? AND url = ? ORDER BY version_timestamp DESC"
+        )
+        .bind(site_id)
+        .bind(url)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows
+            .iter()
+            .map(|row| {
+                (
+                    row.get(0),
+                    row.get(1),
+                    row.get(2),
+                )
+            })
+            .collect())
+    }
+
+    /// Удалить конкретную версию сохраненной страницы
+    /// 
+    /// Удаляет запись о версии страницы из базы данных.
+    /// 
+    /// # Параметры
+    /// * `page_id` - ID версии страницы для удаления
+    /// 
+    /// # Возвращает
+    /// Пустой результат при успехе или ошибку
+    pub async fn delete_saved_page_version(&self, page_id: i64) -> Result<(), sqlx::Error> {
+        sqlx::query("DELETE FROM saved_pages WHERE id = ?")
+            .bind(page_id)
             .execute(&self.pool)
             .await?;
         Ok(())

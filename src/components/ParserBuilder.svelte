@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { invoke } from '../lib/tauri-wrapper';
@@ -17,6 +18,7 @@
   import PlusIcon from './icons/PlusIcon.svelte';
   import PlayIcon from './icons/PlayIcon.svelte';
   import TrashIcon from './icons/TrashIcon.svelte';
+  import RefreshIcon from './icons/RefreshIcon.svelte';
 
   const nodeTypes: NodeTypes = {
     selector: SelectorNode,
@@ -49,6 +51,9 @@
     await loadSites();
   });
 
+  /**
+   * Загружает список всех сайтов из базы данных
+   */
   async function loadSites() {
     try {
       sites = await invoke('get_sites');
@@ -57,10 +62,22 @@
     }
   }
 
+  /**
+   * Обрабатывает клик по узлу графа
+   * 
+   * @param event - событие клика
+   */
   function handleNodeClick(event: any) {
     // Handle node click if needed
   }
 
+  /**
+   * Обрабатывает клик по области графа (не по узлу)
+   * 
+   * Открывает контекстное меню при правом клике.
+   * 
+   * @param event - событие мыши
+   */
   function handlePaneClick(event: MouseEvent) {
     if (event.button === 2) { // Right click
       contextMenu = {
@@ -72,6 +89,13 @@
     }
   }
 
+  /**
+   * Обрабатывает контекстное меню (правый клик)
+   * 
+   * Открывает контекстное меню для добавления узлов.
+   * 
+   * @param event - событие контекстного меню
+   */
   function handleContextMenu(event: MouseEvent) {
     event.preventDefault();
     contextMenu = {
@@ -80,6 +104,13 @@
     };
   }
 
+  /**
+   * Добавляет новый узел в граф парсера
+   * 
+   * Создает узел указанного типа с уникальным ID и случайной позицией.
+   * 
+   * @param type - тип узла ('selector', 'extract', 'filter', 'transform', 'output')
+   */
   function handleAddNode(type: string) {
     const nodeId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     let newNode: Node;
@@ -150,6 +181,12 @@
     contextMenu = null;
   }
 
+  /**
+   * Получает человекочитаемое название типа узла
+   * 
+   * @param type - тип узла
+   * @returns Название узла на русском языке
+   */
   function getNodeLabel(type: string): string {
     const labels: Record<string, string> = {
       selector: 'Selector',
@@ -161,6 +198,13 @@
     return labels[type] || type;
   }
 
+  /**
+   * Обрабатывает создание связи между узлами
+   * 
+   * Создает новое ребро (edge) между двумя узлами в графе.
+   * 
+   * @param connection - информация о связи между узлами
+   */
   function handleConnect(connection: Connection) {
     const newEdge: Edge = {
       id: `edge-${Date.now()}`,
@@ -171,6 +215,13 @@
     edges = [...edges, newEdge];
   }
 
+  /**
+   * Обрабатывает изменения узлов в графе
+   * 
+   * Обновляет позиции узлов после их перемещения.
+   * 
+   * @param changes - массив изменений узлов
+   */
   function handleNodesChange(changes: any[]) {
     // Update nodes based on changes
     for (const change of changes) {
@@ -183,31 +234,57 @@
     }
   }
 
+  /**
+   * Обрабатывает изменения связей (edges) в графе
+   * 
+   * @param changes - массив изменений связей
+   */
   function handleEdgesChange(changes: any[]) {
     // Handle edge changes
   }
 
+  /**
+   * Удаляет выбранные узлы из графа
+   * 
+   * Удаляет узлы и все связанные с ними связи (edges).
+   */
   function handleDeleteSelected() {
     const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
     nodes = nodes.filter(n => !n.selected);
     edges = edges.filter(e => !selectedNodeIds.includes(e.source) && !selectedNodeIds.includes(e.target));
   }
 
-  function handleElementSelect(selector: string, element: HTMLElement, elementData?: any) {
+  /**
+   * Обрабатывает выбор элемента на странице
+   * 
+   * Показывает панель с информацией о выбранном элементе вместо
+   * немедленного создания узла.
+   * 
+   * @param selector - CSS селектор выбранного элемента
+   * @param element - DOM элемент (может быть null)
+   * @param elementData - данные элемента (tagName, text, attributes, similarElements)
+   */
+  function handleElementSelect(selector: string, element: HTMLElement | null, elementData?: any) {
     console.log('handleElementSelect called:', selector, element, elementData);
     
     // Show selection panel instead of creating node immediately
     selectedElementInfo = {
       selector,
       elementInfo: {
-        tagName: elementData?.tagName || element.tagName || 'UNKNOWN',
-        text: elementData?.text || element.textContent?.trim().substring(0, 100) || '',
+        tagName: elementData?.tagName || element?.tagName || 'UNKNOWN',
+        text: elementData?.text || (element?.textContent?.trim().substring(0, 100)) || '',
         attributes: elementData?.attributes || {},
         similarElements: elementData?.similarElements,
       },
     };
   }
 
+  /**
+   * Подтверждает выбор элемента и создает узел селектора
+   * 
+   * Создает новый узел типа 'selector' с селектором выбранного элемента
+   * и автоматически генерирует код парсера.
+   */
   function confirmElementSelection() {
     if (!selectedElementInfo) return;
     
@@ -231,10 +308,20 @@
     }, 100);
   }
 
+  /**
+   * Отменяет выбор элемента
+   * 
+   * Закрывает панель с информацией о выбранном элементе.
+   */
   function cancelElementSelection() {
     selectedElementInfo = null;
   }
 
+  /**
+   * Автоматически определяет похожие элементы на странице
+   * 
+   * Пытается найти похожие элементы и предлагает узлы для извлечения данных.
+   */
   async function autoDetectElements() {
     if (!selectedElementInfo) return;
     
@@ -270,6 +357,15 @@
     }
   }
 
+  /**
+   * Определяет похожие элементы с помощью AI
+   * 
+   * Использует AI для анализа HTML и предложения узлов парсера.
+   * 
+   * @param selector - CSS селектор элемента
+   * @param elementInfo - информация об элементе
+   * @returns Массив предложений узлов для создания
+   */
   async function detectWithAI(selector: string, elementInfo: any): Promise<any[]> {
     try {
       const { detectElementsWithAI } = await import('../lib/ai-detector');
@@ -298,6 +394,12 @@
     }
   }
 
+  /**
+   * Простое эвристическое определение похожих элементов
+   * 
+   * Использует простые правила для определения типа элементов
+   * и предложения узлов для извлечения данных.
+   */
   function simpleAutoDetect() {
     if (!selectedElementInfo) return;
     
@@ -381,6 +483,12 @@
     }, 100);
   }
 
+  /**
+   * Генерирует код парсера на Rust из узлов графа
+   * 
+   * Преобразует визуальный граф парсера в код на языке Rust,
+   * который можно использовать для парсинга веб-страниц.
+   */
   function generateParserCode() {
     // Generate Rust parser code from nodes
     let code = "// Generated parser code\n\n";
@@ -428,6 +536,12 @@
     generatedCode = code;
   }
 
+  /**
+   * Обрабатывает загрузку выбранного сайта
+   * 
+   * Загружает URL сайта в PageViewer и создает узлы из конфигурации парсера.
+   * Валидирует URL и обрабатывает ошибки загрузки.
+   */
   async function handleLoadSite() {
     console.log('[ParserBuilder] handleLoadSite called, selectedSite:', selectedSite);
     try {
@@ -510,6 +624,12 @@
     }
   }
 
+  /**
+   * Сохраняет конфигурацию парсера в базу данных
+   * 
+   * Генерирует конфигурацию парсера из узлов графа и обновляет
+   * конфигурацию выбранного сайта в базе данных.
+   */
   function handleSaveParser() {
     if (!selectedSite) {
       alert('Выберите сайт для сохранения');
@@ -587,6 +707,10 @@
           Удалить
         </button>
       {/if}
+      <button class="btn-secondary" onclick={handleRefreshCache} title="Обновить кеш сохраненных страниц">
+        <RefreshIcon class="icon-small" />
+        Обновить кеш
+      </button>
     </div>
   </div>
 
@@ -594,8 +718,10 @@
     {#if showPageViewer}
       <div class="page-viewer-panel">
         <PageViewer 
-          url={currentUrl} 
-          onElementSelect={(selector, element, data) => handleElementSelect(selector, element, data)} 
+          bind:url={currentUrl}
+          siteId={selectedSite?.id || null}
+          onElementSelect={(selector, element, data) => handleElementSelect(selector, element, data)}
+          onRefreshCache={() => console.log('Cache refreshed')}
         />
       </div>
     {/if}

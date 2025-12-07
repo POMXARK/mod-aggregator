@@ -222,3 +222,9 @@ function parseOpenAIResponse(data: any, element: ElementInfo): AISuggestion[] {
 }
 
 
+
+
+
+
+
+

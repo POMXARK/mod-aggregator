@@ -1,55 +1,118 @@
-# Сообщение коммита
+feat: улучшена логика поиска страниц в кеше с проверкой URL по pathname
 
-## Русский
+feat: improved cache page lookup logic with URL pathname validation
 
-feat: добавлено сохранение веб-страниц со всеми ресурсами (CSS и изображения)
+## Описание / Description
 
-Реализован функционал полного сохранения веб-страниц с встраиванием всех внешних ресурсов:
+Улучшена система кеширования и поиска сохраненных страниц. Теперь при поиске в кеше проверяется соответствие URL не только по hostname, но и по полному pathname, что позволяет корректно находить нужные страницы при переходе по внутренним ссылкам.
 
-**Основные изменения:**
-- Добавлена функция `embedResources()` для обработки и встраивания CSS и изображений в HTML
-- CSS файлы встраиваются как inline стили прямо в HTML (подход SingleFile)
-- Изображения конвертируются в base64 data URLs и встраиваются в HTML
-- Ресурсы дополнительно сохраняются в структурированные папки (css/, images/) для локального хранения
-- Добавлена Rust команда `save_resource` для сохранения ресурсов в подпапки
-- Улучшена функция `save_page_local` для поддержки путей с подпапками
-- Добавлено детальное логирование процесса обработки ресурсов
-- Улучшен поиск CSS файлов и изображений (поддержка различных форматов атрибутов)
+Improved caching and saved page lookup system. Cache lookup now validates URL matches not only by hostname but also by full pathname, enabling correct page retrieval when navigating internal links.
 
-**Технические детали:**
-- Все ресурсы встраиваются в HTML, делая страницу полностью автономной
-- Страницы сохраняются в структуре: `page_TIMESTAMP_hostname/index.html` с подпапками для ресурсов
-- Обработка относительных URL в CSS с автоматическим преобразованием в абсолютные
-- Поддержка различных форматов изображений (PNG, JPEG, GIF, WebP, SVG, ICO)
+## Основные изменения / Key Changes
 
-**Файлы изменены:**
-- `src/components/PageViewer.svelte` - основная логика обработки и встраивания ресурсов
-- `src-tauri/src/main.rs` - добавлена команда `save_resource` и улучшена `save_page_local`
+### Backend (Rust)
 
----
+- **Добавлены вспомогательные функции для работы с URL:**
+  - `extract_data_base_url(html)` - извлекает атрибут `data-base-url` из HTML
+  - `normalize_url_for_comparison(url)` - нормализует URL для корректного сравнения
 
-## English
+- **Улучшена логика поиска в `get_cached_page`:**
+  - Проверка соответствия URL через `data-base-url` атрибут в HTML
+  - Сравнение нормализованных URL с учетом префиксов
+  - Fallback на проверку pathname, если `data-base-url` не найден
+  - Возвращается только страница с соответствующим URL, а не первая найденная
 
-feat: implement full web page saving with embedded resources (CSS and images)
+- **Улучшена логика поиска в базе данных (`get_saved_page`):**
+  - Сначала ищется точное совпадение URL
+  - Затем ищется частичное совпадение (если один URL является префиксом другого)
+  - Это позволяет находить страницы даже при незначительных различиях в URL
 
-Implemented functionality for complete web page saving with embedding of all external resources:
+- **Добавлено детальное логирование:**
+  - Префиксы `[CACHE]` и `[DB_CACHE]` для удобной фильтрации логов
+  - Логирование всех этапов поиска и сравнения URL
+  - Информация о найденных кандидатах и результатах проверки
 
-**Main changes:**
-- Added `embedResources()` function to process and embed CSS and images into HTML
-- CSS files are embedded as inline styles directly in HTML (SingleFile approach)
-- Images are converted to base64 data URLs and embedded in HTML
-- Resources are additionally saved to structured folders (css/, images/) for local storage
-- Added Rust command `save_resource` to save resources to subfolders
-- Enhanced `save_page_local` function to support paths with subfolders
-- Added detailed logging for resource processing
-- Improved CSS files and images search (support for various attribute formats)
+- **Добавлена зависимость `regex`** в `Cargo.toml` для парсинга HTML атрибутов
 
-**Technical details:**
-- All resources are embedded in HTML, making the page fully self-contained
-- Pages are saved in structure: `page_TIMESTAMP_hostname/index.html` with subfolders for resources
-- Processing of relative URLs in CSS with automatic conversion to absolute URLs
-- Support for various image formats (PNG, JPEG, GIF, WebP, SVG, ICO)
+### Frontend (TypeScript/Svelte)
 
-**Files modified:**
-- `src/components/PageViewer.svelte` - main logic for processing and embedding resources
-- `src-tauri/src/main.rs` - added `save_resource` command and enhanced `save_page_local`
+- **Улучшено логирование в `usePageLoader`:**
+  - Логирование нормализации URL
+  - Логирование процесса загрузки и обработки HTML
+  - Информация о длине HTML и этапах обработки
+
+## Функционал / Features
+
+### Кеширование страниц / Page Caching
+
+- **Автоматическое кеширование:** Все загруженные страницы автоматически сохраняются локально
+- **Умный поиск в кеше:** Поиск по полному URL (hostname + pathname), а не только по домену
+- **Привязка к сайтам:** Страницы могут быть привязаны к конкретным сайтам в базе данных
+- **Версионирование:** Поддержка нескольких версий одной страницы с временными метками
+
+### Навигация по внутренним ссылкам / Internal Link Navigation
+
+- **Автоматическое обновление URL:** При клике на внутреннюю ссылку адресная строка обновляется
+- **Кеширование новых страниц:** Переход по внутренней ссылке автоматически кеширует новую страницу
+- **Визуальная обратная связь:** Изменение курсора и стилей при наведении на внутренние ссылки
+- **Корректная загрузка:** Загружается правильная страница из кеша, а не первая найденная для домена
+
+### Обработка ресурсов / Resource Processing
+
+- **Локальное сохранение:** CSS и изображения сохраняются локально для быстрой загрузки
+- **Встраивание ресурсов:** Ресурсы встраиваются в HTML для автономной работы
+- **Кеширование ресурсов:** Ресурсы загружаются из локального кеша, если доступны
+
+## Технические детали / Technical Details
+
+### Нормализация URL
+
+- Убирается trailing slash для консистентности (кроме корневого пути)
+- Приведение к единому формату для сравнения
+- Обработка относительных и абсолютных URL
+
+### Поиск в кеше
+
+1. Поиск по hostname в папках `page_TIMESTAMP_hostname`
+2. Сортировка кандидатов по дате модификации (новые первыми)
+3. Для каждого кандидата:
+   - Извлечение `data-base-url` из HTML
+   - Нормализация обоих URL
+   - Проверка точного совпадения или префиксного соответствия
+   - Возврат первой подходящей страницы
+
+### Поиск в базе данных
+
+1. Точное совпадение URL
+2. Частичное совпадение (префиксное)
+3. Возврат последней версии по временной метке
+
+## Исправленные проблемы / Fixed Issues
+
+- **Проблема:** При переходе по внутренней ссылке загружалась первая найденная страница для домена, а не нужная страница
+- **Решение:** Добавлена проверка соответствия URL по pathname через `data-base-url` атрибут
+
+- **Проблема:** Поиск в базе данных не находил страницы при незначительных различиях в URL
+- **Решение:** Добавлен поиск по частичному совпадению URL
+
+## Измененные файлы / Changed Files
+
+- `src-tauri/src/main.rs` - улучшена логика поиска в кеше и добавлены вспомогательные функции
+- `src-tauri/src/database.rs` - улучшена логика поиска в базе данных
+- `src-tauri/Cargo.toml` - добавлена зависимость `regex`
+- `src/lib/composables/usePageLoader.svelte.ts` - улучшено логирование
+
+## Тестирование / Testing
+
+Для проверки функционала:
+1. Загрузите страницу сайта
+2. Перейдите по внутренней ссылке
+3. Проверьте логи в консоли браузера и терминале Rust
+4. Убедитесь, что загружается правильная страница из кеша
+
+## Будущие улучшения / Future Improvements
+
+- Добавление метаданных файлов для более точного поиска
+- Индексация кеша для быстрого поиска
+- Очистка устаревших страниц из кеша
+- Оптимизация размера кеша

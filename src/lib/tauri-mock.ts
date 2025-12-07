@@ -1,3 +1,4 @@
+
 /**
  * Mock implementation of Tauri commands for browser development
  * This allows the app to run in a regular browser without Tauri backend

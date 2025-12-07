@@ -52,74 +52,95 @@
 
 <style>
   .mod-card {
-    background: #1e293b;
-    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: clamp(0.5rem, 0.75vw, 0.75rem);
     overflow: hidden;
-    border: 1px solid #334155;
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   
   .mod-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    border-color: rgba(14, 165, 233, 0.5);
   }
   
   .mod-image {
     width: 100%;
-    height: 200px;
+    height: clamp(12rem, 20vh, 200px);
     object-fit: cover;
-    background: #0f172a;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    transition: transform 0.3s;
+  }
+
+  .mod-card:hover .mod-image {
+    transform: scale(1.05);
   }
   
   .mod-content {
-    padding: 1.25rem;
+    padding: clamp(1rem, 1.5vw, 1.25rem);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   
   .mod-title {
-    margin: 0 0 0.75rem 0;
-    font-size: 1.25rem;
+    margin: 0 0 clamp(0.5rem, 0.75vw, 0.75rem) 0;
+    font-size: clamp(1.125rem, 1.75vw, 1.25rem);
     font-weight: 600;
     color: #e2e8f0;
     line-height: 1.4;
+    word-break: break-word;
   }
   
   .mod-author, .mod-version {
-    margin: 0.5rem 0;
-    font-size: 0.875rem;
+    margin: clamp(0.375rem, 0.5vw, 0.5rem) 0;
+    font-size: clamp(0.75rem, 1vw, 0.875rem);
     color: #94a3b8;
+    line-height: 1.4;
   }
   
   .mod-description {
-    margin: 1rem 0;
-    font-size: 0.9rem;
+    margin: clamp(0.75rem, 1vw, 1rem) 0;
+    font-size: clamp(0.8125rem, 1.1vw, 0.9rem);
     color: #cbd5e1;
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    flex: 1;
   }
   
   .mod-changes {
-    margin: 1rem 0;
-    padding: 0.75rem;
-    background: #0f172a;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
+    margin: clamp(0.75rem, 1vw, 1rem) 0;
+    padding: clamp(0.625rem, 0.875vw, 0.75rem);
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: clamp(0.375rem, 0.5vw, 0.5rem);
+    font-size: clamp(0.75rem, 1vw, 0.875rem);
     color: #cbd5e1;
+    border-left: 3px solid #0ea5e9;
+    line-height: 1.5;
   }
   
   .mod-changes strong {
     color: #0ea5e9;
+    font-weight: 600;
   }
   
   .mod-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #334155;
+    margin-top: clamp(0.75rem, 1vw, 1rem);
+    padding-top: clamp(0.75rem, 1vw, 1rem);
+    border-top: 1px solid rgba(51, 65, 85, 0.5);
+    flex-wrap: wrap;
+    gap: clamp(0.5rem, 0.75vw, 0.75rem);
   }
   
   .btn-link {
@@ -128,17 +149,21 @@
     color: #0ea5e9;
     cursor: pointer;
     font-weight: 600;
-    padding: 0.5rem 0;
-    transition: color 0.2s;
+    font-size: clamp(0.8125rem, 1.1vw, 0.875rem);
+    padding: clamp(0.375rem, 0.5vw, 0.5rem) 0;
+    transition: all 0.2s;
+    text-decoration: none;
   }
   
   .btn-link:hover {
     color: #38bdf8;
+    text-decoration: underline;
   }
   
   .mod-date {
-    font-size: 0.75rem;
+    font-size: clamp(0.6875rem, 0.9vw, 0.75rem);
     color: #64748b;
+    white-space: nowrap;
   }
 </style>
 

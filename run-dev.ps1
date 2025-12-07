@@ -5,3 +5,9 @@ Write-Host "RUST_LOG=$env:RUST_LOG" -ForegroundColor Yellow
 npm run tauri:dev
 
 
+
+
+
+
+
+
