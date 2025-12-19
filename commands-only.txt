@@ -1,0 +1,20 @@
+# КОМАНДЫ ДЛЯ ЗАПУСКА ERKAPHARM VPN (ФИНАЛЬНЫЕ)
+
+## ПОЛНОСТЬЮ АВТОМАТИЧЕСКИ:
+wsl -d Ubuntu
+cd /mnt/c/Users/User/mod-aggregator
+./auto-connect.sh
+
+## ИЛИ ПОШАГОВО:
+./quick-fix-all.sh               # Исправить все проблемы
+./test-sudo-openconnect.sh       # Проверить sudo
+./connect-rkf-manual.sh          # Если DNS работает
+./connect-auto-ip.sh             # Автоматически по IP (обход DNS)
+
+## В WINDOWS (селективная маршрутизация):
+.\setup-selective-routing.ps1
+# Или .\setup-selective-routing.bat
+
+## ОТКЛЮЧЕНИЕ:
+# В WSL: Ctrl+C
+# В Windows: route delete [network] mask [mask] [wsl_ip]

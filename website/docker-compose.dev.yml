@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  docusaurus-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Монтируем исходники для hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/.docusaurus
+    environment:
+      - NODE_ENV=development
+    command: npm start -- --host 0.0.0.0
+    restart: unless-stopped
+

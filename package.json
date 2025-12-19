@@ -17,7 +17,14 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:dev:verbose": "RUST_LOG=debug tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "docs:install": "cd website && npm install",
+    "docs:start": "cd website && npm start",
+    "docs:build": "cd website && npm run build",
+    "docs:serve": "cd website && npm run serve",
+    "docs:docker:build": "cd website && docker build -t mod-aggregator-docs .",
+    "docs:docker:up": "cd website && docker-compose up -d",
+    "docs:docker:down": "cd website && docker-compose down"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

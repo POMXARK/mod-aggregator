@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Localhost Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Тест подключения к localhost для OAuth</h1>
+    <p>Это поможет определить, может ли браузер подключаться к локальному приложению.</p>
+
+    <button onclick="testConnection()">Тестировать подключение</button>
+    <div id="result"></div>
+
+    <h2>Если тест не прошел:</h2>
+    <ul>
+        <li>Измените DNS настройки в Mullvad Browser с "Max Protection" на "Standard"</li>
+        <li>Используйте обычный Chrome для OAuth авторизации</li>
+        <li>Отключите DNS over HTTPS временно</li>
+        <li>Попробуйте заменить <code>localhost</code> на <code>127.0.0.1</code> в URL</li>
+    </ul>
+
+    <script>
+        async function testConnection() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<div class="result">Тестируем подключение...</div>';
+
+            const urls = [
+                'http://localhost:53920/oauth-callback?test=1',
+                'http://127.0.0.1:53920/oauth-callback?test=1'
+            ];
+
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url, { mode: 'no-cors' });
+                    result.innerHTML += `<div class="result success">✓ ${url} - подключение возможно</div>`;
+                } catch (error) {
+                    result.innerHTML += `<div class="result error">✗ ${url} - ошибка: ${error.message}</div>`;
+                }
+            }
+
+            result.innerHTML += '<div class="result">Тест завершен. Если все варианты показывают ошибку, проблема в настройках браузера.</div>';
+        }
+    </script>
+</body>
+</html>
+

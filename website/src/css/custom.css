@@ -1,0 +1,38 @@
+/**
+ * Custom CSS для Mod Aggregator документации
+ */
+
+:root {
+  --ifm-color-primary: #0ea5e9;
+  --ifm-color-primary-dark: #0d94d1;
+  --ifm-color-primary-darker: #0c8bc6;
+  --ifm-color-primary-darkest: #0a72a3;
+  --ifm-color-primary-light: #1fb0f0;
+  --ifm-color-primary-lighter: #2ab5f1;
+  --ifm-color-primary-lightest: #4cc1f3;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #0ea5e9;
+  --ifm-color-primary-dark: #1fb0f0;
+  --ifm-color-primary-darker: #2ab5f1;
+  --ifm-color-primary-darkest: #4cc1f3;
+  --ifm-color-primary-light: #0d94d1;
+  --ifm-color-primary-lighter: #0c8bc6;
+  --ifm-color-primary-lightest: #0a72a3;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Улучшение читаемости кода */
+.prism-code {
+  font-size: 0.9rem;
+}
+
+/* Стили для диаграмм */
+.mermaid {
+  text-align: center;
+  margin: 2rem 0;
+}
+

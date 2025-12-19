@@ -192,6 +192,7 @@ globs: src/**/*.svelte
 - **ВСЕГДА** пиши комментарии на русском языке
 - Объясняй сложную логику на русском
 - Комментируй неочевидные решения
+- Следуй правилам документации для AI агентов (см. `ai-development-tdd.mdc`)
 
 ## Документация функций, методов и классов
 
@@ -242,5 +243,116 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
   }
 </script>
 ```
+
+## Тестирование
+
+### Unit тесты с Vitest
+
+- Используй Vitest для unit тестирования компонентов
+- Используй `@testing-library/svelte` для работы с компонентами
+- Тестируй поведение, а не реализацию
+- Размещай тесты рядом с компонентами: `Component.svelte` и `Component.test.ts`
+
+### Пример теста Svelte компонента
+
+```typescript
+// src/components/SiteList.test.ts
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/svelte';
+import SiteList from './SiteList.svelte';
+
+describe('SiteList', () => {
+  it('should render list of sites', () => {
+    const sites = [
+      { id: 1, name: 'Site 1', url: 'https://site1.com' },
+      { id: 2, name: 'Site 2', url: 'https://site2.com' },
+    ];
+
+    render(SiteList, { props: { sites } });
+
+    expect(screen.getByText('Site 1')).toBeInTheDocument();
+    expect(screen.getByText('Site 2')).toBeInTheDocument();
+  });
+});
+```
+
+### Тестирование Svelte 5 Runes
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/svelte';
+import Counter from './Counter.svelte';
+
+describe('Counter with Svelte 5 runes', () => {
+  it('should increment count on button click', async () => {
+    const { component } = render(Counter);
+    
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent('Count: 0');
+    
+    await fireEvent.click(button);
+    expect(button).toHaveTextContent('Count: 1');
+  });
+});
+```
+
+### E2E тестирование с Cypress
+
+- Используй Cypress для тестирования полных пользовательских сценариев
+- Тестируй взаимодействие между компонентами
+- Тестируй интеграцию с Tauri командами
+
+### Использование data-testid
+
+**КРИТИЧЕСКИ ВАЖНО: Используй data-testid для элементов, которые нужно тестировать!**
+
+```svelte
+<button data-testid="add-site-button" on:click={handleAdd}>
+  Добавить сайт
+</button>
+
+<input 
+  data-testid="site-name-input" 
+  bind:value={siteName} 
+/>
+```
+
+### Пример Cypress теста
+
+```typescript
+// cypress/e2e/components.cy.ts
+describe('Component Interactions', () => {
+  it('should update state when user interacts', () => {
+    cy.visit('/');
+    cy.get('[data-testid="counter-button"]').click();
+    cy.get('[data-testid="counter-value"]').should('contain', '1');
+  });
+});
+```
+
+### TDD подход
+
+- **ВСЕГДА** пиши тесты перед реализацией функциональности
+- Следуй циклу Red-Green-Refactor
+- Тесты должны быть быстрыми и изолированными
+- Один тест проверяет одну вещь
+
+### Запуск тестов
+
+```bash
+# Unit тесты
+npm test
+
+# E2E тесты
+npm run test:e2e
+
+# Все тесты
+npm run test:all
+```
+
+### Покрытие кода
+
+- Используй `@vitest/coverage-v8` для проверки покрытия
+- Стремись к минимум 70% покрытия для критичных компонентов
+- Минимум 50% покрытия для всего проекта
 
 
