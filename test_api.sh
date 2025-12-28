@@ -6,3 +6,26 @@ curl -k -X POST https://localhost:9443/user/login-sms-prestep \
   -d '{"phone":"79141888576","marketplace":"superapteka"}' \
   --max-time 10
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

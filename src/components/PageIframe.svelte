@@ -1,7 +1,7 @@
 <script lang="ts">
   /**
    * Компонент для отображения веб-страницы в iframe
-   * 
+   *
    * Загружает HTML содержимое в iframe через Blob URL для безопасного
    * отображения обработанных страниц.
    */
@@ -17,21 +17,30 @@
     iframeRef?: HTMLIFrameElement | null;
   }
 
-  let { html, loading, error, iframeRef = $bindable<HTMLIFrameElement | null>(null) }: Props = $props();
+  let {
+    html,
+    loading,
+    error,
+    iframeRef = $bindable<HTMLIFrameElement | null>(null),
+  }: Props = $props();
 
   let blobUrl: string | null = $state(null);
 
   /**
    * Загружает HTML в iframe через Blob URL
-   * 
+   *
    * Создает Blob URL из HTML содержимого и загружает его в iframe.
    * Автоматически очищает предыдущий Blob URL при обновлении.
    */
   let previousHtml = $state<string | null>(null);
   $effect(() => {
     // Обновляем только если HTML действительно изменился
-    if (!html || html === previousHtml) return;
-    if (!iframeRef) return;
+    if (!html || html === previousHtml) {
+      return;
+    }
+    if (!iframeRef) {
+      return;
+    }
 
     previousHtml = html;
 
@@ -49,7 +58,7 @@
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const newBlobUrl = URL.createObjectURL(blob);
       blobUrl = newBlobUrl;
-      
+
       // Устанавливаем src только если iframe еще существует
       if (iframeRef && iframeRef.contentWindow) {
         iframeRef.src = newBlobUrl;
@@ -63,7 +72,7 @@
         try {
           URL.revokeObjectURL(blobUrl);
           blobUrl = null;
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
       }
@@ -123,4 +132,3 @@
     background: white;
   }
 </style>
-

@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "extends": ["eslint:recommended"],
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    "src-tauri/",
+    "coverage/",
+    ".svelte-kit/",
+    "*.config.*",
+    "public/",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "cypress/",
+    "**/*.md",
+    "scripts/",
+    "*.bat",
+    "*.sh",
+    "*.ps1"
+  ]
+}

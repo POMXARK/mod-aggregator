@@ -1,6 +1,6 @@
 /**
  * Composable для управления UI состоянием
- * 
+ *
  * Отделяет логику UI от компонентов. Предоставляет функции для управления
  * текущей страницей, состоянием боковой панели и выбранным сайтом.
  */
@@ -12,7 +12,7 @@ export type Page = 'mods' | 'sites' | 'parser' | 'notifications';
 
 /**
  * Создает composable для управления UI состоянием
- * 
+ *
  * @returns Объект с состоянием UI и методами для управления
  */
 export function useUI() {
@@ -22,7 +22,7 @@ export function useUI() {
 
   /**
    * Устанавливает текущую страницу приложения
-   * 
+   *
    * @param page - страница для установки
    */
   function setPage(page: Page) {
@@ -38,7 +38,7 @@ export function useUI() {
 
   /**
    * Устанавливает состояние боковой панели
-   * 
+   *
    * @param open - true для открытия, false для закрытия
    */
   function setSidebarOpen(open: boolean) {
@@ -47,7 +47,7 @@ export function useUI() {
 
   /**
    * Устанавливает выбранный сайт
-   * 
+   *
    * @param siteId - ID сайта для выбора (null = снять выбор)
    */
   function setSelectedSite(siteId: number | null) {
@@ -64,4 +64,3 @@ export function useUI() {
     setSelectedSite,
   };
 }
-

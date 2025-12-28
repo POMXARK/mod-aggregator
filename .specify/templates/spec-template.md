@@ -18,6 +18,9 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+  
+  **TDD REQUIREMENT (Constitution Principle III)**: Each user story MUST have corresponding Cypress E2E tests
+  written FIRST before implementation. The "Independent Test" section should describe the Cypress E2E test scenario.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)

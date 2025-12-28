@@ -18,7 +18,7 @@
     onShowRecentUrls: (show: boolean) => void;
   }
 
-  let {
+  const {
     url,
     loading,
     selectionMode,
@@ -37,8 +37,8 @@
 </script>
 
 <div class="viewer-header" class:collapsed={panelCollapsed}>
-  <button 
-    class="btn-collapse" 
+  <button
+    class="btn-collapse"
     onclick={onToggleCollapse}
     aria-label={panelCollapsed ? 'Развернуть панель' : 'Свернуть панель'}
     title={panelCollapsed ? 'Развернуть панель' : 'Свернуть панель'}
@@ -48,12 +48,12 @@
   <div class="header-content">
     <div class="url-input-group">
       <div class="url-input-wrapper">
-        <input 
-          type="url" 
+        <input
+          type="url"
           value={url}
-          oninput={(e) => onUrlChange(e.currentTarget.value)}
+          oninput={e => onUrlChange(e.currentTarget.value)}
           onfocus={() => onShowRecentUrls(recentUrls.length > 0)}
-          onkeydown={(e) => {
+          onkeydown={e => {
             if (e.key === 'Enter') {
               onLoad(false);
             }
@@ -62,34 +62,45 @@
           class="url-input"
         />
         <RecentUrlsDropdown
-          recentUrls={recentUrls}
+          {recentUrls}
           show={showRecentUrls}
           onSelect={onSelectRecent}
           onRefresh={onRefreshRecent}
           onRemove={onRemoveRecent}
         />
       </div>
-      <button 
-        class="btn-load" 
-        onclick={() => onLoad(false)} 
-        disabled={loading} 
+      <button
+        class="btn-load"
+        onclick={() => onLoad(false)}
+        disabled={loading}
         title="Загрузить привязанную страницу"
       >
         {loading ? '⏳' : '📥'}
       </button>
-      <button 
-        class="btn-refresh" 
-        onclick={() => onLoad(true)} 
-        disabled={loading} 
+      <button
+        class="btn-refresh"
+        onclick={() => onLoad(true)}
+        disabled={loading}
         title="Обновить страницу с сервера"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+          ></path>
         </svg>
       </button>
     </div>
-    <button 
-      class="btn-select" 
+    <button
+      class="btn-select"
       class:active={selectionMode}
       onclick={onToggleSelection}
       title={selectionMode ? 'Отключить выделение' : 'Включить выделение элементов'}
@@ -97,9 +108,7 @@
       {selectionMode ? '✓' : '🎯'}
     </button>
     {#if selectionMode}
-      <div class="selection-mode-hint">
-        🎯 Режим выделения активен
-      </div>
+      <div class="selection-mode-hint">🎯 Режим выделения активен</div>
     {/if}
   </div>
 </div>
@@ -114,15 +123,15 @@
     transition: all 0.3s ease;
     min-height: 3rem;
   }
-  
+
   .viewer-header.collapsed {
     min-height: 2.5rem;
   }
-  
+
   .viewer-header.collapsed .header-content {
     display: none;
   }
-  
+
   .btn-collapse {
     padding: 0.25rem 0.5rem;
     background: #334155;
@@ -138,11 +147,11 @@
     align-items: center;
     justify-content: center;
   }
-  
+
   .btn-collapse:hover {
     background: #475569;
   }
-  
+
   .header-content {
     display: flex;
     gap: 0.5rem;
@@ -202,13 +211,13 @@
   .btn-refresh:hover:not(:disabled) {
     background: #0284c7;
   }
-  
+
   .btn-load:disabled,
   .btn-refresh:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   .btn-refresh {
     margin-left: 0.5rem;
     display: flex;
@@ -216,7 +225,7 @@
     justify-content: center;
     padding: 0.375rem;
   }
-  
+
   .btn-refresh svg {
     width: 16px;
     height: 16px;
@@ -239,7 +248,8 @@
   }
 
   @keyframes pulse-hint {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
       box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
     }
@@ -249,6 +259,3 @@
     }
   }
 </style>
-
-
-

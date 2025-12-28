@@ -1,8 +1,21 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+
+// Новые модели для системы зависимостей
+pub mod collection;
+pub mod collection_logic;
+pub mod dependency;
+pub mod file;
+pub mod session_state;
+
+pub use dependency::{DependencyType, FileDependency};
+pub use file::File;
+// pub use collection::Collection; // Not used in this module
+// pub use collection_logic::{CollectionLogicRule, ConditionType, Action}; // Not used in this module
+// pub use session_state::{SessionState, RecentAction, RecentActionType, UiPreferences}; // Not used in this module
 
 /// Структура данных для сайта
-/// 
+///
 /// Представляет сайт с его конфигурацией парсера и метаданными
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Site {
@@ -15,7 +28,7 @@ pub struct Site {
 }
 
 /// Структура данных для мода
-/// 
+///
 /// Представляет мод с его метаданными (название, версия, автор и т.д.)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Mod {
@@ -33,7 +46,7 @@ pub struct Mod {
 }
 
 /// Структура данных для обновления мода
-/// 
+///
 /// Используется для отслеживания изменений версий модов
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModUpdate {
@@ -45,7 +58,7 @@ pub struct ModUpdate {
 }
 
 /// Структура данных для уведомления
-/// 
+///
 /// Представляет уведомление о обновлении мода или других событиях
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Notification {
@@ -59,9 +72,10 @@ pub struct Notification {
 }
 
 /// Структура данных для узла парсера
-/// 
+///
 /// Представляет узел в графе парсера (selector, extract, filter, transform, output)
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct ParserNode {
     /// Уникальный идентификатор узла
     pub id: String,
@@ -74,13 +88,13 @@ pub struct ParserNode {
 }
 
 /// Структура данных для конфигурации парсера
-/// 
+///
 /// Представляет полную конфигурацию парсера с узлами и связями между ними
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct ParserConfig {
     /// Список узлов парсера
     pub nodes: Vec<ParserNode>,
     /// Список связей между узлами (from_id, to_id)
     pub connections: Vec<(String, String)>,
 }
-

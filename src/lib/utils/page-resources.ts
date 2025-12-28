@@ -2,7 +2,9 @@
  * Утилиты для обработки ресурсов страницы (CSS, изображения)
  * Вынесено из PageViewer для разделения логики
  */
-import { invoke } from '../tauri-wrapper';
+import { invoke } from '@/lib/tauri-wrapper';
+
+// btoa is available in browser environment
 
 /**
  * Обрабатывает HTML и встраивает внешние ресурсы (CSS, изображения) как base64
@@ -25,7 +27,7 @@ export async function embedResources(
   try {
     // Обрабатываем CSS файлы
     processedHtml = await processCssFiles(processedHtml, baseUrl, pageFolder);
-    
+
     // Обрабатываем изображения
     processedHtml = await processImages(processedHtml, baseUrl, pageFolder);
 
@@ -44,13 +46,11 @@ export async function embedResources(
 /**
  * Обрабатывает CSS файлы: находит, загружает и встраивает их
  */
-async function processCssFiles(
-  html: string,
-  baseUrl: string,
-  pageFolder: string
-): Promise<string> {
-  const cssLinkRegex1 = /<link[^>]*rel\s*=\s*["']?stylesheet["']?[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi;
-  const cssLinkRegex2 = /<link[^>]*type\s*=\s*["']?text\/css["']?[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi;
+async function processCssFiles(html: string, baseUrl: string, pageFolder: string): Promise<string> {
+  const cssLinkRegex1 =
+    /<link[^>]*rel\s*=\s*["']?stylesheet["']?[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi;
+  const cssLinkRegex2 =
+    /<link[^>]*type\s*=\s*["']?text\/css["']?[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi;
   const cssLinkRegex3 = /<link[^>]*href\s*=\s*["']([^"']+\.css[^"']*)["'][^>]*>/gi;
   const cssLinks: Map<string, string> = new Map();
   let match: RegExpExecArray | null = null;
@@ -58,7 +58,11 @@ async function processCssFiles(
   // Ищем CSS файлы
   while ((match = cssLinkRegex1.exec(html)) !== null) {
     const cssUrl = match[1];
-    if (!cssUrl.startsWith('data:') && !cssUrl.startsWith('blob:') && !cssUrl.startsWith('http://localhost')) {
+    if (
+      !cssUrl.startsWith('data:') &&
+      !cssUrl.startsWith('blob:') &&
+      !cssUrl.startsWith('http://localhost')
+    ) {
       try {
         const absoluteUrl = new URL(cssUrl, baseUrl).href;
         if (!cssLinks.has(absoluteUrl)) {
@@ -73,7 +77,11 @@ async function processCssFiles(
   match = null;
   while ((match = cssLinkRegex2.exec(html)) !== null) {
     const cssUrl = match[1];
-    if (!cssUrl.startsWith('data:') && !cssUrl.startsWith('blob:') && !cssUrl.startsWith('http://localhost')) {
+    if (
+      !cssUrl.startsWith('data:') &&
+      !cssUrl.startsWith('blob:') &&
+      !cssUrl.startsWith('http://localhost')
+    ) {
       try {
         const absoluteUrl = new URL(cssUrl, baseUrl).href;
         if (!cssLinks.has(absoluteUrl)) {
@@ -88,7 +96,12 @@ async function processCssFiles(
   match = null;
   while ((match = cssLinkRegex3.exec(html)) !== null) {
     const cssUrl = match[1];
-    if (!cssUrl.startsWith('data:') && !cssUrl.startsWith('blob:') && !cssUrl.startsWith('http://localhost') && cssUrl.includes('.css')) {
+    if (
+      !cssUrl.startsWith('data:') &&
+      !cssUrl.startsWith('blob:') &&
+      !cssUrl.startsWith('http://localhost') &&
+      cssUrl.includes('.css')
+    ) {
       try {
         const absoluteUrl = new URL(cssUrl, baseUrl).href;
         if (!cssLinks.has(absoluteUrl)) {
@@ -115,29 +128,42 @@ async function processCssFiles(
       const cssDir = cssBaseUrl.href.substring(0, cssBaseUrl.href.lastIndexOf('/') + 1);
       const urlRegex = /url\(["']?([^"')]+)["']?\)/gi;
       decodedCss = decodedCss.replace(urlRegex, (match, url) => {
-        if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+        if (
+          url.startsWith('data:') ||
+          url.startsWith('blob:') ||
+          url.startsWith('http://') ||
+          url.startsWith('https://') ||
+          url.startsWith('//')
+        ) {
           return match;
         }
         try {
           let absoluteCssUrl: string;
           try {
             absoluteCssUrl = new URL(url, cssDir).href;
-          } catch (e1) {
+          } catch {
             try {
               absoluteCssUrl = new URL(url, baseUrl).href;
-            } catch (e2) {
+            } catch {
               return match;
             }
           }
           return match.replace(url, absoluteCssUrl);
-        } catch (e) {
+        } catch {
           return match;
         }
       });
 
       // Встраиваем CSS как inline стиль
-      const styleOpenTag = [60, 115, 116, 121, 108, 101, 32, 116, 121, 112, 101, 61, 34, 116, 101, 120, 116, 47, 99, 115, 115, 34, 62].map(c => String.fromCharCode(c)).join('');
-      const styleCloseTag = [60, 47, 115, 116, 121, 108, 101, 62].map(c => String.fromCharCode(c)).join('');
+      const styleOpenTag = [
+        60, 115, 116, 121, 108, 101, 32, 116, 121, 112, 101, 61, 34, 116, 101, 120, 116, 47, 99,
+        115, 115, 34, 62,
+      ]
+        .map(c => String.fromCharCode(c))
+        .join('');
+      const styleCloseTag = [60, 47, 115, 116, 121, 108, 101, 62]
+        .map(c => String.fromCharCode(c))
+        .join('');
       const inlineStyle = styleOpenTag + decodedCss + styleCloseTag;
 
       // Сохраняем CSS в папку
@@ -146,7 +172,7 @@ async function processCssFiles(
         await invoke<string>('save_resource', {
           url: absoluteUrl,
           data: cssBytes,
-          subfolder: cssSubfolder
+          subfolder: cssSubfolder,
         });
       } catch (e) {
         console.warn('[PageResources] Failed to save CSS to folder:', e);
@@ -155,8 +181,14 @@ async function processCssFiles(
       // Заменяем ссылку на CSS
       const escapedOriginalUrl = originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const escapedAbsoluteUrl = absoluteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const linkRegex1 = new RegExp(`<link[^>]*href\\s*=\\s*["']${escapedOriginalUrl}["'][^>]*>`, 'gi');
-      const linkRegex2 = new RegExp(`<link[^>]*href\\s*=\\s*["']${escapedAbsoluteUrl}["'][^>]*>`, 'gi');
+      const linkRegex1 = new RegExp(
+        `<link[^>]*href\\s*=\\s*["']${escapedOriginalUrl}["'][^>]*>`,
+        'gi'
+      );
+      const linkRegex2 = new RegExp(
+        `<link[^>]*href\\s*=\\s*["']${escapedAbsoluteUrl}["'][^>]*>`,
+        'gi'
+      );
       processedHtml = processedHtml.replace(linkRegex1, inlineStyle);
       processedHtml = processedHtml.replace(linkRegex2, inlineStyle);
 
@@ -172,11 +204,7 @@ async function processCssFiles(
 /**
  * Обрабатывает изображения: находит, загружает и встраивает их как base64
  */
-async function processImages(
-  html: string,
-  baseUrl: string,
-  pageFolder: string
-): Promise<string> {
+async function processImages(html: string, baseUrl: string, pageFolder: string): Promise<string> {
   const imgRegex1 = /<img[^>]*src\s*=\s*["']([^"']+)["'][^>]*>/gi;
   const imgRegex2 = /<img[^>]*src\s*=\s*([^\s>]+)[^>]*>/gi;
   const bgImgRegex = /background-image\s*:\s*url\(["']?([^"')]+)["']?\)/gi;
@@ -186,7 +214,11 @@ async function processImages(
   // Ищем изображения
   while ((match = imgRegex1.exec(html)) !== null) {
     const imgUrl = match[1];
-    if (!imgUrl.startsWith('data:') && !imgUrl.startsWith('blob:') && !imgUrl.startsWith('http://localhost')) {
+    if (
+      !imgUrl.startsWith('data:') &&
+      !imgUrl.startsWith('blob:') &&
+      !imgUrl.startsWith('http://localhost')
+    ) {
       try {
         const absoluteUrl = new URL(imgUrl, baseUrl).href;
         if (!imgUrls.has(absoluteUrl)) {
@@ -201,13 +233,18 @@ async function processImages(
   match = null;
   while ((match = imgRegex2.exec(html)) !== null) {
     const imgUrl = match[1];
-    if (!imgUrl.startsWith('data:') && !imgUrl.startsWith('blob:') && !imgUrl.startsWith('http://localhost') && !imgUrl.includes('=')) {
+    if (
+      !imgUrl.startsWith('data:') &&
+      !imgUrl.startsWith('blob:') &&
+      !imgUrl.startsWith('http://localhost') &&
+      !imgUrl.includes('=')
+    ) {
       try {
         const absoluteUrl = new URL(imgUrl, baseUrl).href;
         if (!imgUrls.has(absoluteUrl)) {
           imgUrls.set(absoluteUrl, imgUrl);
         }
-      } catch (e) {
+      } catch {
         // Игнорируем ошибки
       }
     }
@@ -216,7 +253,11 @@ async function processImages(
   match = null;
   while ((match = bgImgRegex.exec(html)) !== null) {
     const imgUrl = match[1];
-    if (!imgUrl.startsWith('data:') && !imgUrl.startsWith('blob:') && !imgUrl.startsWith('http://localhost')) {
+    if (
+      !imgUrl.startsWith('data:') &&
+      !imgUrl.startsWith('blob:') &&
+      !imgUrl.startsWith('http://localhost')
+    ) {
       try {
         const absoluteUrl = new URL(imgUrl, baseUrl).href;
         if (!imgUrls.has(absoluteUrl)) {
@@ -250,11 +291,17 @@ async function processImages(
       // Определяем MIME тип
       let mimeType = 'image/png';
       const urlLower = absoluteUrl.toLowerCase();
-      if (urlLower.match(/\.(jpg|jpeg)$/)) mimeType = 'image/jpeg';
-      else if (urlLower.match(/\.gif$/)) mimeType = 'image/gif';
-      else if (urlLower.match(/\.webp$/)) mimeType = 'image/webp';
-      else if (urlLower.match(/\.svg$/)) mimeType = 'image/svg+xml';
-      else if (urlLower.match(/\.ico$/)) mimeType = 'image/x-icon';
+      if (urlLower.match(/\.(jpg|jpeg)$/)) {
+        mimeType = 'image/jpeg';
+      } else if (urlLower.match(/\.gif$/)) {
+        mimeType = 'image/gif';
+      } else if (urlLower.match(/\.webp$/)) {
+        mimeType = 'image/webp';
+      } else if (urlLower.match(/\.svg$/)) {
+        mimeType = 'image/svg+xml';
+      } else if (urlLower.match(/\.ico$/)) {
+        mimeType = 'image/x-icon';
+      }
 
       const dataUrl = `data:${mimeType};base64,${base64}`;
 
@@ -264,7 +311,7 @@ async function processImages(
         await invoke<string>('save_resource', {
           url: absoluteUrl,
           data: imgBytes,
-          subfolder: imgSubfolder
+          subfolder: imgSubfolder,
         });
       } catch (e) {
         console.warn('[PageResources] Failed to save image to folder:', e);
@@ -280,10 +327,16 @@ async function processImages(
       const imgSrcRegex2 = new RegExp(`(src\\s*=\\s*["'])${escapedAbsoluteUrl}(["'])`, 'gi');
       processedHtml = processedHtml.replace(imgSrcRegex2, `$1${dataUrl}$2`);
 
-      const bgImgUrlRegex1 = new RegExp(`(background-image\\s*:\\s*url\\(["']?)${escapedOriginalUrl}(["']?\\))`, 'gi');
+      const bgImgUrlRegex1 = new RegExp(
+        `(background-image\\s*:\\s*url\\(["']?)${escapedOriginalUrl}(["']?\\))`,
+        'gi'
+      );
       processedHtml = processedHtml.replace(bgImgUrlRegex1, `$1${dataUrl}$2`);
 
-      const bgImgUrlRegex2 = new RegExp(`(background-image\\s*:\\s*url\\(["']?)${escapedAbsoluteUrl}(["']?\\))`, 'gi');
+      const bgImgUrlRegex2 = new RegExp(
+        `(background-image\\s*:\\s*url\\(["']?)${escapedAbsoluteUrl}(["']?\\))`,
+        'gi'
+      );
       processedHtml = processedHtml.replace(bgImgUrlRegex2, `$1${dataUrl}$2`);
 
       console.log('[PageResources] Embedded image as base64:', absoluteUrl);
@@ -294,6 +347,3 @@ async function processImages(
 
   return processedHtml;
 }
-
-
-

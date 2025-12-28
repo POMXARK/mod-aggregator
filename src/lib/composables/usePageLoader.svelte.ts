@@ -1,13 +1,13 @@
 /**
  * Composable для загрузки и обработки веб-страниц
- * 
+ *
  * Предоставляет функции для загрузки страниц через Tauri, обработки HTML
  * (удаление скриптов, встраивание скрипта выделения, встраивание ресурсов)
  * и управления состоянием загрузки
  */
-import { invoke } from '../tauri-wrapper';
-import { embedResources } from '../utils/page-resources';
-import { removeScripts, embedSelectionScript } from '../utils/html-processor';
+import { invoke } from '@/lib/tauri-wrapper';
+import { embedResources } from '@/lib/utils/page-resources';
+import { removeScripts, embedSelectionScript } from '@/lib/utils/html-processor';
 import { getSelectionScriptContent, getSelectionStyles } from '../utils/selection-script';
 import { getNavigationScriptContent } from '../utils/navigation-script';
 
@@ -25,7 +25,7 @@ export interface PageLoaderOptions {
 
 /**
  * Создает composable для загрузки и обработки веб-страниц
- * 
+ *
  * @param options - опции для настройки загрузчика
  * @returns Объект с состоянием загрузки и методом loadPage
  */
@@ -36,10 +36,10 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
 
   /**
    * Загружает страницу с учетом кеша и привязки к сайту
-   * 
+   *
    * Загружает страницу через Tauri, обрабатывает HTML (удаляет скрипты,
    * встраивает скрипт выделения, встраивает ресурсы) и сохраняет результат.
-   * 
+   *
    * @param url - URL страницы для загрузки
    * @param forceRefresh - если true, загружает с сервера и создает новую версию
    * @returns Promise с HTML содержимым страницы или null в случае ошибки
@@ -58,14 +58,14 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
     try {
       const urlObj = new URL(normalizedUrl);
       normalizedUrl = urlObj.href; // Получаем полный нормализованный URL
-      
+
       // Убираем trailing slash для консистентности (если это не корневой путь)
       if (normalizedUrl.endsWith('/') && normalizedUrl.split('/').length > 4) {
         normalizedUrl = normalizedUrl.slice(0, -1);
       }
-      
+
       console.log('[PageLoader] Normalized URL:', normalizedUrl, 'from:', url);
-      
+
       // Проверяем, что URL действительно полный
       if (normalizedUrl !== url) {
         console.log('[PageLoader] URL was normalized:', url, '->', normalizedUrl);
@@ -83,11 +83,18 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
       const siteId = typeof options.siteId === 'function' ? options.siteId() : options.siteId;
 
       // Загружаем страницу через Tauri с нормализованным URL
-      console.log('[PageLoader] Fetching page with normalized URL:', normalizedUrl, 'forceRefresh:', forceRefresh, 'siteId:', siteId);
-      const html = await invoke<string>('fetch_page', { 
-        url: normalizedUrl, 
+      console.log(
+        '[PageLoader] Fetching page with normalized URL:',
+        normalizedUrl,
+        'forceRefresh:',
         forceRefresh,
-        siteId: siteId || null 
+        'siteId:',
+        siteId
+      );
+      const html = await invoke<string>('fetch_page', {
+        url: normalizedUrl,
+        forceRefresh,
+        siteId: siteId || null,
       });
 
       if (!html) {
@@ -102,14 +109,24 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
       // Удаляем скрипты (включая старые скрипты навигации)
       console.log('[PageLoader] Removing scripts from HTML...');
       processed = removeScripts(processed);
-      console.log('[PageLoader] Scripts removed, processed HTML length:', processed.length, 'chars');
+      console.log(
+        '[PageLoader] Scripts removed, processed HTML length:',
+        processed.length,
+        'chars'
+      );
 
       // Встраиваем скрипт навигации, скрипт выделения и стили
       // Используем нормализованный URL для скрипта навигации
       const selectionScriptContent = getSelectionScriptContent();
       const navigationScriptContent = getNavigationScriptContent(normalizedUrl);
       const styles = getSelectionStyles();
-      processed = embedSelectionScript(processed, selectionScriptContent, navigationScriptContent, styles, normalizedUrl);
+      processed = embedSelectionScript(
+        processed,
+        selectionScriptContent,
+        navigationScriptContent,
+        styles,
+        normalizedUrl
+      );
 
       // Встраиваем ресурсы (CSS, изображения)
       // Сначала проверяем, есть ли папка кеша для этого URL
@@ -117,7 +134,9 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
         let pageFolder: string;
         if (!forceRefresh) {
           // Пытаемся найти папку кеша для этого URL
-          const cacheFolder = await invoke<string | null>('get_cache_folder_for_url', { url: normalizedUrl });
+          const cacheFolder = await invoke<string | null>('get_cache_folder_for_url', {
+            url: normalizedUrl,
+          });
           if (cacheFolder) {
             pageFolder = cacheFolder;
             console.log('[PageLoader] Using cache folder for resources:', pageFolder);
@@ -143,14 +162,15 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
 
       return processed;
     } catch (e: any) {
-      const errorMessage = e?.message || e?.toString() || 'Неизвестная ошибка при загрузке страницы';
+      const errorMessage =
+        e?.message || e?.toString() || 'Неизвестная ошибка при загрузке страницы';
       error = errorMessage;
       console.error('[PageLoader] Error loading page:', e);
-      
+
       if (options.onError) {
         options.onError(errorMessage);
       }
-      
+
       return null;
     } finally {
       loading = false;
@@ -158,10 +178,15 @@ export function usePageLoader(options: PageLoaderOptions = {}) {
   }
 
   return {
-    get loading() { return loading; },
-    get error() { return error; },
-    get processedHtml() { return processedHtml; },
+    get loading() {
+      return loading;
+    },
+    get error() {
+      return error;
+    },
+    get processedHtml() {
+      return processedHtml;
+    },
     loadPage,
   };
 }
-

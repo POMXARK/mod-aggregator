@@ -11,26 +11,28 @@ let tauriCheckCache: boolean | null = null;
  * Check if we're in Tauri by trying to use the API
  */
 function checkTauri(): boolean {
-  if (tauriCheckCache !== null) return tauriCheckCache;
-  
+  if (tauriCheckCache !== null) {
+    return tauriCheckCache;
+  }
+
   // First try the simple check
   if (isTauri()) {
     tauriCheckCache = true;
     return true;
   }
-  
+
   // If simple check fails, try to actually use the API
   // This will fail in browser but work in Tauri
   try {
-    // @ts-ignore - check if Tauri API is available
+    // @ts-expect-error - check if Tauri API is available
     if (typeof window !== 'undefined' && window.__TAURI__) {
       tauriCheckCache = true;
       return true;
     }
-  } catch (e) {
+  } catch {
     // Not in Tauri
   }
-  
+
   tauriCheckCache = false;
   return false;
 }
@@ -55,8 +57,7 @@ export async function invoke<T = any>(cmd: string, args?: any): Promise<T> {
       throw error;
     }
   }
-  
+
   // Running in browser - use mock
   return mockInvoke<T>(cmd, args);
 }
-

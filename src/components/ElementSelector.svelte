@@ -12,7 +12,7 @@
     onAutoDetect?: () => void;
   }
 
-  let { selector, elementInfo, onConfirm, onCancel, onAutoDetect }: Props = $props();
+  const { selector, elementInfo, onConfirm, onCancel, onAutoDetect }: Props = $props();
 </script>
 
 <div class="element-selector">
@@ -20,37 +20,37 @@
     <h3>Выбранный элемент</h3>
     <button class="btn-close" onclick={onCancel} aria-label="Закрыть">×</button>
   </div>
-  
+
   <div class="selector-content">
     <div class="info-group">
       <div class="info-label">CSS Селектор:</div>
       <code class="selector-code">{selector}</code>
     </div>
-    
+
     <div class="info-group">
       <div class="info-label">Тег:</div>
       <span class="tag-badge">{elementInfo.tagName}</span>
     </div>
-    
+
     {#if elementInfo.text}
       <div class="info-group">
         <div class="info-label">Текст:</div>
         <div class="text-preview">{elementInfo.text}</div>
       </div>
     {/if}
-    
+
     {#if elementInfo.similarElements !== undefined}
       <div class="info-group">
         <div class="info-label">Похожих элементов:</div>
         <span class="count-badge">{elementInfo.similarElements}</span>
       </div>
     {/if}
-    
+
     {#if Object.keys(elementInfo.attributes).length > 0}
       <div class="info-group">
         <div class="info-label">Атрибуты:</div>
         <div class="attributes-list">
-          {#each Object.entries(elementInfo.attributes) as [key, value]}
+          {#each Object.entries(elementInfo.attributes) as [key, value] (key)}
             <div class="attribute-item">
               <strong>{key}:</strong> <span>{value}</span>
             </div>
@@ -59,19 +59,13 @@
       </div>
     {/if}
   </div>
-  
+
   <div class="selector-actions">
     {#if onAutoDetect}
-      <button class="btn-auto" onclick={onAutoDetect}>
-        🔍 Автоопределение
-      </button>
+      <button class="btn-auto" onclick={onAutoDetect}> 🔍 Автоопределение </button>
     {/if}
-    <button class="btn-confirm" onclick={onConfirm}>
-      ✓ Создать ноду и сгенерировать код
-    </button>
-    <button class="btn-cancel" onclick={onCancel}>
-      Отмена
-    </button>
+    <button class="btn-confirm" onclick={onConfirm}> ✓ Создать ноду и сгенерировать код </button>
+    <button class="btn-cancel" onclick={onCancel}> Отмена </button>
   </div>
 </div>
 
@@ -269,4 +263,3 @@
     background: #475569;
   }
 </style>
-

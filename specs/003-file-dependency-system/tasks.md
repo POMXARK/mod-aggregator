@@ -24,20 +24,20 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create directory structure for dependencies feature in src/components/dependencies/
-- [ ] T002 Create directory structure for collections feature in src/components/collections/
-- [ ] T003 Create directory structure for files feature in src/components/files/
-- [ ] T004 Create directory structure for import-export feature in src/components/import-export/
-- [ ] T005 Create directory structure for session feature in src/components/session/
-- [ ] T006 [P] Create directory structure for lib utilities in src/lib/dependencies/
-- [ ] T007 [P] Create directory structure for lib utilities in src/lib/collections/
-- [ ] T008 [P] Create directory structure for lib utilities in src/lib/import-export/
-- [ ] T009 [P] Create directory structure for lib utilities in src/lib/session/
-- [ ] T010 [P] Create directory structure for types in src/types/
-- [ ] T011 [P] Create directory structure for backend commands in src-tauri/src/commands/
-- [ ] T012 [P] Create directory structure for backend services in src-tauri/src/services/
-- [ ] T013 [P] Create directory structure for backend models in src-tauri/src/models/
-- [ ] T014 [P] Create directory structure for database migrations in src-tauri/src/database/migrations/
+- [X] T001 Create directory structure for dependencies feature in src/components/dependencies/
+- [X] T002 Create directory structure for collections feature in src/components/collections/
+- [X] T003 Create directory structure for files feature in src/components/files/
+- [X] T004 Create directory structure for import-export feature in src/components/import-export/
+- [X] T005 Create directory structure for session feature in src/components/session/
+- [X] T006 [P] Create directory structure for lib utilities in src/lib/dependencies/
+- [X] T007 [P] Create directory structure for lib utilities in src/lib/collections/
+- [X] T008 [P] Create directory structure for lib utilities in src/lib/import-export/
+- [X] T009 [P] Create directory structure for lib utilities in src/lib/session/
+- [X] T010 [P] Create directory structure for types in src/types/
+- [X] T011 [P] Create directory structure for backend commands in src-tauri/src/commands/
+- [X] T012 [P] Create directory structure for backend services in src-tauri/src/services/
+- [X] T013 [P] Create directory structure for backend models in src-tauri/src/models/
+- [X] T014 [P] Create directory structure for database migrations in src-tauri/src/database/migrations/
 
 ---
 
@@ -47,21 +47,21 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T015 Create database migration 003_add_dependencies.sql in src-tauri/src/database/migrations/003_add_dependencies.sql
-- [ ] T016 Create database migration 004_add_collections.sql in src-tauri/src/database/migrations/004_add_collections.sql
-- [ ] T017 Create database migration 005_add_session_state.sql in src-tauri/src/database/migrations/005_add_session_state.sql
-- [ ] T018 [P] Create File model with name@version in src-tauri/src/models/file.rs
-- [ ] T019 [P] Create FileDependency model in src-tauri/src/models/dependency.rs
-- [ ] T020 [P] Create Collection model in src-tauri/src/models/collection.rs
-- [ ] T021 [P] Create CollectionLogicRule model in src-tauri/src/models/collection_logic.rs
-- [ ] T022 [P] Create SessionState model in src-tauri/src/models/session_state.rs
-- [ ] T023 [P] Create TypeScript types for File in src/types/file.ts
-- [ ] T024 [P] Create TypeScript types for FileDependency in src/types/dependency.ts
-- [ ] T025 [P] Create TypeScript types for Collection in src/types/collection.ts
-- [ ] T026 [P] Create TypeScript types for CollectionLogicRule in src/types/collection-logic.ts
-- [ ] T027 [P] Create TypeScript types for SessionState in src/types/session.ts
-- [ ] T028 Implement database schema extension in src-tauri/src/database/schema.rs
-- [ ] T029 Update existing database initialization to run new migrations in src-tauri/src/database.rs
+- [X] T015 Create database migration 003_add_dependencies.sql in src-tauri/src/database/migrations/003_add_dependencies.sql
+- [X] T016 Create database migration 004_add_collections.sql in src-tauri/src/database/migrations/004_add_collections.sql
+- [X] T017 Create database migration 005_add_session_state.sql in src-tauri/src/database/migrations/005_add_session_state.sql
+- [X] T018 [P] Create File model with name@version in src-tauri/src/models/file.rs
+- [X] T019 [P] Create FileDependency model in src-tauri/src/models/dependency.rs
+- [X] T020 [P] Create Collection model in src-tauri/src/models/collection.rs
+- [X] T021 [P] Create CollectionLogicRule model in src-tauri/src/models/collection_logic.rs
+- [X] T022 [P] Create SessionState model in src-tauri/src/models/session_state.rs
+- [X] T023 [P] Create TypeScript types for File in src/types/file.ts
+- [X] T024 [P] Create TypeScript types for FileDependency in src/types/dependency.ts
+- [X] T025 [P] Create TypeScript types for Collection in src/types/collection.ts
+- [X] T026 [P] Create TypeScript types for CollectionLogicRule in src/types/collection-logic.ts
+- [X] T027 [P] Create TypeScript types for SessionState in src/types/session.ts
+- [X] T028 Implement database schema extension in src-tauri/src/database/schema.rs
+- [X] T029 Update existing database initialization to run new migrations in src-tauri/src/database.rs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -75,29 +75,29 @@
 
 ### Implementation for User Story 1
 
-- [ ] T030 [P] [US1] Create dependency graph service in src-tauri/src/services/dependency_service/graph.rs
-- [ ] T031 [P] [US1] Create dependency validator service in src-tauri/src/services/dependency_service/validator.rs
-- [ ] T032 [P] [US1] Create version resolver service in src-tauri/src/services/dependency_service/resolver.rs
-- [ ] T030a [P] [US1] Unit test for circular dependency detection in tests/backend/services/dependency_service/test_validator.rs
-- [ ] T031a [P] [US1] Unit test for dependency graph algorithms in tests/backend/services/dependency_service/test_graph.rs
-- [ ] T033 [US1] Implement get_file_dependencies command in src-tauri/src/commands/dependencies.rs
-- [ ] T034 [US1] Implement add_file_dependency command in src-tauri/src/commands/dependencies.rs
-- [ ] T035 [US1] Implement remove_file_dependency command in src-tauri/src/commands/dependencies.rs
-- [ ] T036 [US1] Implement check_dependencies command in src-tauri/src/commands/dependencies.rs
-- [ ] T037 [US1] Implement check_circular_dependencies command in src-tauri/src/commands/dependencies.rs
-- [ ] T038 [US1] Implement get_dependent_files command in src-tauri/src/commands/dependencies.rs
-- [ ] T039 [US1] Implement resolve_dependency_version command in src-tauri/src/commands/dependencies.rs
-- [ ] T040 [US1] Implement get_dependency_graph command in src-tauri/src/commands/dependencies.rs
-- [ ] T041 [US1] Implement get_installation_order command in src-tauri/src/commands/dependencies.rs
-- [ ] T042 [P] [US1] Create dependency graph utility in src/lib/dependencies/dependency-graph.ts
-- [ ] T043 [P] [US1] Create dependency validator utility in src/lib/dependencies/dependency-validator.ts
-- [ ] T044 [P] [US1] Create version resolver utility in src/lib/dependencies/version-resolver.ts
-- [ ] T045 [P] [US1] Create DependencyGraph component in src/components/dependencies/DependencyGraph.svelte
-- [ ] T046 [P] [US1] Create DependencyEditor component in src/components/dependencies/DependencyEditor.svelte
-- [ ] T047 [P] [US1] Create DependencyWarning component in src/components/dependencies/DependencyWarning.svelte
-- [ ] T048 [P] [US1] Create VersionSelector component in src/components/dependencies/VersionSelector.svelte
-- [ ] T049 [US1] Integrate dependency commands with Tauri app state in src-tauri/src/main.rs
-- [ ] T050 [US1] Add error handling and logging for dependency operations in src-tauri/src/commands/dependencies.rs
+- [X] T030 [P] [US1] Create dependency graph service in src-tauri/src/services/dependency_service/graph.rs
+- [X] T031 [P] [US1] Create dependency validator service in src-tauri/src/services/dependency_service/validator.rs
+- [X] T032 [P] [US1] Create version resolver service in src-tauri/src/services/dependency_service/resolver.rs
+- [X] T030a [P] [US1] Unit test for circular dependency detection in tests/backend/services/dependency_service/test_validator.rs
+- [X] T031a [P] [US1] Unit test for dependency graph algorithms in tests/backend/services/dependency_service/test_graph.rs
+- [X] T033 [US1] Implement get_file_dependencies command in src-tauri/src/commands/dependencies.rs
+- [X] T034 [US1] Implement add_file_dependency command in src-tauri/src/commands/dependencies.rs
+- [X] T035 [US1] Implement remove_file_dependency command in src-tauri/src/commands/dependencies.rs
+- [X] T036 [US1] Implement check_dependencies command in src-tauri/src/commands/dependencies.rs
+- [X] T037 [US1] Implement check_circular_dependencies command in src-tauri/src/commands/dependencies.rs
+- [X] T038 [US1] Implement get_dependent_files command in src-tauri/src/commands/dependencies.rs
+- [X] T039 [US1] Implement resolve_dependency_version command in src-tauri/src/commands/dependencies.rs
+- [X] T040 [US1] Implement get_dependency_graph command in src-tauri/src/commands/dependencies.rs
+- [X] T041 [US1] Implement get_installation_order command in src-tauri/src/commands/dependencies.rs
+- [X] T042 [P] [US1] Create dependency graph utility in src/lib/dependencies/dependency-graph.ts
+- [X] T043 [P] [US1] Create dependency validator utility in src/lib/dependencies/dependency-validator.ts
+- [X] T044 [P] [US1] Create version resolver utility in src/lib/dependencies/version-resolver.ts
+- [X] T045 [P] [US1] Create DependencyGraph component in src/components/dependencies/DependencyGraph.svelte
+- [X] T046 [P] [US1] Create DependencyEditor component in src/components/dependencies/DependencyEditor.svelte
+- [X] T047 [P] [US1] Create DependencyWarning component in src/components/dependencies/DependencyWarning.svelte
+- [X] T048 [P] [US1] Create VersionSelector component in src/components/dependencies/VersionSelector.svelte
+- [X] T049 [US1] Integrate dependency commands with Tauri app state in src-tauri/src/main.rs
+- [X] T050 [US1] Add error handling and logging for dependency operations in src-tauri/src/commands/dependencies.rs
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -111,18 +111,18 @@
 
 ### Implementation for User Story 2
 
-- [ ] T051 [US2] Implement create_file command in src-tauri/src/commands/files.rs
-- [ ] T052 [US2] Implement update_file command in src-tauri/src/commands/files.rs
-- [ ] T053 [US2] Implement delete_file command with dependency check in src-tauri/src/commands/files.rs
-- [ ] T054 [US2] Implement upload_file_version command in src-tauri/src/commands/files.rs
-- [ ] T055 [US2] Implement get_file_by_name_version command in src-tauri/src/commands/files.rs
-- [ ] T056 [US2] Implement get_file_versions command in src-tauri/src/commands/files.rs
-- [ ] T057 [P] [US2] Create FileForm component in src/components/files/FileForm.svelte
-- [ ] T058 [US2] Add dependency editing to FileForm in src/components/files/FileForm.svelte
-- [ ] T059 [US2] Add validation for name@version uniqueness in src-tauri/src/commands/files.rs
-- [ ] T060 [US2] Add validation for file parameters in src/components/files/FileForm.svelte
-- [ ] T061 [US2] Integrate FileForm with dependency management in src/components/files/FileForm.svelte
-- [ ] T062 [US2] Add error handling for file operations in src-tauri/src/commands/files.rs
+- [X] T051 [US2] Implement create_file command in src-tauri/src/commands/files.rs
+- [X] T052 [US2] Implement update_file command in src-tauri/src/commands/files.rs
+- [X] T053 [US2] Implement delete_file command with dependency check in src-tauri/src/commands/files.rs
+- [X] T054 [US2] Implement upload_file_version command in src-tauri/src/commands/files.rs
+- [X] T055 [US2] Implement get_file_by_name_version command in src-tauri/src/commands/files.rs
+- [X] T056 [US2] Implement get_file_versions command in src-tauri/src/commands/files.rs
+- [X] T057 [P] [US2] Create FileForm component in src/components/files/FileForm.svelte
+- [X] T058 [US2] Add dependency editing to FileForm in src/components/files/FileForm.svelte
+- [X] T059 [US2] Add validation for name@version uniqueness in src-tauri/src/commands/files.rs
+- [X] T060 [US2] Add validation for file parameters in src/components/files/FileForm.svelte
+- [X] T061 [US2] Integrate FileForm with dependency management in src/components/files/FileForm.svelte
+- [X] T062 [US2] Add error handling for file operations in src-tauri/src/commands/files.rs
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -136,20 +136,20 @@
 
 ### Implementation for User Story 3
 
-- [ ] T063 [US3] Implement export_file command in src-tauri/src/commands/import_export.rs
-- [ ] T064 [US3] Implement export_collection command in src-tauri/src/commands/import_export.rs
-- [ ] T065 [US3] Implement export_build command in src-tauri/src/commands/import_export.rs
-- [ ] T066 [US3] Implement import_file command in src-tauri/src/commands/import_export.rs
-- [ ] T067 [US3] Implement import_collection command in src-tauri/src/commands/import_export.rs
-- [ ] T068 [US3] Implement import_build command in src-tauri/src/commands/import_export.rs
-- [ ] T069 [US3] Implement validate_import_json command in src-tauri/src/commands/import_export.rs
-- [ ] T070 [P] [US3] Create JSON serializer utility in src/lib/import-export/json-serializer.ts
-- [ ] T071 [P] [US3] Create JSON serializer service in src-tauri/src/services/import_export_service.rs
-- [ ] T072 [P] [US3] Create ImportDialog component in src/components/import-export/ImportDialog.svelte
-- [ ] T073 [P] [US3] Create ExportDialog component in src/components/import-export/ExportDialog.svelte
-- [ ] T074 [US3] Add JSON schema validation for import in src-tauri/src/services/import_export_service.rs
-- [ ] T075 [US3] Add dependency resolution for imports in src-tauri/src/commands/import_export.rs
-- [ ] T076 [US3] Add error handling for import/export operations in src-tauri/src/commands/import_export.rs
+- [X] T063 [US3] Implement export_file command in src-tauri/src/commands/import_export.rs
+- [x] T064 [US3] Implement export_collection command in src-tauri/src/commands/import_export.rs
+- [x] T065 [US3] Implement export_build command in src-tauri/src/commands/import_export.rs
+- [X] T066 [US3] Implement import_file command in src-tauri/src/commands/import_export.rs
+- [x] T067 [US3] Implement import_collection command in src-tauri/src/commands/import_export.rs
+- [x] T068 [US3] Implement import_build command in src-tauri/src/commands/import_export.rs
+- [X] T069 [US3] Implement validate_import_json command in src-tauri/src/commands/import_export.rs
+- [X] T070 [P] [US3] Create JSON serializer utility in src/lib/import-export/json-serializer.ts
+- [X] T071 [P] [US3] Create JSON serializer service in src-tauri/src/services/import_export_service.rs
+- [X] T072 [P] [US3] Create ImportDialog component in src/components/import-export/ImportDialog.svelte
+- [X] T073 [P] [US3] Create ExportDialog component in src/components/import-export/ExportDialog.svelte
+- [X] T074 [US3] Add JSON schema validation for import in src-tauri/src/services/import_export_service.rs
+- [X] T075 [US3] Add dependency resolution for imports in src-tauri/src/commands/import_export.rs
+- [X] T076 [US3] Add error handling for import/export operations in src-tauri/src/commands/import_export.rs
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently
 
@@ -163,34 +163,34 @@
 
 ### Implementation for User Story 4
 
-- [ ] T077 [US4] Implement get_collections command in src-tauri/src/commands/collections.rs
-- [ ] T078 [US4] Implement create_collection command in src-tauri/src/commands/collections.rs
-- [ ] T079 [US4] Implement update_collection command in src-tauri/src/commands/collections.rs
-- [ ] T080 [US4] Implement delete_collection command in src-tauri/src/commands/collections.rs
-- [ ] T081 [US4] Implement get_collection_files command in src-tauri/src/commands/collections.rs
-- [ ] T082 [US4] Implement add_file_to_collection command in src-tauri/src/commands/collections.rs
-- [ ] T083 [US4] Implement remove_file_from_collection command in src-tauri/src/commands/collections.rs
-- [ ] T084 [US4] Implement reorder_collection_files command in src-tauri/src/commands/collections.rs
-- [ ] T085 [US4] Implement get_collection_logic_rules command in src-tauri/src/commands/collections.rs
-- [ ] T086 [US4] Implement create_collection_logic_rule command in src-tauri/src/commands/collections.rs
-- [ ] T087 [US4] Implement update_collection_logic_rule command in src-tauri/src/commands/collections.rs
-- [ ] T088 [US4] Implement delete_collection_logic_rule command in src-tauri/src/commands/collections.rs
-- [ ] T089 [US4] Implement evaluate_collection_logic command in src-tauri/src/commands/collections.rs
-- [ ] T090 [US4] Implement combine_collections command in src-tauri/src/commands/collections.rs
-- [ ] T091 [US4] Implement get_files_from_multiple_collections command in src-tauri/src/commands/collections.rs
-- [ ] T092 [P] [US4] Create collection logic evaluator service in src-tauri/src/services/collection_service/logic_evaluator.rs
-- [ ] T092a [P] [US4] Unit test for collection logic evaluation in tests/backend/services/collection_service/test_logic_evaluator.rs
-- [ ] T093 [P] [US4] Create collection logic utility in src/lib/collections/collection-logic.ts
-- [ ] T094 [P] [US4] Create collection composer utility in src/lib/collections/collection-composer.ts
-- [ ] T095 [P] [US4] Create CollectionLogicBuilder component in src/components/collections/CollectionLogicBuilder.svelte
-- [ ] T096 [P] [US4] Create CollectionComposer component in src/components/collections/CollectionComposer.svelte
-- [ ] T097 [P] [US4] Create CollectionViewer component in src/components/collections/CollectionViewer.svelte
-- [ ] T098 [US4] Add UI constructor for boolean conditions in src/components/collections/CollectionLogicBuilder.svelte
-- [ ] T099 [US4] Add UI constructor for collection_check conditions in src/components/collections/CollectionLogicBuilder.svelte
-- [ ] T100 [US4] Add UI constructor for file_check conditions in src/components/collections/CollectionLogicBuilder.svelte
-- [ ] T101 [US4] Add UI constructor for and/or conditions in src/components/collections/CollectionLogicBuilder.svelte
-- [ ] T102 [US4] Add validation for collection logic rules in src-tauri/src/commands/collections.rs
-- [ ] T103 [US4] Integrate collection commands with Tauri app state in src-tauri/src/main.rs
+- [x] T077 [US4] Implement get_collections command in src-tauri/src/commands/collections.rs
+- [x] T078 [US4] Implement create_collection command in src-tauri/src/commands/collections.rs
+- [x] T079 [US4] Implement update_collection command in src-tauri/src/commands/collections.rs
+- [x] T080 [US4] Implement delete_collection command in src-tauri/src/commands/collections.rs
+- [x] T081 [US4] Implement get_collection_files command in src-tauri/src/commands/collections.rs
+- [x] T082 [US4] Implement add_file_to_collection command in src-tauri/src/commands/collections.rs
+- [x] T083 [US4] Implement remove_file_from_collection command in src-tauri/src/commands/collections.rs
+- [x] T084 [US4] Implement reorder_collection_files command in src-tauri/src/commands/collections.rs
+- [x] T085 [US4] Implement get_collection_logic_rules command in src-tauri/src/commands/collections.rs
+- [x] T086 [US4] Implement create_collection_logic_rule command in src-tauri/src/commands/collections.rs
+- [x] T087 [US4] Implement update_collection_logic_rule command in src-tauri/src/commands/collections.rs
+- [x] T088 [US4] Implement delete_collection_logic_rule command in src-tauri/src/commands/collections.rs
+- [x] T089 [US4] Implement evaluate_collection_logic command in src-tauri/src/commands/collections.rs
+- [x] T090 [US4] Implement combine_collections command in src-tauri/src/commands/collections.rs
+- [x] T091 [US4] Implement get_files_from_multiple_collections command in src-tauri/src/commands/collections.rs
+- [x] T092 [P] [US4] Create collection logic evaluator service in src-tauri/src/services/collection_service/logic_evaluator.rs
+- [x] T092a [P] [US4] Unit test for collection logic evaluation in tests/backend/services/collection_service/test_logic_evaluator.rs
+- [x] T093 [P] [US4] Create collection logic utility in src/lib/collections/collection-logic.ts
+- [x] T094 [P] [US4] Create collection composer utility in src/lib/collections/collection-composer.ts
+- [x] T095 [P] [US4] Create CollectionLogicBuilder component in src/components/collections/CollectionLogicBuilder.svelte
+- [x] T096 [P] [US4] Create CollectionComposer component in src/components/collections/CollectionComposer.svelte
+- [x] T097 [P] [US4] Create CollectionViewer component in src/components/collections/CollectionViewer.svelte
+- [x] T098 [US4] Add UI constructor for boolean conditions in src/components/collections/CollectionLogicBuilder.svelte
+- [x] T099 [US4] Add UI constructor for collection_check conditions in src/components/collections/CollectionLogicBuilder.svelte
+- [x] T100 [US4] Add UI constructor for file_check conditions in src/components/collections/CollectionLogicBuilder.svelte
+- [x] T101 [US4] Add UI constructor for and/or conditions in src/components/collections/CollectionLogicBuilder.svelte
+- [x] T102 [US4] Add validation for collection logic rules in src-tauri/src/commands/collections.rs
+- [x] T103 [US4] Integrate collection commands with Tauri app state in src-tauri/src/main.rs
 
 **Checkpoint**: At this point, User Stories 1-4 should all work independently
 
@@ -204,22 +204,22 @@
 
 ### Implementation for User Story 5
 
-- [ ] T103a [US5] Create batch_operations.rs command file structure in src-tauri/src/commands/batch_operations.rs
-- [ ] T104 [US5] Implement batch_delete_files command in src-tauri/src/commands/batch_operations.rs
-- [ ] T105 [US5] Implement batch_move_files_to_collection command in src-tauri/src/commands/batch_operations.rs
-- [ ] T106 [US5] Implement batch_update_file_properties command in src-tauri/src/commands/batch_operations.rs
-- [ ] T107 [US5] Implement batch_add_dependencies command in src-tauri/src/commands/batch_operations.rs
-- [ ] T108 [US5] Implement batch_check_dependencies command in src-tauri/src/commands/batch_operations.rs
-- [ ] T109 [US5] Implement batch_export_files command in src-tauri/src/commands/batch_operations.rs
-- [ ] T110 [US5] Implement validate_batch_operation command in src-tauri/src/commands/batch_operations.rs
-- [ ] T111 [P] [US5] Create FileList component with multi-selection in src/components/files/FileList.svelte
-- [ ] T112 [P] [US5] Create BatchOperations component in src/components/files/BatchOperations.svelte
-- [ ] T113 [US5] Add click selection (single, Ctrl+Click, Shift+Click) to FileList in src/components/files/FileList.svelte
-- [ ] T114 [US5] Add drag selection to FileList in src/components/files/FileList.svelte
-- [ ] T115 [US5] Add batch operation menu to BatchOperations in src/components/files/BatchOperations.svelte
-- [ ] T116 [US5] Add dependency warnings for batch operations in src/components/files/BatchOperations.svelte
-- [ ] T117 [US5] Add error handling for batch operations in src-tauri/src/commands/batch_operations.rs
-- [ ] T118 [US5] Integrate batch operations with dependency checking in src-tauri/src/commands/batch_operations.rs
+- [x] T103a [US5] Create batch_operations.rs command file structure in src-tauri/src/commands/batch_operations.rs
+- [x] T104 [US5] Implement batch_delete_files command in src-tauri/src/commands/batch_operations.rs
+- [x] T105 [US5] Implement batch_move_files_to_collection command in src-tauri/src/commands/batch_operations.rs
+- [x] T106 [US5] Implement batch_update_file_properties command in src-tauri/src/commands/batch_operations.rs
+- [x] T107 [US5] Implement batch_add_dependencies command in src-tauri/src/commands/batch_operations.rs
+- [x] T108 [US5] Implement batch_check_dependencies command in src-tauri/src/commands/batch_operations.rs
+- [x] T109 [US5] Implement batch_export_files command in src-tauri/src/commands/batch_operations.rs
+- [x] T110 [US5] Implement validate_batch_operation command in src-tauri/src/commands/batch_operations.rs
+- [x] T111 [P] [US5] Create FileList component with multi-selection in src/components/files/FileList.svelte
+- [x] T112 [P] [US5] Create BatchOperations component in src/components/files/BatchOperations.svelte
+- [x] T113 [US5] Add click selection (single, Ctrl+Click, Shift+Click) to FileList in src/components/files/FileList.svelte
+- [x] T114 [US5] Add drag selection to FileList in src/components/files/FileList.svelte
+- [x] T115 [US5] Add batch operation menu to BatchOperations in src/components/files/BatchOperations.svelte
+- [x] T116 [US5] Add dependency warnings for batch operations in src/components/files/BatchOperations.svelte
+- [x] T117 [US5] Add error handling for batch operations in src-tauri/src/commands/batch_operations.rs
+- [x] T118 [US5] Integrate batch operations with dependency checking in src-tauri/src/commands/batch_operations.rs
 
 **Checkpoint**: At this point, User Stories 1-5 should all work independently
 
@@ -233,24 +233,24 @@
 
 ### Implementation for User Story 6
 
-- [ ] T119 [US6] Implement get_session_state command in src-tauri/src/commands/session_state.rs
-- [ ] T120 [US6] Implement update_file_order command in src-tauri/src/commands/session_state.rs
-- [ ] T121 [US6] Implement update_ui_preferences command in src-tauri/src/commands/session_state.rs
-- [ ] T122 [US6] Implement update_open_collections command in src-tauri/src/commands/session_state.rs
-- [ ] T123 [US6] Implement update_selected_files command in src-tauri/src/commands/session_state.rs
-- [ ] T124 [US6] Implement add_recent_action command in src-tauri/src/commands/session_state.rs
-- [ ] T125 [US6] Implement get_recent_actions command in src-tauri/src/commands/session_state.rs
-- [ ] T126 [US6] Implement clear_recent_actions command in src-tauri/src/commands/session_state.rs
-- [ ] T127 [US6] Implement restore_session command in src-tauri/src/commands/session_state.rs
-- [ ] T128 [US6] Implement reset_session_state command in src-tauri/src/commands/session_state.rs
-- [ ] T129 [P] [US6] Create session state utility in src/lib/session/session-state.ts
-- [ ] T130 [P] [US6] Create SessionRestore component in src/components/session/SessionRestore.svelte
-- [ ] T131 [US6] Create FileDragDrop component for reordering in src/components/files/FileDragDrop.svelte
-- [ ] T132 [US6] Add auto-save for file order changes in src/components/files/FileDragDrop.svelte
-- [ ] T133 [US6] Add auto-save for UI preferences changes in src/components/session/SessionRestore.svelte
-- [ ] T134 [US6] Add session restoration on app startup in src/App.svelte
-- [ ] T135 [US6] Add validation for restored session state in src-tauri/src/commands/session_state.rs
-- [ ] T136 [US6] Add limit enforcement for recent_actions (max 50) in src-tauri/src/commands/session_state.rs
+- [x] T119 [US6] Implement get_session_state command in src-tauri/src/commands/session_state.rs
+- [x] T120 [US6] Implement update_file_order command in src-tauri/src/commands/session_state.rs
+- [x] T121 [US6] Implement update_ui_preferences command in src-tauri/src/commands/session_state.rs
+- [x] T122 [US6] Implement update_open_collections command in src-tauri/src/commands/session_state.rs
+- [x] T123 [US6] Implement update_selected_files command in src-tauri/src/commands/session_state.rs
+- [x] T124 [US6] Implement add_recent_action command in src-tauri/src/commands/session_state.rs
+- [x] T125 [US6] Implement get_recent_actions command in src-tauri/src/commands/session_state.rs
+- [x] T126 [US6] Implement clear_recent_actions command in src-tauri/src/commands/session_state.rs
+- [x] T127 [US6] Implement restore_session command in src-tauri/src/commands/session_state.rs
+- [x] T128 [US6] Implement reset_session_state command in src-tauri/src/commands/session_state.rs
+- [x] T129 [P] [US6] Create session state utility in src/lib/session/session-state.ts
+- [x] T130 [P] [US6] Create SessionRestore component in src/components/session/SessionRestore.svelte
+- [x] T131 [US6] Create FileDragDrop component for reordering in src/components/files/FileDragDrop.svelte
+- [x] T132 [US6] Add auto-save for file order changes in src/components/files/FileDragDrop.svelte
+- [x] T133 [US6] Add auto-save for UI preferences changes in src/components/session/SessionRestore.svelte
+- [x] T134 [US6] Add session restoration on app startup in src/App.svelte
+- [x] T135 [US6] Add validation for restored session state in src-tauri/src/commands/session_state.rs
+- [x] T136 [US6] Add limit enforcement for recent_actions (max 50) in src-tauri/src/commands/session_state.rs
 
 **Checkpoint**: At this point, all User Stories 1-6 should be fully functional
 
@@ -260,21 +260,21 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T137 [P] Add JSDoc documentation to all TypeScript utilities in src/lib/
-- [ ] T138 [P] Add Rust documentation to all public functions in src-tauri/src/
-- [ ] T139 [P] Create README for dependencies feature in src/components/dependencies/README.md
-- [ ] T140 [P] Create README for collections feature in src/components/collections/README.md
-- [ ] T141 [P] Create README for files feature in src/components/files/README.md
-- [ ] T142 [P] Create README for import-export feature in src/components/import-export/README.md
-- [ ] T143 [P] Create README for session feature in src/components/session/README.md
-- [ ] T144 Code cleanup and refactoring across all new modules
-- [ ] T145 Performance optimization for dependency graph operations
-- [ ] T146 Performance optimization for collection logic evaluation
-- [ ] T146a Performance optimization for multi-collection file viewing (SC-009: <500ms response time, maintain UI responsiveness) in src/components/collections/CollectionViewer.svelte and src-tauri/src/commands/collections.rs
-- [ ] T147 Add comprehensive error messages for all user-facing operations
-- [ ] T148 Run quickstart.md validation scenarios
-- [ ] T149 Add logging for all critical operations
-- [ ] T150 Security review for file operations and dependency validation
+- [x] T137 [P] Add JSDoc documentation to all TypeScript utilities in src/lib/
+- [x] T138 [P] Add Rust documentation to all public functions in src-tauri/src/
+- [x] T139 [P] Create README for dependencies feature in src/components/dependencies/README.md
+- [x] T140 [P] Create README for collections feature in src/components/collections/README.md
+- [x] T141 [P] Create README for files feature in src/components/files/README.md
+- [x] T142 [P] Create README for import-export feature in src/components/import-export/README.md
+- [x] T143 [P] Create README for session feature in src/components/session/README.md
+- [x] T144 Code cleanup and refactoring across all new modules
+- [x] T145 Performance optimization for dependency graph operations
+- [x] T146 Performance optimization for collection logic evaluation
+- [x] T146a Performance optimization for multi-collection file viewing (SC-009: <500ms response time, maintain UI responsiveness) in src/components/collections/CollectionViewer.svelte and src-tauri/src/commands/collections.rs
+- [x] T147 Add comprehensive error messages for all user-facing operations
+- [ ] T148 Run quickstart.md validation scenarios (Manual testing required)
+- [x] T149 Add logging for all critical operations
+- [ ] T150 Security review for file operations and dependency validation (Manual review required)
 
 ---
 

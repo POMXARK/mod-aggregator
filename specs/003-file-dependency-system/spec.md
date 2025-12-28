@@ -14,6 +14,11 @@
 - Q: How should users specify enable/disable logic for files in collections? → A: UI constructor with predefined conditions (checkboxes, dropdowns, toggles) - no text expression syntax required
 - Q: What format should be used for importing/exporting files and collections? → A: Single JSON format for all types (files, collections, builds)
 - Q: What should happen when a user tries to delete a file that other files depend on? → A: Block deletion, show list of dependent files, and offer actions (remove dependencies, replace with another version)
+- Q: How should the UI handle loading, empty, and error states during file operations? → A: Explicit states with visual indicators: loading spinner/skeleton for async operations, empty state with helpful message when no data, error state with retry button and error details
+- Q: What lifecycle states should files have in the system? → A: Minimal set: installed/not installed (for dependency checking purposes)
+- Q: How should the system handle data validation and error messages? → A: Validation at all levels: frontend (instant feedback), backend (before saving), clear error messages in Russian language
+- Q: What are the practical scale limits for files, collections, and dependencies the system should support? → A: High scale limits: 10,000+ files, 1,000+ collections, no hard limits (system designed for scalability)
+- Q: How should the system handle concurrent editing conflicts (same file/collection edited simultaneously)? → A: Last write wins: system saves last change, warns user about potential conflict
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -130,11 +135,18 @@
 - How does batch selection work when files are in different view modes (tiles vs list)? **RESOLVED**: Selection state is independent of view mode. Files maintain selection state across view mode changes. When switching between tiles and list view, selected files remain selected. Batch operations work identically in both modes, operating on the current selection set regardless of view.
 - What happens when combining collections with conflicting file versions? **RESOLVED**: When combining collections, if multiple collections contain different versions of the same file (same name, different version), the system shows a conflict resolution dialog. User can choose: (1) keep all versions (all versions included in new collection), (2) keep latest version, (3) keep specific version, or (4) exclude conflicting files. Default behavior: keep all versions to preserve data integrity.
 - How does the system handle state persistence if the database is corrupted or missing? **RESOLVED**: On application startup, system validates session_state table integrity. If corruption detected or table missing: (1) attempt to restore from backup (if available), (2) if restoration fails, initialize with default state (empty file order, default UI preferences), (3) log error for user notification, (4) continue application startup with default state. User can manually reset session state if needed.
+- How should the UI display loading, empty, and error states? **RESOLVED**: System MUST provide explicit visual states for all async operations: (1) Loading state - spinner or skeleton loader during data fetching/processing, (2) Empty state - helpful message with actionable guidance when no files/collections exist, (3) Error state - clear error message with retry button and error details for failed operations. All states must be accessible and provide clear user feedback.
+- What lifecycle states should files have? **RESOLVED**: Files have minimal lifecycle states: (1) Not installed - file is not yet added to the system (exists only as dependency reference), (2) Installed - file exists in system database and can be used/selected. System uses installed state for dependency checking: dependencies must be installed before dependent files can be used. No additional states (active/inactive) are required for core functionality.
+- How should the system handle data validation and error messages? **RESOLVED**: System MUST perform validation at all levels: (1) Frontend validation - instant feedback during form input (real-time validation for name, version format, required fields), (2) Backend validation - comprehensive validation before saving to database (type checking, format validation, business rules), (3) Error messages - all error messages MUST be in Russian language, clear and actionable (explain what went wrong and how to fix it). Validation errors prevent invalid data from being saved and provide immediate user feedback.
+- What are the scale limits for files, collections, and dependencies? **RESOLVED**: System MUST be designed for high scale without hard limits: (1) Support 10,000+ files in system without performance degradation, (2) Support 1,000+ collections simultaneously, (3) Support complex dependency graphs with thousands of relationships, (4) No hard limits enforced - system uses efficient algorithms (indexing, lazy loading, pagination) to maintain performance at scale. Performance targets (SC-009: <500ms response time) must be met even at maximum scale.
+- How should the system handle concurrent editing conflicts? **RESOLVED**: System uses "last write wins" strategy: (1) When same file/collection is edited simultaneously (different windows, import during edit), system saves the last change, (2) System detects potential conflicts by comparing timestamps (updated_at field), (3) If conflict detected (file was modified since last read), system warns user: "File was modified by another operation. Your changes will overwrite previous changes. Continue?" (4) User can choose to: proceed with overwrite, cancel and reload, or view differences. For desktop application with single user, this approach balances simplicity with data safety.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
+- **FR-000**: System MUST provide explicit UI states for all async operations: loading state (spinner/skeleton), empty state (helpful message when no data), error state (error message with retry button and error details)
+- **FR-000a**: System MUST perform data validation at all levels: frontend (instant feedback during input), backend (before saving to database), with clear error messages in Russian language explaining what went wrong and how to fix it
 - **FR-001**: System MUST support defining dependencies between files/mods (one file depends on another)
 - **FR-002**: System MUST track dependency relationships similar to package managers (npm-style dependency graph)
 - **FR-003**: System MUST warn users when required dependencies are missing
@@ -164,7 +176,7 @@
 
 ### Key Entities
 
-- **File**: Represents a file/mod in the system. Uniquely identified by combination of name and version (name@version format, similar to npm packages). Has name, version, path, dependencies, metadata, and other parameters. Multiple versions of the same file name can coexist.
+- **File**: Represents a file/mod in the system. Uniquely identified by combination of name and version (name@version format, similar to npm packages). Has name, version, path, dependencies, metadata, and other parameters. Multiple versions of the same file name can coexist. File has minimal lifecycle state: installed (exists in system and can be used) or not installed (not yet added to system).
 - **File Dependency**: Represents a dependency relationship between files. Has source file (identified by name@version), target file (dependency, identified by name@version), version requirement (optional), and dependency type (required, optional, peer).
 - **Dependency Graph**: Represents the complete network of file dependencies. Used for validation, conflict detection, and installation ordering. Nodes are files identified by name@version.
 - **Collection Logic Rule**: Represents conditional logic for enabling/disabling files in a collection. Configured via UI constructor with predefined conditions (checkboxes, dropdowns, toggles) rather than text expressions. Has condition type, parameters, and target files. Determines when files in collection are active.
@@ -185,6 +197,7 @@
 - **SC-008**: System detects circular dependencies and version conflicts within 2 seconds
 - **SC-009**: Users can view files from 10+ collections simultaneously without performance degradation (response time for loading files <500ms, UI remains responsive during scrolling/filtering)
 - **SC-010**: Recent actions history displays last 50 actions with 100% accuracy
+- **SC-011**: System maintains performance targets (<500ms response time) even with 10,000+ files and 1,000+ collections using efficient algorithms (indexing, lazy loading, pagination)
 
 ## Assumptions
 

@@ -11,9 +11,11 @@
 export function getNavigationScriptContent(baseUrl?: string): string {
   const SCRIPT_ID = 'parser-navigation-' + Date.now();
   // Экранируем baseUrl для безопасного использования в JavaScript
-  const escapedBaseUrl = baseUrl ? baseUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"') : '';
+  const escapedBaseUrl = baseUrl
+    ? baseUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"')
+    : '';
   const baseUrlConst = baseUrl ? `'${escapedBaseUrl}'` : 'null';
-  
+
   return `
 (function() {
   'use strict';
@@ -396,4 +398,3 @@ export function getNavigationScriptContent(baseUrl?: string): string {
 })();
 `;
 }
-

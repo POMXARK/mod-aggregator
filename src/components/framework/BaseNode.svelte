@@ -1,18 +1,18 @@
 <script lang="ts">
   import { Handle, Position } from '@xyflow/svelte';
   import type { NodeProps } from '@xyflow/svelte';
-  import { getNodeConfig } from '../../lib/framework/node-config';
-  import { shouldShowField } from '../../lib/framework/field-types';
-  import BaseField from './BaseField.svelte';
+  import { getNodeConfig } from '@/lib/framework/node-config';
+  import { shouldShowField } from '@/lib/framework/field-types';
+  import BaseField from '@/components/framework/BaseField';
 
   interface UniversalNodeData {
     nodeType: string;
     label: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   type Props = NodeProps<UniversalNodeData>;
-  let { data, selected }: Props = $props();
+  const { data, selected }: Props = $props();
 
   // Получаем конфигурацию ноды
   const nodeType = $derived(data.nodeType || 'selector');
@@ -35,11 +35,11 @@
     return data[key];
   }
 
-  function setFieldValue(key: string, value: any) {
+  function setFieldValue(key: string, value: unknown) {
     data[key] = value;
   }
 
-  function handleFieldChange(key: string, value: any) {
+  function handleFieldChange(key: string, value: unknown) {
     setFieldValue(key, value);
   }
 
@@ -53,31 +53,27 @@
   const hasTarget = $derived(config?.handles?.target !== false);
 </script>
 
-<div 
-  class="base-node" 
-  class:selected
-  style="--node-color: {nodeColor};"
->
+<div class="base-node" class:selected style="--node-color: {nodeColor};">
   {#if hasTarget}
     <Handle type="target" position={Position.Top} />
   {/if}
-  
+
   <div class="node-header">
     {#if config?.icon}
       <span class="node-icon">{config.icon}</span>
     {/if}
     <strong>{data.label || config?.label || 'Node'}</strong>
   </div>
-  
+
   {#if config?.description}
     <div class="node-description">{config.description}</div>
   {/if}
-  
+
   <div class="node-content">
     {#if config}
-      {#each visibleFields as field}
+      {#each visibleFields as field (field.key)}
         <BaseField
-          field={field}
+          {field}
           value={getFieldValue(field.key)}
           onValueChange={handleFieldChange}
           nodeId={data.id}
@@ -87,7 +83,7 @@
       <div class="error">Неизвестный тип ноды: {nodeType}</div>
     {/if}
   </div>
-  
+
   {#if hasSource}
     <Handle type="source" position={Position.Bottom} />
   {/if}
@@ -103,12 +99,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: all 0.2s;
   }
-  
+
   .base-node.selected {
     border-color: var(--node-color, #0ea5e9);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--node-color, #0ea5e9) 20%, transparent);
   }
-  
+
   .node-header {
     padding: 0.75rem;
     background: #0f172a;
@@ -122,7 +118,7 @@
   .node-icon {
     font-size: 1rem;
   }
-  
+
   .node-header strong {
     font-size: 0.9rem;
     font-weight: 600;
@@ -136,7 +132,7 @@
     background: #0f172a;
     border-bottom: 1px solid #334155;
   }
-  
+
   .node-content {
     padding: 0.75rem;
   }
@@ -149,4 +145,3 @@
     border-radius: 0.375rem;
   }
 </style>
-

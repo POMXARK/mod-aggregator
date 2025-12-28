@@ -1,12 +1,13 @@
 <script lang="ts">
   import { open } from '@tauri-apps/plugin-shell';
-  
+  import type { Mod } from '../lib/api';
+
   interface Props {
-    mod: any;
+    mod: Mod;
   }
-  
-  let { mod }: Props = $props();
-  
+
+  const { mod }: Props = $props();
+
   async function handleOpen() {
     await open(mod.url);
   }
@@ -16,33 +17,31 @@
   {#if mod.image_url}
     <img src={mod.image_url} alt={mod.title} class="mod-image" />
   {/if}
-  
+
   <div class="mod-content">
     <h3 class="mod-title">{mod.title}</h3>
-    
+
     {#if mod.author}
       <p class="mod-author">Автор: {mod.author}</p>
     {/if}
-    
+
     {#if mod.version}
       <p class="mod-version">Версия: {mod.version}</p>
     {/if}
-    
+
     {#if mod.description}
       <p class="mod-description">{mod.description}</p>
     {/if}
-    
+
     {#if mod.changes}
       <div class="mod-changes">
         <strong>Изменения:</strong>
         <p>{mod.changes}</p>
       </div>
     {/if}
-    
+
     <div class="mod-footer">
-      <button class="btn-link" onclick={handleOpen}>
-        Открыть на сайте
-      </button>
+      <button class="btn-link" onclick={handleOpen}> Открыть на сайте </button>
       <span class="mod-date">
         Обновлено: {new Date(mod.updated_at).toLocaleDateString('ru-RU')}
       </span>
@@ -62,13 +61,13 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   .mod-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     border-color: rgba(14, 165, 233, 0.5);
   }
-  
+
   .mod-image {
     width: 100%;
     height: clamp(12rem, 20vh, 200px);
@@ -80,14 +79,14 @@
   .mod-card:hover .mod-image {
     transform: scale(1.05);
   }
-  
+
   .mod-content {
     padding: clamp(1rem, 1.5vw, 1.25rem);
     flex: 1;
     display: flex;
     flex-direction: column;
   }
-  
+
   .mod-title {
     margin: 0 0 clamp(0.5rem, 0.75vw, 0.75rem) 0;
     font-size: clamp(1.125rem, 1.75vw, 1.25rem);
@@ -96,14 +95,15 @@
     line-height: 1.4;
     word-break: break-word;
   }
-  
-  .mod-author, .mod-version {
+
+  .mod-author,
+  .mod-version {
     margin: clamp(0.375rem, 0.5vw, 0.5rem) 0;
     font-size: clamp(0.75rem, 1vw, 0.875rem);
     color: #94a3b8;
     line-height: 1.4;
   }
-  
+
   .mod-description {
     margin: clamp(0.75rem, 1vw, 1rem) 0;
     font-size: clamp(0.8125rem, 1.1vw, 0.9rem);
@@ -115,7 +115,7 @@
     overflow: hidden;
     flex: 1;
   }
-  
+
   .mod-changes {
     margin: clamp(0.75rem, 1vw, 1rem) 0;
     padding: clamp(0.625rem, 0.875vw, 0.75rem);
@@ -126,12 +126,12 @@
     border-left: 3px solid #0ea5e9;
     line-height: 1.5;
   }
-  
+
   .mod-changes strong {
     color: #0ea5e9;
     font-weight: 600;
   }
-  
+
   .mod-footer {
     display: flex;
     justify-content: space-between;
@@ -142,7 +142,43 @@
     flex-wrap: wrap;
     gap: clamp(0.5rem, 0.75vw, 0.75rem);
   }
-  
+
+  /* Планшеты */
+  @media (max-width: 1024px) {
+    .mod-card {
+      padding: clamp(0.875rem, 1.2vw, 1rem);
+    }
+  }
+
+  /* Мобильная адаптация карточки мода */
+  @media (max-width: 767px) {
+    .mod-card {
+      padding: 1rem;
+    }
+
+    .mod-image {
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .mod-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .mod-date {
+      white-space: normal;
+      text-align: center;
+    }
+
+    .btn-link {
+      width: 100%;
+      text-align: center;
+      padding: 0.5rem;
+    }
+  }
+
   .btn-link {
     background: transparent;
     border: none;
@@ -154,16 +190,15 @@
     transition: all 0.2s;
     text-decoration: none;
   }
-  
+
   .btn-link:hover {
     color: #38bdf8;
     text-decoration: underline;
   }
-  
+
   .mod-date {
     font-size: clamp(0.6875rem, 0.9vw, 0.75rem);
     color: #64748b;
     white-space: nowrap;
   }
 </style>
-

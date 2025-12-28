@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+src-tauri/target/
+coverage/
+.svelte-kit/
+
+# Config files
+*.config.js
+*.config.ts
+
+# Generated files
+public/
+website/build/
+
+# Documentation
+**/*.md
+
+# Scripts
+scripts/
+*.bat
+*.sh
+*.ps1
+
+# Lock files
+package-lock.json
+Cargo.lock
+
+
+

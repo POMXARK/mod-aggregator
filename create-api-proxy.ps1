@@ -127,3 +127,26 @@ Write-Host ""
 Write-Host "Запуск прокси..." -ForegroundColor Cyan
 Start-Process -FilePath ".\ApiProxy.exe" -NoNewWindow
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

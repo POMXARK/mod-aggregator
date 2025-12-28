@@ -1,11 +1,10 @@
 /**
  * Реестр конфигураций нод
- * 
+ *
  * Здесь регистрируются все типы нод для конструктора
  */
 
 import { registerNodeType } from './node-config';
-import type { NodeTypeConfig } from './node-config';
 
 /**
  * Регистрирует все стандартные типы нод
@@ -207,4 +206,3 @@ export function registerStandardNodeTypes(): void {
     },
   });
 }
-

@@ -53,3 +53,26 @@ wsl -d Ubuntu -- bash -c "cd ~ && node api-proxy.js"
 
 **Запустите `.\start-api-proxy.bat` и откройте `http://localhost:8080` - API заработает без ошибок! 🚀**
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

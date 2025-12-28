@@ -1,10 +1,10 @@
 /**
  * Composable для работы с модами
- * 
+ *
  * Отделяет бизнес-логику от компонентов. Предоставляет функции для загрузки
  * модов и проверки обновлений через Tauri API.
  */
-import { invoke } from '../tauri-wrapper';
+import { invoke } from '@/lib/tauri-wrapper';
 
 /**
  * Интерфейс для данных мода
@@ -24,7 +24,7 @@ export interface Mod {
 
 /**
  * Создает composable для работы с модами
- * 
+ *
  * @returns Объект с состоянием модов и методами для работы с ними
  */
 export function useMods() {
@@ -34,7 +34,7 @@ export function useMods() {
 
   /**
    * Загружает список модов из базы данных
-   * 
+   *
    * @param siteId - ID сайта для фильтрации (null = все сайты)
    */
   async function loadMods(siteId: number | null = null) {
@@ -52,10 +52,10 @@ export function useMods() {
 
   /**
    * Проверяет обновления модов для указанного сайта или всех сайтов
-   * 
+   *
    * Загружает страницы сайтов, парсит моды и сравнивает с существующими в базе данных.
    * Создает записи о новых модах и обновлениях существующих.
-   * 
+   *
    * @param siteId - ID сайта для проверки (null = все сайты)
    * @returns true при успехе, false при ошибке
    */
@@ -83,4 +83,3 @@ export function useMods() {
     checkUpdates,
   };
 }
-

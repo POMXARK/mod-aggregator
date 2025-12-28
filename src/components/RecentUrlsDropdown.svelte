@@ -7,32 +7,40 @@
     onRemove: (url: string) => void;
   }
 
-  let { recentUrls, show, onSelect, onRefresh, onRemove }: Props = $props();
+  const { recentUrls, show, onSelect, onRefresh, onRemove }: Props = $props();
 </script>
 
 {#if show && recentUrls.length > 0}
   <div class="recent-urls-dropdown">
     <div class="recent-urls-header">Последние открытые:</div>
-    {#each recentUrls as recentUrl}
+    {#each recentUrls as recentUrl (recentUrl)}
       <div class="recent-url-item">
-        <button 
-          class="recent-url-link"
-          onclick={() => onSelect(recentUrl)}
-        >
+        <button class="recent-url-link" onclick={() => onSelect(recentUrl)}>
           {recentUrl}
         </button>
         <div class="recent-url-actions">
-          <button 
+          <button
             class="recent-url-refresh"
             onclick={() => onRefresh(recentUrl)}
             aria-label="Обновить"
             title="Обновить страницу с сервера"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+              ></path>
             </svg>
           </button>
-          <button 
+          <button
             class="recent-url-remove"
             onclick={() => onRemove(recentUrl)}
             aria-label="Удалить"
@@ -114,7 +122,7 @@
     gap: 0.25rem;
     flex-shrink: 0;
   }
-  
+
   .recent-url-refresh,
   .recent-url-remove {
     background: none;
@@ -133,28 +141,25 @@
     justify-content: center;
     flex-shrink: 0;
   }
-  
+
   .recent-url-refresh {
     font-size: 0.875rem;
   }
-  
+
   .recent-url-refresh svg {
     width: 14px;
     height: 14px;
     display: block;
     flex-shrink: 0;
   }
-  
+
   .recent-url-refresh:hover {
     color: #0ea5e9;
     background: rgba(14, 165, 233, 0.1);
   }
-  
+
   .recent-url-remove:hover {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
   }
 </style>
-
-
-

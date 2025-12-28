@@ -20,8 +20,8 @@ export default defineConfig({
   },
   clearScreen: false,
   server: {
-    port: 1420,
-    strictPort: true,
+    port: 1421,
+    strictPort: false, // Автоматически выберет свободный порт, если 1421 занят
     watch: {
       ignored: ['**/src-tauri/**'],
     },

@@ -64,3 +64,26 @@ echo "http://localhost:8080/  (HTTP вместо HTTPS)"
 echo ""
 echo "Остановка: pkill -f 'ssh.*8080'"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

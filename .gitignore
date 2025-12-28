@@ -31,6 +31,11 @@ dist-ssr
 # Tauri
 src-tauri/target
 src-tauri/Cargo.lock
+src-tauri/debug
+src-tauri/release
+*.rs.bk
+*.rlib
+*.prof*
 
 # Database
 *.db

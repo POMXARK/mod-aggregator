@@ -1,6 +1,6 @@
 /**
  * Composable для управления выделением элементов в iframe
- * 
+ *
  * Предоставляет функции для включения/выключения режима выделения
  * и обработки сообщений от скрипта выделения в iframe
  */
@@ -17,7 +17,7 @@ export interface SelectionCallbacks {
 
 /**
  * Создает composable для управления выделением элементов в iframe
- * 
+ *
  * @param callbacks - callback функции для обработки событий выделения
  * @returns Объект с состоянием выделения и методами управления
  */
@@ -27,9 +27,9 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
 
   /**
    * Включает режим выделения элементов в iframe
-   * 
+   *
    * Отправляет сообщение в iframe для активации скрипта выделения.
-   * 
+   *
    * @param iframeRef - ссылка на iframe элемент
    */
   function enableSelectionInIframe(iframeRef: HTMLIFrameElement | null) {
@@ -39,10 +39,7 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
     }
 
     try {
-      iframeRef.contentWindow.postMessage(
-        { type: 'enable-selection' },
-        '*'
-      );
+      iframeRef.contentWindow.postMessage({ type: 'enable-selection' }, '*');
       selectionMode = true;
       console.log('[Selection] Selection mode enabled in iframe');
     } catch (e) {
@@ -52,9 +49,9 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
 
   /**
    * Выключает режим выделения элементов в iframe
-   * 
+   *
    * Отправляет сообщение в iframe для деактивации скрипта выделения.
-   * 
+   *
    * @param iframeRef - ссылка на iframe элемент
    */
   function disableSelectionInIframe(iframeRef: HTMLIFrameElement | null) {
@@ -63,10 +60,7 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
     }
 
     try {
-      iframeRef.contentWindow.postMessage(
-        { type: 'disable-selection' },
-        '*'
-      );
+      iframeRef.contentWindow.postMessage({ type: 'disable-selection' }, '*');
       selectionMode = false;
       console.log('[Selection] Selection mode disabled in iframe');
     } catch (e) {
@@ -76,10 +70,10 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
 
   /**
    * Обрабатывает сообщения от скрипта выделения в iframe
-   * 
+   *
    * Обрабатывает сообщения типа 'parser-script-ready', 'element-selected',
    * 'navigate-internal-link' и вызывает соответствующие callbacks.
-   * 
+   *
    * @param event - событие сообщения от iframe
    */
   function handleMessage(event: MessageEvent) {
@@ -118,7 +112,7 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
           } else {
             console.warn('[Selection] Missing onInternalLink callback or URL:', {
               hasCallback: !!callbacks.onInternalLink,
-              url: event.data.url
+              url: event.data.url,
             });
           }
           break;
@@ -134,9 +128,9 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
 
   /**
    * Переключает режим выделения элементов в iframe
-   * 
+   *
    * Включает режим выделения, если он выключен, и наоборот.
-   * 
+   *
    * @param iframeRef - ссылка на iframe элемент
    */
   function toggleSelectionMode(iframeRef: HTMLIFrameElement | null) {
@@ -148,12 +142,15 @@ export function useSelection(callbacks: SelectionCallbacks = {}) {
   }
 
   return {
-    get selectionMode() { return selectionMode; },
-    get scriptReady() { return scriptReady; },
+    get selectionMode() {
+      return selectionMode;
+    },
+    get scriptReady() {
+      return scriptReady;
+    },
     enableSelectionInIframe,
     disableSelectionInIframe,
     handleMessage,
     toggleSelectionMode,
   };
 }
-

@@ -13,20 +13,45 @@ export function removeScripts(html: string): string {
 
   // Удаляем все встроенные скрипты, включая наши скрипты навигации и выделения
   // Это важно, чтобы при загрузке из кеша мы могли встроить скрипты заново с правильным URL
-  modifiedHtml = modifiedHtml.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '<!-- Removed script -->');
+  modifiedHtml = modifiedHtml.replace(
+    /<script[^>]*>[\s\S]*?<\/script>/gi,
+    '<!-- Removed script -->'
+  );
   modifiedHtml = modifiedHtml.replace(/<script[^>]*>/gi, '<!-- Removed script tag -->');
   modifiedHtml = modifiedHtml.replace(/<\/script>/gi, '<!-- Removed script close tag -->');
-  modifiedHtml = modifiedHtml.replace(/<script[^>]*\/\s*>/gi, '<!-- Removed self-closing script -->');
-  
+  modifiedHtml = modifiedHtml.replace(
+    /<script[^>]*\/\s*>/gi,
+    '<!-- Removed self-closing script -->'
+  );
+
   // Также удаляем data-base-url атрибуты, которые мы добавляли ранее
-  modifiedHtml = modifiedHtml.replace(/\s+data-base-url\s*=\s*["\'][^"\']*["\']/gi, '');
+  modifiedHtml = modifiedHtml.replace(/\s+data-base-url\s*=\s*["'][^"']*["']/gi, '');
 
   // Удаляем inline обработчики событий
   const inlineHandlers = [
-    'onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup', 'onmousemove',
-    'ontouchstart', 'ontouchend', 'ontouchmove', 'onload', 'onerror', 'onchange',
-    'onsubmit', 'onfocus', 'onblur', 'onkeydown', 'onkeyup', 'onkeypress',
-    'ondblclick', 'oncontextmenu', 'onwheel', 'onscroll', 'onresize'
+    'onclick',
+    'onmouseover',
+    'onmouseout',
+    'onmousedown',
+    'onmouseup',
+    'onmousemove',
+    'ontouchstart',
+    'ontouchend',
+    'ontouchmove',
+    'onload',
+    'onerror',
+    'onchange',
+    'onsubmit',
+    'onfocus',
+    'onblur',
+    'onkeydown',
+    'onkeyup',
+    'onkeypress',
+    'ondblclick',
+    'oncontextmenu',
+    'onwheel',
+    'onscroll',
+    'onresize',
   ];
 
   inlineHandlers.forEach(handler => {
@@ -35,12 +60,18 @@ export function removeScripts(html: string): string {
   });
 
   // Удаляем data-атрибуты с JavaScript
-  modifiedHtml = modifiedHtml.replace(/\s+data-[^=]*=\s*["\'][^"\']*addEventListener[^"\']*["\']/gi, '');
-  modifiedHtml = modifiedHtml.replace(/\s+data-[^=]*=\s*["\'][^"\']*javascript[^"\']*["\']/gi, '');
-  modifiedHtml = modifiedHtml.replace(/\s+data-[^=]*=\s*["\'][^"\']*on\w+[^"\']*["\']/gi, '');
+  modifiedHtml = modifiedHtml.replace(
+    /\s+data-[^=]*=\s*["'][^"']*addEventListener[^"']*["']/gi,
+    ''
+  );
+  modifiedHtml = modifiedHtml.replace(/\s+data-[^=]*=\s*["'][^"']*javascript[^"']*["']/gi, '');
+  modifiedHtml = modifiedHtml.replace(/\s+data-[^=]*=\s*["'][^"']*on\w+[^"']*["']/gi, '');
 
   // Удаляем noscript теги
-  modifiedHtml = modifiedHtml.replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '<!-- Removed noscript -->');
+  modifiedHtml = modifiedHtml.replace(
+    /<noscript[^>]*>[\s\S]*?<\/noscript>/gi,
+    '<!-- Removed noscript -->'
+  );
 
   return modifiedHtml;
 }
@@ -55,35 +86,42 @@ export function removeScripts(html: string): string {
  * @returns HTML со встроенными скриптами и стилями
  */
 export function embedSelectionScript(
-  html: string, 
-  scriptContent: string, 
+  html: string,
+  scriptContent: string,
   navigationScriptContent: string,
-  cssStyles: string, 
+  cssStyles: string,
   baseUrl?: string
 ): string {
   const scriptCloseTag = '</' + 'script>';
-  
+
   // Экранируем скрипт выделения
   const escapedSelectionScript = scriptContent
     .replace(new RegExp(scriptCloseTag, 'g'), '<\\/script>')
     .replace(/<!--/g, '<\\!--')
     .replace(/-->/g, '--\\>')
     .replace(/<\/script>/gi, '<\\/script>');
-  
+
   // Экранируем скрипт навигации
   const escapedNavigationScript = navigationScriptContent
     .replace(new RegExp(scriptCloseTag, 'g'), '<\\/script>')
     .replace(/<!--/g, '<\\!--')
     .replace(/-->/g, '--\\>')
     .replace(/<\/script>/gi, '<\\/script>');
-  
-  const selectionScriptTag = '<script id="parser-selection-script" type="text/javascript">' + escapedSelectionScript + '</' + 'script>';
-  const navigationScriptTag = '<script id="parser-navigation-script" type="text/javascript">' + escapedNavigationScript + '</' + 'script>';
+
+  const selectionScriptTag =
+    '<script id="parser-selection-script" type="text/javascript">' +
+    escapedSelectionScript +
+    '</' +
+    'script>';
+  const navigationScriptTag =
+    '<script id="parser-navigation-script" type="text/javascript">' +
+    escapedNavigationScript +
+    '</' +
+    'script>';
   const scriptsTag = navigationScriptTag + selectionScriptTag;
-  const scriptTagEnd = '</' + 'script>';
 
   let modifiedHtml = html;
-  
+
   // Добавляем data-атрибут с базовым URL для определения внутренних ссылок
   let baseUrlAttribute = '';
   if (baseUrl) {
@@ -95,7 +133,7 @@ export function embedSelectionScript(
   // Вставляем скрипты и стили как можно раньше
   // Скрипт навигации должен быть первым, чтобы он работал когда режим выделения выключен
   // Важно: добавляем baseUrlAttribute и к html, и к body для надежности
-  
+
   // Сначала добавляем скрипты и стили
   if (modifiedHtml.includes('<!DOCTYPE') || modifiedHtml.includes('<!doctype')) {
     modifiedHtml = modifiedHtml.replace(/(<!DOCTYPE[^>]*>)/i, '$1' + cssStyles + scriptsTag);
@@ -112,7 +150,7 @@ export function embedSelectionScript(
   } else {
     modifiedHtml = cssStyles + scriptsTag + modifiedHtml;
   }
-  
+
   // Затем добавляем data-base-url атрибут к html и body
   if (baseUrlAttribute) {
     // Добавляем к html элементу
@@ -122,7 +160,7 @@ export function embedSelectionScript(
         modifiedHtml = modifiedHtml.replace(/(<html[^>]*>)/i, `$1${baseUrlAttribute}`);
       }
     }
-    
+
     // Добавляем к body элементу
     if (modifiedHtml.includes('<body')) {
       const bodyMatch = modifiedHtml.match(/(<body[^>]*>)/i);
@@ -134,6 +172,3 @@ export function embedSelectionScript(
 
   return modifiedHtml;
 }
-
-
-

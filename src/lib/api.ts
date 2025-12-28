@@ -1,10 +1,11 @@
 import { invoke } from './tauri-wrapper';
+import type { ParserConfig } from './types';
 
 export interface Site {
   id: number;
   name: string;
   url: string;
-  parser_config: any;
+  parser_config: ParserConfig;
   created_at: string;
   updated_at: string;
 }
@@ -38,11 +39,16 @@ export const api = {
     return invoke('get_sites');
   },
 
-  async addSite(name: string, url: string, parserConfig: any): Promise<Site> {
+  async addSite(name: string, url: string, parserConfig: ParserConfig): Promise<Site> {
     return invoke('add_site', { name, url, parserConfig });
   },
 
-  async updateSite(id: number, name: string, url: string, parserConfig: any): Promise<void> {
+  async updateSite(
+    id: number,
+    name: string,
+    url: string,
+    parserConfig: ParserConfig
+  ): Promise<void> {
     return invoke('update_site', { id, name, url, parserConfig });
   },
 
@@ -54,11 +60,11 @@ export const api = {
     return invoke('get_mods', { siteId });
   },
 
-  async checkUpdates(siteId?: number): Promise<any[]> {
+  async checkUpdates(siteId?: number): Promise<Mod[]> {
     return invoke('check_updates', { siteId });
   },
 
-  async buildParser(html: string, selector: string): Promise<any> {
+  async buildParser(html: string, selector: string): Promise<ParserConfig> {
     return invoke('build_parser', { html, selector });
   },
 
@@ -74,4 +80,3 @@ export const api = {
     return invoke('mark_notification_read', { id });
   },
 };
-

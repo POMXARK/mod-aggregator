@@ -175,3 +175,26 @@ interface ParserNode {
 Ошибка → Backend → Result<T, String> → Frontend → UI (сообщение об ошибке)
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

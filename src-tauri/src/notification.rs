@@ -1,8 +1,8 @@
-use crate::models::{ModUpdate, Notification};
 use crate::database::Database;
+use crate::models::{ModUpdate, Notification};
 
 /// Сервис для работы с уведомлениями
-/// 
+///
 /// Предоставляет методы для создания и отправки уведомлений об обновлениях модов
 pub struct NotificationService {
     app_handle: tauri::AppHandle,
@@ -10,10 +10,10 @@ pub struct NotificationService {
 
 impl NotificationService {
     /// Создать новый экземпляр сервиса уведомлений
-    /// 
+    ///
     /// # Параметры
     /// * `app_handle` - handle приложения Tauri для отправки системных уведомлений
-    /// 
+    ///
     /// # Возвращает
     /// Новый экземпляр NotificationService
     pub fn new(app_handle: tauri::AppHandle) -> Self {
@@ -21,19 +21,23 @@ impl NotificationService {
     }
 
     /// Создать и отправить уведомление об обновлении мода
-    /// 
+    ///
     /// Создает запись в базе данных и отправляет системное уведомление.
-    /// 
+    ///
     /// # Параметры
     /// * `update` - информация об обновлении мода
-    /// 
+    ///
     /// # Возвращает
     /// Пустой результат при успехе или ошибку
-    pub async fn notify_update(&self, update: &ModUpdate) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn notify_update(
+        &self,
+        update: &ModUpdate,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let db = Database::new().await?;
-        
+
         let title = format!("Обновление мода");
-        let message = if let (Some(old_v), Some(new_v)) = (&update.old_version, &update.new_version) {
+        let message = if let (Some(old_v), Some(new_v)) = (&update.old_version, &update.new_version)
+        {
             format!("Версия изменена: {} → {}", old_v, new_v)
         } else {
             "Мод обновлен".to_string()
@@ -66,4 +70,3 @@ impl NotificationService {
         Ok(())
     }
 }
-

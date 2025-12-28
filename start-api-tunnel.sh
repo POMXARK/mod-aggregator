@@ -61,3 +61,26 @@ echo "https://localhost:9443/  (вместо https://api.erkapharm.com/)"
 echo ""
 echo "Остановка: pkill -f 'ssh.*9443'"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

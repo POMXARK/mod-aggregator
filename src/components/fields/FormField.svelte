@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { FieldConfig, FieldOption } from '../../lib/node-configs';
+  import type { FieldConfig } from '@/lib/node-configs';
 
   interface Props {
     field: FieldConfig;
-    value: any;
-    onValueChange: (key: string, value: any) => void;
+    value: unknown;
+    onValueChange: (key: string, value: unknown) => void;
     nodeId?: string;
   }
 
-  let { field, value, onValueChange, nodeId }: Props = $props();
+  const { field, value, onValueChange, nodeId }: Props = $props();
 
-  function handleChange(newValue: any) {
+  function handleChange(newValue: unknown) {
     onValueChange(field.key, newValue);
   }
 
@@ -18,7 +18,10 @@
     const target = e.currentTarget as HTMLTextAreaElement;
     // Для полей типа fields (массив через запятую)
     if (field.key === 'fields') {
-      const fields = target.value.split(',').map(f => f.trim()).filter(f => f);
+      const fields = target.value
+        .split(',')
+        .map(f => f.trim())
+        .filter(f => f);
       handleChange(fields);
     } else {
       handleChange(target.value);
@@ -33,13 +36,16 @@
       <span class="required">*</span>
     {/if}
   </label>
-  
+
   {#if field.type === 'text' || field.type === 'number'}
     <input
       id="field-{field.key}-{nodeId || 'default'}"
       type={field.type}
       value={value ?? ''}
-      oninput={(e) => handleChange(field.type === 'number' ? Number(e.currentTarget.value) : e.currentTarget.value)}
+      oninput={e =>
+        handleChange(
+          field.type === 'number' ? Number(e.currentTarget.value) : e.currentTarget.value
+        )}
       placeholder={field.placeholder}
       required={field.validation?.required}
       min={field.validation?.min}
@@ -50,10 +56,10 @@
     <select
       id="field-{field.key}-{nodeId || 'default'}"
       value={value ?? field.defaultValue ?? ''}
-      onchange={(e) => handleChange(e.currentTarget.value)}
+      onchange={e => handleChange(e.currentTarget.value)}
     >
       {#if field.options}
-        {#each field.options as option}
+        {#each field.options as option (option.value)}
           <option value={option.value}>{option.label}</option>
         {/each}
       {/if}
@@ -61,7 +67,7 @@
   {:else if field.type === 'textarea'}
     <textarea
       id="field-{field.key}-{nodeId || 'default'}"
-      value={typeof value === 'string' ? value : (Array.isArray(value) ? value.join(', ') : '')}
+      value={typeof value === 'string' ? value : Array.isArray(value) ? value.join(', ') : ''}
       oninput={handleTextareaChange}
       placeholder={field.placeholder}
       required={field.validation?.required}
@@ -72,10 +78,10 @@
       id="field-{field.key}-{nodeId || 'default'}"
       type="checkbox"
       checked={value ?? false}
-      onchange={(e) => handleChange(e.currentTarget.checked)}
+      onchange={e => handleChange(e.currentTarget.checked)}
     />
   {/if}
-  
+
   {#if field.validation?.required && !value && value !== 0}
     <span class="error">Обязательное поле</span>
   {/if}
@@ -132,4 +138,3 @@
     margin-top: 0.25rem;
   }
 </style>
-

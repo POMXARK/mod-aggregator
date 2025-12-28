@@ -1,5 +1,42 @@
 # Mod Aggregator
 
+## ESLint Rules
+
+### Custom Rules
+
+#### `require-svelte-extension`
+
+Enforces explicit `.svelte` extensions in component imports.
+
+**Why?** Vite requires explicit file extensions for proper module resolution. Without `.svelte` extensions, the bundler cannot resolve Svelte component imports.
+
+**Examples:**
+
+❌ **Bad:**
+```typescript
+import Component from './Component';
+import MyButton from '../ui/MyButton';
+```
+
+✅ **Good:**
+```typescript
+import Component from './Component.svelte';
+import MyButton from '../ui/MyButton.svelte';
+```
+
+**Auto-fix:** The rule provides automatic fixes that add the `.svelte` extension to imports.
+
+**Configuration:**
+```javascript
+{
+  "rules": {
+    "custom-rules/require-svelte-extension": "error"
+  }
+}
+```
+
+# Mod Aggregator
+
 Десктопное приложение для агрегации модов из различных сайтов с визуальным конструктором парсеров.
 
 ## Архитектура проекта

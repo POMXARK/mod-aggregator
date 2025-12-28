@@ -1,6 +1,6 @@
 /**
  * Конфигурация полей для различных типов нод
- * 
+ *
  * Используется для создания универсальных компонентов нод
  * без дублирования кода, как в CRM дашбордах
  */
@@ -229,19 +229,19 @@ export function createNodeData(type: string): Record<string, any> {
   if (!config) {
     return {};
   }
-  
+
   const data: Record<string, any> = {
     label: config.label,
     ...config.defaultData,
   };
-  
+
   // Устанавливаем значения по умолчанию для всех полей
   config.fields.forEach(field => {
     if (field.defaultValue !== undefined && data[field.key] === undefined) {
       data[field.key] = field.defaultValue;
     }
   });
-  
+
   return data;
 }
 

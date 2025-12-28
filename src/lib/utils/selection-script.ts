@@ -8,11 +8,52 @@
  * @returns HTML строка со стилями
  */
 export function getSelectionStyles(): string {
-  const styleOpen = String.fromCharCode(60, 115, 116, 121, 108, 101, 32, 105, 100, 61, 34, 112, 97, 114, 115, 101, 114, 45, 115, 101, 108, 101, 99, 116, 105, 111, 110, 45, 115, 116, 121, 108, 101, 115, 34, 62);
-  const hoverBoxCss = '#parser-hover-box {position: absolute !important; pointer-events: none !important; z-index: 2147483647 !important; border: 2px solid #4285f4 !important; background: rgba(66, 133, 244, 0.15) !important; box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3) !important; transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1) !important; display: none !important; box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; opacity: 1 !important;}';
-  const overlayCss = '#parser-info-overlay {position: fixed !important; background: #1e1e1e !important; color: #d4d4d4 !important; padding: 6px 10px !important; border-radius: 3px !important; font-size: 11px !important; font-family: "Consolas", "Monaco", "Courier New", monospace !important; pointer-events: none !important; z-index: 2147483647 !important; border: 1px solid #4285f4 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important; display: none !important; line-height: 1.4 !important; max-width: 300px !important; word-wrap: break-word !important; margin: 0 !important; visibility: visible !important; opacity: 1 !important;}';
+  const styleOpen = String.fromCharCode(
+    60,
+    115,
+    116,
+    121,
+    108,
+    101,
+    32,
+    105,
+    100,
+    61,
+    34,
+    112,
+    97,
+    114,
+    115,
+    101,
+    114,
+    45,
+    115,
+    101,
+    108,
+    101,
+    99,
+    116,
+    105,
+    111,
+    110,
+    45,
+    115,
+    116,
+    121,
+    108,
+    101,
+    115,
+    34,
+    62
+  );
+  const hoverBoxCss =
+    '#parser-hover-box {position: absolute !important; pointer-events: none !important; z-index: 2147483647 !important; border: 2px solid #4285f4 !important; background: rgba(66, 133, 244, 0.15) !important; box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3) !important; transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1) !important; display: none !important; box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; opacity: 1 !important;}';
+  const overlayCss =
+    '#parser-info-overlay {position: fixed !important; background: #1e1e1e !important; color: #d4d4d4 !important; padding: 6px 10px !important; border-radius: 3px !important; font-size: 11px !important; font-family: "Consolas", "Monaco", "Courier New", monospace !important; pointer-events: none !important; z-index: 2147483647 !important; border: 1px solid #4285f4 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important; display: none !important; line-height: 1.4 !important; max-width: 300px !important; word-wrap: break-word !important; margin: 0 !important; visibility: visible !important; opacity: 1 !important;}';
+  const highlightCss =
+    '.parser-highlight {outline: 3px solid #0ea5e9 !important; outline-offset: 2px !important; background-color: rgba(14, 165, 233, 0.1) !important; position: relative !important;}';
   const styleClose = String.fromCharCode(60, 47, 115, 116, 121, 108, 101, 62);
-  return styleOpen + hoverBoxCss + overlayCss + styleClose;
+  return styleOpen + hoverBoxCss + overlayCss + highlightCss + styleClose;
 }
 
 /**
@@ -425,6 +466,50 @@ export function getSelectionScriptContent(): string {
     }
   }
   
+  function highlightElementsBySelector(selector) {
+    if (!selector) return;
+    
+    try {
+      // Убираем предыдущие выделения
+      document.querySelectorAll('.parser-highlight').forEach(function(el) {
+        el.classList.remove('parser-highlight');
+      });
+      
+      // Находим все элементы по селектору
+      const elements = document.querySelectorAll(selector);
+      
+      if (elements.length === 0) {
+        log('No elements found for selector: ' + selector);
+        return;
+      }
+      
+      // Выделяем найденные элементы
+      elements.forEach(function(el, index) {
+        if (el instanceof HTMLElement) {
+          el.classList.add('parser-highlight');
+          
+          // Прокручиваем к первому элементу
+          if (index === 0) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+      
+      log('Highlighted ' + elements.length + ' elements for selector: ' + selector);
+      
+      // Отправляем сообщение о количестве найденных элементов
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'elements-highlighted',
+          selector: selector,
+          count: elements.length,
+        }, '*');
+      }
+    } catch (e) {
+      log('Failed to highlight elements: ' + e);
+    }
+  }
+  
   function disableSelection() {
     if (!isSelectionMode) {
       return;
@@ -502,7 +587,7 @@ export function getSelectionScriptContent(): string {
         return;
       }
       
-      const validTypes = ['enable-selection', 'disable-selection'];
+      const validTypes = ['enable-selection', 'disable-selection', 'highlight-elements'];
       if (event.data.type && validTypes.includes(event.data.type)) {
         log('Received valid message: ' + event.data.type + ' from origin: ' + (event.origin || 'unknown'));
         
@@ -522,6 +607,15 @@ export function getSelectionScriptContent(): string {
               disableSelection();
             } catch (e) {
               log('Error disabling selection from message: ' + e);
+            }
+          }, 10);
+        } else if (event.data.type === 'highlight-elements') {
+          log('Highlighting elements from message, selector: ' + event.data.selector);
+          setTimeout(function() {
+            try {
+              highlightElementsBySelector(event.data.selector);
+            } catch (e) {
+              log('Error highlighting elements from message: ' + e);
             }
           }, 10);
         }

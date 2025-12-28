@@ -26,3 +26,26 @@ Write-Host ""
 Write-Host "Вместо:" -ForegroundColor Yellow
 Write-Host "https://api.erkapharm.com/" -ForegroundColor Cyan
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

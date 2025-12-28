@@ -490,3 +490,26 @@ CollectionFile (many) ──> (1) CollectionLogicRule (опционально)
 SessionState (1) - singleton
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

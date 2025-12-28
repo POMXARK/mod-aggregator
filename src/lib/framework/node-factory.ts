@@ -1,6 +1,6 @@
 /**
  * Фабрика для создания нод
- * 
+ *
  * Упрощает создание нод с использованием конфигурации
  */
 
@@ -19,10 +19,7 @@ export interface CreateNodeOptions {
 /**
  * Создает новую ноду на основе типа
  */
-export function createNode(
-  type: string,
-  options: CreateNodeOptions = {}
-): Node | null {
+export function createNode(type: string, options: CreateNodeOptions = {}): Node | null {
   const config = getNodeConfig(type);
   if (!config) {
     console.error(`Unknown node type: ${type}`);
@@ -30,9 +27,9 @@ export function createNode(
   }
 
   const nodeId = options.id || `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  const position = options.position || { 
-    x: Math.random() * 400 + 100, 
-    y: Math.random() * 400 + 100 
+  const position = options.position || {
+    x: Math.random() * 400 + 100,
+    y: Math.random() * 400 + 100,
   };
 
   const data = createNodeData(type, options.data);
@@ -55,7 +52,7 @@ export function createNodeFromConfig(config: {
   data: Record<string, any>;
 }): Node {
   const nodeId = config.id || `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return {
     id: nodeId,
     type: 'universal',
@@ -72,7 +69,7 @@ export function createNodeFromConfig(config: {
  */
 export function cloneNode(node: Node, offset: { x: number; y: number } = { x: 20, y: 20 }): Node {
   const newId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return {
     ...node,
     id: newId,

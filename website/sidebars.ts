@@ -34,6 +34,15 @@ const sidebars: SidebarsConfig = {
         'components/page-viewer',
       ],
     },
+    {
+      type: 'category',
+      label: 'Руководство пользователя',
+      items: [
+        'user-guide/README',
+        'user-guide/getting-started',
+        'user-guide/files',
+      ],
+    },
   ],
 };
 

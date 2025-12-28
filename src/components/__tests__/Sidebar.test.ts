@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import Sidebar from '../Sidebar.svelte';
+import Sidebar from '@/components/Sidebar';
 
 describe('Sidebar', () => {
   const mockSites = [
@@ -54,8 +54,8 @@ describe('Sidebar', () => {
 
     // Find the button by role and text within nav
     const nav = screen.getByRole('navigation');
-    const sitesButton = Array.from(nav.querySelectorAll('button')).find(
-      (btn) => btn.textContent?.includes('Сайты')
+    const sitesButton = Array.from(nav.querySelectorAll('button')).find(btn =>
+      btn.textContent?.includes('Сайты')
     );
     expect(sitesButton).toBeInTheDocument();
 
@@ -113,21 +113,21 @@ describe('Sidebar', () => {
   });
 
   it('shows active state for current page', () => {
-    const { container } = render(Sidebar, { 
-      props: { ...defaultProps(), currentPage: 'sites' } 
+    const { container } = render(Sidebar, {
+      props: { ...defaultProps(), currentPage: 'sites' },
     });
 
     // Find the button by role and text within nav
     const nav = screen.getByRole('navigation');
-    const sitesButton = Array.from(nav.querySelectorAll('button')).find(
-      (btn) => btn.textContent?.includes('Сайты')
+    const sitesButton = Array.from(nav.querySelectorAll('button')).find(btn =>
+      btn.textContent?.includes('Сайты')
     );
     expect(sitesButton).toHaveClass('active');
   });
 
   it('shows active state for selected site', () => {
-    const { container } = render(Sidebar, { 
-      props: { ...defaultProps(), selectedSiteId: 1 } 
+    const { container } = render(Sidebar, {
+      props: { ...defaultProps(), selectedSiteId: 1 },
     });
 
     const siteButton = screen.getByText('Test Site 1').closest('button');
@@ -135,8 +135,8 @@ describe('Sidebar', () => {
   });
 
   it('updates active state when currentPage prop changes', () => {
-    const { component } = render(Sidebar, { 
-      props: defaultProps() 
+    const { component } = render(Sidebar, {
+      props: defaultProps(),
     });
 
     // Initially mods should be active
@@ -148,19 +148,19 @@ describe('Sidebar', () => {
 
     // Sites should now be active
     const nav = screen.getByRole('navigation');
-    const sitesButton = Array.from(nav.querySelectorAll('button')).find(
-      (btn) => btn.textContent?.includes('Сайты')
+    const sitesButton = Array.from(nav.querySelectorAll('button')).find(btn =>
+      btn.textContent?.includes('Сайты')
     );
     expect(sitesButton).toHaveClass('active');
-    
+
     // Mods should no longer be active
     const updatedModsButton = screen.getByText('Моды').closest('button');
     expect(updatedModsButton).not.toHaveClass('active');
   });
 
   it('updates active state when selectedSiteId prop changes', () => {
-    const { component } = render(Sidebar, { 
-      props: defaultProps() 
+    const { component } = render(Sidebar, {
+      props: defaultProps(),
     });
 
     // Initially "Все сайты" should be active
@@ -173,10 +173,9 @@ describe('Sidebar', () => {
     // Site 1 should now be active
     const site1Button = screen.getByText('Test Site 1').closest('button');
     expect(site1Button).toHaveClass('active');
-    
+
     // "Все сайты" should no longer be active
     const updatedAllSitesButton = screen.getByText('Все сайты');
     expect(updatedAllSitesButton).not.toHaveClass('active');
   });
 });
-

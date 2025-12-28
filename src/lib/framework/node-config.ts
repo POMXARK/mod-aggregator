@@ -1,6 +1,6 @@
 /**
  * Конфигурация нод
- * 
+ *
  * Централизованное определение всех типов нод и их полей
  */
 
@@ -50,7 +50,10 @@ export function getNodeConfig(type: string): NodeTypeConfig | undefined {
 /**
  * Создает начальные данные для ноды
  */
-export function createNodeData(type: string, customData?: Record<string, any>): Record<string, any> {
+export function createNodeData(
+  type: string,
+  customData?: Record<string, any>
+): Record<string, any> {
   const config = getNodeConfig(type);
   if (!config) {
     console.warn(`Unknown node type: ${type}`);

@@ -1,10 +1,10 @@
 /**
  * Composable для работы с уведомлениями
- * 
+ *
  * Отделяет бизнес-логику от компонентов. Предоставляет функции для загрузки
  * уведомлений и отметки их как прочитанных через Tauri API.
  */
-import { invoke } from '../tauri-wrapper';
+import { invoke } from '@/lib/tauri-wrapper';
 
 /**
  * Интерфейс для данных уведомления
@@ -19,7 +19,7 @@ export interface Notification {
 
 /**
  * Создает composable для работы с уведомлениями
- * 
+ *
  * @returns Объект с состоянием уведомлений и методами для работы с ними
  */
 export function useNotifications() {
@@ -28,7 +28,7 @@ export function useNotifications() {
   let error = $state<string | null>(null);
 
   /** Вычисляемое значение: количество непрочитанных уведомлений */
-  let unreadCount = $derived(notifications.filter(n => !n.read).length);
+  const unreadCount = $derived(notifications.filter(n => !n.read).length);
 
   /**
    * Загружает список всех уведомлений из базы данных
@@ -48,7 +48,7 @@ export function useNotifications() {
 
   /**
    * Отмечает уведомление как прочитанное
-   * 
+   *
    * @param id - ID уведомления для отметки
    * @returns true при успехе, false при ошибке
    */
@@ -66,7 +66,7 @@ export function useNotifications() {
 
   /**
    * Отмечает все уведомления как прочитанные
-   * 
+   *
    * @returns true при успехе, false при ошибке
    */
   async function markAllAsRead(): Promise<boolean> {
@@ -94,4 +94,3 @@ export function useNotifications() {
     markAllAsRead,
   };
 }
-

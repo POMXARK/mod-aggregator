@@ -4,21 +4,23 @@
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { invoke } from '../lib/tauri-wrapper';
+  import { invoke } from '@/lib/tauri-wrapper';
+  import type { Site } from '@/lib/api';
   import { SvelteFlow, Background, Controls, MiniMap } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
   import type { Node, Edge, Connection, NodeTypes } from '@xyflow/svelte';
-  
+
   // Фреймворк конструктора
-  import { initParserFramework, createNode, getRegisteredNodeTypes } from '../lib/framework';
+  import {
+    initParserFramework,
+    createNode,
+    getRegisteredNodeTypes,
+  } from '@/components/lib/framework.svelte';
   import UniversalNode from './nodes/UniversalNode.svelte';
-  
+
   // Остальные компоненты
   import PageViewer from './PageViewer.svelte';
   import ContextMenu from './ContextMenu.svelte';
-  import ElementSelector from './ElementSelector.svelte';
-  
-  import PlusIcon from './icons/PlusIcon.svelte';
   import PlayIcon from './icons/PlayIcon.svelte';
   import TrashIcon from './icons/TrashIcon.svelte';
   import RefreshIcon from './icons/RefreshIcon.svelte';
@@ -34,21 +36,12 @@
   // Состояние
   let nodes = $state<Node[]>([]);
   let edges = $state<Edge[]>([]);
-  let selectedSite = $state<any | null>(null);
-  let sites = $state<any[]>([]);
+  let selectedSite = $state<Site | null>(null);
+  let sites = $state<Site[]>([]);
   let currentUrl = $state('');
   let showPageViewer = $state(false);
   let contextMenu = $state<{ x: number; y: number } | null>(null);
   let generatedCode = $state('');
-  let selectedElementInfo = $state<{
-    selector: string;
-    elementInfo: {
-      tagName: string;
-      text: string;
-      attributes: Record<string, string>;
-      similarElements?: number;
-    };
-  } | null>(null);
   let error = $state<string | null>(null);
 
   // Доступные типы нод из фреймворка
@@ -73,13 +66,13 @@
    * Упрощенная функция добавления ноды через фреймворк
    */
   function handleAddNode(type: string) {
-    const position = { 
-      x: Math.random() * 400 + 100, 
-      y: Math.random() * 400 + 100 
+    const position = {
+      x: Math.random() * 400 + 100,
+      y: Math.random() * 400 + 100,
     };
-    
+
     const newNode = createNode(type, { position });
-    
+
     if (newNode) {
       nodes = [...nodes, newNode];
       contextMenu = null;
@@ -116,11 +109,14 @@
    */
   function handleConnect(connection: Connection) {
     if (connection.source && connection.target) {
-      edges = [...edges, {
-        id: `edge-${connection.source}-${connection.target}`,
-        source: connection.source,
-        target: connection.target,
-      }];
+      edges = [
+        ...edges,
+        {
+          id: `edge-${connection.source}-${connection.target}`,
+          source: connection.source,
+          target: connection.target,
+        },
+      ];
     }
   }
 
@@ -128,14 +124,11 @@
    * Удаляет выбранные ноды
    */
   function handleDeleteSelected() {
-    const selectedNodeIds = nodes
-      .filter(n => n.selected)
-      .map(n => n.id);
-    
+    const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+
     nodes = nodes.filter(n => !n.selected);
-    edges = edges.filter(e => 
-      !selectedNodeIds.includes(e.source) && 
-      !selectedNodeIds.includes(e.target)
+    edges = edges.filter(
+      e => !selectedNodeIds.includes(e.source) && !selectedNodeIds.includes(e.target)
     );
   }
 
@@ -145,7 +138,7 @@
   async function handleLoadSite() {
     try {
       error = null;
-      
+
       if (!selectedSite) {
         currentUrl = '';
         showPageViewer = false;
@@ -153,30 +146,29 @@
         edges = [];
         return;
       }
-      
+
       if (!selectedSite.url) {
         error = 'Выбранный сайт не имеет URL';
         return;
       }
-      
+
       try {
         new URL(selectedSite.url);
-      } catch (e) {
+      } catch {
         error = 'Неверный формат URL';
         return;
       }
-      
+
       currentUrl = selectedSite.url;
       showPageViewer = true;
-      
+
       // Загружаем конфигурацию парсера из сайта
-      const config = selectedSite.parser_config || {};
+      // const config = selectedSite.parser_config || {};
       nodes = [];
       edges = [];
-      
+
       // TODO: Восстановление нод из конфигурации
       // Это можно сделать через createNodeFromConfig
-      
     } catch (err) {
       console.error('Error loading site:', err);
       error = 'Ошибка загрузки сайта';
@@ -188,21 +180,24 @@
    */
   function generateParserCode() {
     // TODO: Реализовать генерацию кода через фреймворк
-    let code = "// Generated parser code\n\n";
-    code += "use scraper::{Html, Selector};\n\n";
-    code += "pub fn parse_page(html: &str) -> Result<Vec<serde_json::Value>, Box<dyn std::error::Error>> {\n";
-    code += "    let document = Html::parse_document(html);\n";
-    code += "    let mut results = Vec::new();\n\n";
-    
+    let code = '// Generated parser code\n\n';
+    code += 'use scraper::{Html, Selector};\n\n';
+    code +=
+      'pub fn parse_page(html: &str) -> Result<Vec<serde_json::Value>, Box<dyn std::error::Error>> {\n';
+    code += '    let document = Html::parse_document(html);\n';
+    code += '    let mut results = Vec::new();\n\n';
+
     // Находим корневую ноду selector
-    const rootNode = nodes.find(n => n.data.nodeType === 'selector' && !edges.some(e => e.target === n.id));
-    
+    const rootNode = nodes.find(
+      n => n.data.nodeType === 'selector' && !edges.some(e => e.target === n.id)
+    );
+
     if (rootNode) {
       const selector = rootNode.data.selector || '';
       code += `    let selector = Selector::parse("${selector}")?;\n`;
-      code += "    for element in document.select(&selector) {\n";
-      code += "        let mut item = serde_json::json!({});\n";
-      
+      code += '    for element in document.select(&selector) {\n';
+      code += '        let mut item = serde_json::json!({});\n';
+
       // Обрабатываем связанные ноды extract
       const extractEdges = edges.filter(e => e.source === rootNode.id);
       for (const edge of extractEdges) {
@@ -218,14 +213,14 @@
           }
         }
       }
-      
-      code += "        results.push(item);\n";
-      code += "    }\n\n";
+
+      code += '        results.push(item);\n';
+      code += '    }\n\n';
     }
-    
-    code += "    Ok(results)\n";
-    code += "}\n";
-    
+
+    code += '    Ok(results)\n';
+    code += '}\n';
+
     generatedCode = code;
   }
 
@@ -237,7 +232,7 @@
       error = 'Выберите сайт для сохранения';
       return;
     }
-    
+
     try {
       const parserConfig = {
         nodes: nodes.map(n => ({
@@ -251,14 +246,14 @@
           to: e.target,
         })),
       };
-      
+
       await invoke('update_site', {
         id: selectedSite.id,
         name: selectedSite.name,
         url: selectedSite.url,
         parser_config: parserConfig,
       });
-      
+
       // Обновляем список сайтов
       await loadSites();
       error = null;
@@ -274,16 +269,16 @@
     <div class="toolbar-section">
       <select bind:value={selectedSite} onchange={handleLoadSite}>
         <option value={null}>Выберите сайт</option>
-        {#each sites as site}
+        {#each sites as site (site.id)}
           <option value={site}>{site.name}</option>
         {/each}
       </select>
-      
+
       <button on:click={handleLoadSite} title="Загрузить сайт">
         <RefreshIcon />
       </button>
     </div>
-    
+
     <div class="toolbar-section">
       <button on:click={generateParserCode} title="Сгенерировать код">
         <PlayIcon />
@@ -291,9 +286,7 @@
       <button on:click={handleDeleteSelected} title="Удалить выбранные">
         <TrashIcon />
       </button>
-      <button on:click={handleSaveParser} title="Сохранить парсер">
-        Сохранить
-      </button>
+      <button on:click={handleSaveParser} title="Сохранить парсер"> Сохранить </button>
     </div>
   </div>
 
@@ -320,8 +313,8 @@
         x={contextMenu.x}
         y={contextMenu.y}
         nodeTypes={availableNodeTypes}
-        on:add-node={(e) => handleAddNode(e.detail)}
-        on:close={() => contextMenu = null}
+        on:add-node={e => handleAddNode(e.detail)}
+        on:close={() => (contextMenu = null)}
       />
     {/if}
 
@@ -426,4 +419,3 @@
     font-size: 0.875rem;
   }
 </style>
-

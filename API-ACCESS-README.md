@@ -71,3 +71,26 @@ curl -k -H 'Host: api.erkapharm.com' https://localhost:9443
 
 **Запустите `.\open-api-browser.bat` - API ErkaPharm откроется в браузере! 🚀**
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

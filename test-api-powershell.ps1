@@ -63,3 +63,26 @@ Write-Host "Из PowerShell: Требует игнорирования SSL и п
 Write-Host ""
 Write-Host "Для браузера: Добавьте api.erkapharm.com -> 127.0.0.1 в hosts" -ForegroundColor Green
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

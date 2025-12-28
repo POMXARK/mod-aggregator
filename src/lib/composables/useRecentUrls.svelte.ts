@@ -1,6 +1,6 @@
 /**
  * Composable для управления списком последних открытых URL
- * 
+ *
  * Предоставляет функции для загрузки, сохранения и управления списком
  * последних открытых URL в localStorage
  */
@@ -9,7 +9,7 @@ const MAX_URLS = 10;
 
 /**
  * Создает composable для работы с последними открытыми URL
- * 
+ *
  * @returns Объект с состоянием и методами для работы с последними URL
  */
 export function useRecentUrls() {
@@ -33,14 +33,16 @@ export function useRecentUrls() {
 
   /**
    * Сохраняет URL в список последних открытых
-   * 
+   *
    * Добавляет URL в начало списка и ограничивает список до MAX_URLS элементов.
-   * 
+   *
    * @param url - URL для сохранения
    */
   function saveRecentUrl(url: string) {
-    if (!url || url.trim() === '') return;
-    
+    if (!url || url.trim() === '') {
+      return;
+    }
+
     try {
       const urls = recentUrls.filter(u => u !== url);
       urls.unshift(url);
@@ -53,7 +55,7 @@ export function useRecentUrls() {
 
   /**
    * Удаляет URL из списка последних открытых
-   * 
+   *
    * @param urlToRemove - URL для удаления
    */
   function removeRecentUrl(urlToRemove: string) {
@@ -67,7 +69,7 @@ export function useRecentUrls() {
 
   /**
    * Переключает видимость списка последних открытых URL
-   * 
+   *
    * @param show - если указано, устанавливает видимость, иначе переключает
    */
   function toggleRecentUrls(show?: boolean) {
@@ -79,12 +81,15 @@ export function useRecentUrls() {
   }
 
   return {
-    get recentUrls() { return recentUrls; },
-    get showRecentUrls() { return showRecentUrls; },
+    get recentUrls() {
+      return recentUrls;
+    },
+    get showRecentUrls() {
+      return showRecentUrls;
+    },
     loadRecentUrls,
     saveRecentUrl,
     removeRecentUrl,
     toggleRecentUrls,
   };
 }
-

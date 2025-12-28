@@ -1,10 +1,10 @@
 /**
  * Composable для работы с сайтами
- * 
+ *
  * Отделяет бизнес-логику от компонентов. Предоставляет функции для загрузки,
  * сохранения и удаления сайтов через Tauri API.
  */
-import { invoke } from '../tauri-wrapper';
+import { invoke } from '@/lib/tauri-wrapper';
 
 /**
  * Интерфейс для данных сайта
@@ -18,7 +18,7 @@ export interface Site {
 
 /**
  * Создает composable для работы с сайтами
- * 
+ *
  * @returns Объект с состоянием сайтов и методами для работы с ними
  */
 export function useSites() {
@@ -44,7 +44,7 @@ export function useSites() {
 
   /**
    * Удаляет сайт из базы данных
-   * 
+   *
    * @param id - ID сайта для удаления
    * @returns true при успехе, false при ошибке
    */
@@ -62,7 +62,7 @@ export function useSites() {
 
   /**
    * Сохраняет сайт в базу данных (создает новый или обновляет существующий)
-   * 
+   *
    * @param site - данные сайта для сохранения
    * @returns true при успехе, false при ошибке
    */
@@ -87,4 +87,3 @@ export function useSites() {
     saveSite,
   };
 }
-

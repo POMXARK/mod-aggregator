@@ -1,7 +1,10 @@
 # Компоненты
 
-
 Описание компонентов приложения.
+
+> 📚 **Полная документация:** См. [docs/components/COMPONENTS_REFERENCE.md](../../docs/components/COMPONENTS_REFERENCE.md) для детального описания всех компонентов с методами и пропсами.
+> 
+> 🌳 **Дерево компонентов:** См. [docs/components/COMPONENTS_TREE.md](../../docs/components/COMPONENTS_TREE.md) для визуального представления иерархии компонентов.
 
 ## Основные компоненты
 

@@ -1,9 +1,11 @@
 <!--
 Sync Impact Report:
-- Version: 0.0.0 → 1.0.0 (Initial constitution creation)
-- Principles: 7 core principles defined
-- Sections: Technical Stack, Development Workflow, AI Agent Rules, Project-Specific Constraints
-- Templates: ⚠ Requires review of plan-template.md, spec-template.md, tasks-template.md
+- Version: 1.1.0 → 1.2.0 (MINOR: Added mandatory build validation and unified frontend/backend development requirements)
+- Version: 1.2.0 → 1.2.1 (PATCH: Added Svelte attribute quoting rule for JSON/complex strings)
+- Version: 1.2.1 → 1.2.2 (PATCH: Added mandatory documentation update rule after prompt completion)
+- Principles: No principle changes
+- Sections: Added Build Validation & Error Checking, Updated Development Phase Requirements in Development Workflow, Added Svelte Attribute Quoting rule
+- Templates: ✅ Updated tasks-template.md
 - Follow-up: None
 -->
 
@@ -17,8 +19,8 @@ Every feature starts as a standalone, reusable component; Components must be sel
 ### II. Type Safety (NON-NEGOTIABLE)
 TypeScript for frontend and Rust for backend - strict typing mandatory; All functions must have proper type annotations; No `any` types without explicit justification; Type safety ensures reliability and maintainability of the universal file aggregator system.
 
-### III. Test-Driven Development (TDD)
-TDD where applicable: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle encouraged; Frontend: Vitest + Testing Library; Backend: Standard Rust tests; Critical parsing logic MUST have tests before implementation.
+### III. Test-Driven Development (TDD) (NON-NEGOTIABLE)
+**MANDATORY TDD PROCESS**: All functionality MUST be verified with automated Cypress E2E tests; Test FIRST, then implement; Red-Green-Refactor cycle is mandatory, not optional; Tests written → User approved → Tests fail → Then implement → Tests pass; Frontend: Vitest + Testing Library for unit tests, Cypress for E2E tests; Backend: Standard Rust tests; Critical parsing logic MUST have tests before implementation; All user stories MUST have corresponding Cypress E2E tests covering complete user flows.
 
 ### IV. Separation of Concerns
 Clear separation between Frontend (Svelte 5) and Backend (Rust/Tauri); Frontend handles UI/UX, visual parser builder, node editor, and browser integration; Backend handles business logic, parsing engine, database operations, and file system operations; Communication via Tauri commands only.
@@ -62,13 +64,23 @@ Always propose multiple improvement options (minimum 2-3 variants); Be proactive
 - Isolate styles in components using Tailwind utility classes
 - Use composables for reusable frontend logic
 - Modular Rust code with clear separation of concerns
+- **Svelte Attribute Quoting**: When using JSON or complex strings in Svelte attributes (placeholder, title, aria-label, etc.), ALWAYS use template literals (backticks) instead of single/double quotes if the string contains quotes inside. Example: `placeholder={`{"key": "value"}`}` instead of `placeholder='{"key": "value"}'`
 
 ### Testing Strategy
+**TDD MANDATORY**: All new functionality MUST follow Test-Driven Development:
+1. **Write Cypress E2E test FIRST** - covering complete user flow
+2. **Verify test FAILS** - confirms test is valid and feature doesn't exist
+3. **Implement feature** - make test pass
+4. **Refactor** - improve code while keeping tests green
+
+**Test Coverage Requirements**:
+- **E2E Tests (Cypress)**: MANDATORY for all user stories - must cover complete user flows from start to finish
 - **Unit Tests**: Critical logic MUST have unit tests (parser nodes, data transformations)
 - **Integration Tests**: Tauri commands, database operations, file system operations
-- **E2E Tests**: User flows (Cypress) for critical paths (parser creation, mod installation)
 - **Frontend**: Vitest + Testing Library for component testing
 - **Backend**: Standard Rust test framework with async support
+
+**Test Execution Order**: Cypress E2E tests → Unit tests → Integration tests → Implementation
 
 ### Search & Research Protocol
 **CRITICAL**: When solving tasks, ALWAYS follow this order:
@@ -83,11 +95,40 @@ Always propose multiple improvement options (minimum 2-3 variants); Be proactive
 - **Document Solutions**: Record successful patterns, avoid repeating failed approaches
 - **Ask for Help**: If stuck, communicate problem to user instead of repeating attempts
 
+### Build Validation & Error Checking (NON-NEGOTIABLE)
+**MANDATORY VALIDATION PROCESS**: Before completing any phase or user story:
+1. **Run `npm run tauri dev`** - start Tauri development server
+2. **Check for errors** - verify no compilation errors, runtime errors, or warnings
+3. **Fix all errors** - MUST resolve all errors before proceeding to next phase
+4. **Verify application runs** - ensure both frontend and backend work together correctly
+5. **No errors policy** - implementation phase is NOT complete until `npm run tauri dev` runs without errors
+
+**Error Resolution Process**:
+- Compilation errors MUST be fixed immediately
+- Runtime errors MUST be resolved before moving forward
+- Warnings SHOULD be addressed, critical warnings MUST be fixed
+- Type errors (TypeScript/Rust) are blocking - cannot proceed with type errors
+- Integration errors between frontend and backend MUST be resolved
+
+### Unified Frontend/Backend Development
+**MANDATORY**: In each implementation phase, develop BOTH frontend UI and backend logic together:
+- **No separate phases** - do NOT split frontend and backend into separate phases
+- **Single phase approach** - implement backend commands AND frontend components in the same phase
+- **Integrated testing** - test frontend and backend integration during development
+- **Synchronized completion** - frontend UI and backend API must be completed together
+- **Tauri command integration** - frontend components must call backend Tauri commands in the same phase
+
+**Rationale**: Tauri applications require tight integration between frontend and backend. Developing them separately leads to integration issues, type mismatches, and delayed error detection. Unified development ensures compatibility and faster error resolution.
+
 ### Git & Documentation
 - Meaningful, structured commit messages
 - README files in each directory describing component architecture
 - Documentation in Docusaurus format (website/docs/)
 - Keep documentation synchronized with code changes
+- **MANDATORY**: After completing any prompt/task that affects functionality, features, or architecture:
+  1. **Update Docusaurus documentation** - update relevant docs in `website/docs/` to reflect changes
+  2. **Update speckit specifications** - if feature specifications exist in `specs/`, update them with new information
+  3. **Keep documentation current** - documentation must always reflect the current state of the codebase
 
 ## AI Agent Rules
 
@@ -142,4 +183,4 @@ Constitution supersedes all other practices; Amendments require documentation, a
 
 All PRs/reviews must verify compliance with constitution principles; Complexity must be justified; Use `.cursor/rules/` for runtime development guidance; Constitution violations must be addressed before merge.
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-19 | **Last Amended**: 2025-12-19
+**Version**: 1.2.2 | **Ratified**: 2025-12-19 | **Last Amended**: 2025-12-20

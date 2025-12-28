@@ -107,3 +107,26 @@ Write-Host "  Откройте его в Mullvad Browser и нажмите кн�
 Write-Host ""
 Write-Host "Какой вариант хотите попробовать?" -ForegroundColor Cyan
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

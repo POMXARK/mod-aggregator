@@ -6,7 +6,7 @@
     onAddNode: (type: string) => void;
   }
 
-  let { x, y, onClose, onAddNode }: Props = $props();
+  const { x, y, onClose, onAddNode }: Props = $props();
 
   const nodeTypes = [
     { type: 'selector', label: 'Selector', icon: '🔍' },
@@ -36,12 +36,12 @@
   });
 </script>
 
-<div 
-  class="context-menu" 
+<div
+  class="context-menu"
   style="left: {x}px; top: {y}px;"
   role="menu"
   tabindex="-1"
-  onkeydown={(e) => {
+  onkeydown={e => {
     if (e.key === 'Escape') {
       onClose();
     }
@@ -49,11 +49,8 @@
 >
   <div class="menu-header">Добавить ноду</div>
   <div class="menu-items">
-    {#each nodeTypes as nodeType}
-      <button
-        class="menu-item"
-        onclick={() => handleAddNode(nodeType.type)}
-      >
+    {#each nodeTypes as nodeType (nodeType.type)}
+      <button class="menu-item" onclick={() => handleAddNode(nodeType.type)}>
         <span class="menu-icon">{nodeType.icon}</span>
         <span class="menu-label">{nodeType.label}</span>
       </button>
@@ -113,4 +110,3 @@
     font-size: 0.9rem;
   }
 </style>
-

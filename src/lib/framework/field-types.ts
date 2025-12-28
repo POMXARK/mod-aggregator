@@ -1,15 +1,15 @@
 /**
  * Типы полей и их конфигурации
- * 
+ *
  * Определяет все возможные типы полей и их поведение
  */
 
-export type FieldType = 
-  | 'text' 
-  | 'select' 
-  | 'number' 
-  | 'checkbox' 
-  | 'multiselect' 
+export type FieldType =
+  | 'text'
+  | 'select'
+  | 'number'
+  | 'checkbox'
+  | 'multiselect'
   | 'textarea'
   | 'color'
   | 'date'
@@ -63,11 +63,10 @@ export interface FieldConfig {
 /**
  * Проверяет, должно ли поле отображаться на основе условий
  */
-export function shouldShowField(
-  field: FieldConfig,
-  data: Record<string, any>
-): boolean {
-  if (!field.showIf) return true;
+export function shouldShowField(field: FieldConfig, data: Record<string, any>): boolean {
+  if (!field.showIf) {
+    return true;
+  }
 
   const { field: dependentField, operator, value } = field.showIf;
   const dependentValue = data[dependentField];
@@ -91,11 +90,10 @@ export function shouldShowField(
 /**
  * Валидирует значение поля
  */
-export function validateField(
-  field: FieldConfig,
-  value: any
-): string | null {
-  if (!field.validation) return null;
+export function validateField(field: FieldConfig, value: any): string | null {
+  if (!field.validation) {
+    return null;
+  }
 
   const { validation } = field;
 

@@ -28,13 +28,15 @@ export async function detectElementsWithAI(
 
   try {
     // Try Hugging Face Inference API (free, no key required for some models)
-    const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        inputs: `Analyze this HTML element and suggest CSS selectors for parsing:
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: `Analyze this HTML element and suggest CSS selectors for parsing:
 Tag: ${selectedElement.tagName}
 Text: ${selectedElement.text.substring(0, 200)}
 Attributes: ${JSON.stringify(selectedElement.attributes)}
@@ -46,8 +48,9 @@ Suggest selectors for:
 3. URL extraction (if links present)
 4. Image extraction (if images present)
 5. Description/text extraction`,
-      }),
-    });
+        }),
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -69,10 +72,10 @@ Suggest selectors for:
 
 function parseAIResponse(aiData: any, element: ElementInfo): AISuggestion[] {
   const suggestions: AISuggestion[] = [];
-  
+
   // Simple heuristic parsing of AI response
   // In production, use proper NLP parsing
-  
+
   // Check for list patterns
   if (element.tagName.toLowerCase().match(/li|div|article|section/)) {
     suggestions.push({
@@ -84,14 +87,14 @@ function parseAIResponse(aiData: any, element: ElementInfo): AISuggestion[] {
       confidence: 0.7,
     });
   }
-  
+
   return suggestions;
 }
 
 function heuristicDetection(element: ElementInfo): AISuggestion[] {
   const suggestions: AISuggestion[] = [];
   const tagName = element.tagName.toLowerCase();
-  
+
   // Detect list items
   if (tagName === 'li' || element.attributes.class?.includes('item')) {
     // Find parent container
@@ -105,7 +108,7 @@ function heuristicDetection(element: ElementInfo): AISuggestion[] {
       confidence: 0.8,
     });
   }
-  
+
   // Detect links
   if (tagName === 'a' || element.attributes.href) {
     suggestions.push({
@@ -118,7 +121,7 @@ function heuristicDetection(element: ElementInfo): AISuggestion[] {
       confidence: 0.9,
     });
   }
-  
+
   // Detect images
   if (tagName === 'img' || element.attributes.src) {
     suggestions.push({
@@ -131,7 +134,7 @@ function heuristicDetection(element: ElementInfo): AISuggestion[] {
       confidence: 0.9,
     });
   }
-  
+
   // Detect headings (likely titles)
   if (tagName.match(/^h[1-6]$/)) {
     suggestions.push({
@@ -144,7 +147,7 @@ function heuristicDetection(element: ElementInfo): AISuggestion[] {
       confidence: 0.85,
     });
   }
-  
+
   // Always suggest text extraction
   suggestions.push({
     type: 'extract',
@@ -155,7 +158,7 @@ function heuristicDetection(element: ElementInfo): AISuggestion[] {
     },
     confidence: 0.7,
   });
-  
+
   return suggestions;
 }
 
@@ -176,14 +179,15 @@ export async function detectWithOpenAI(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert web scraping assistant. Analyze HTML elements and suggest CSS selectors for parsing.',
+            content:
+              'You are an expert web scraping assistant. Analyze HTML elements and suggest CSS selectors for parsing.',
           },
           {
             role: 'user',
@@ -212,19 +216,8 @@ Suggest CSS selectors for parsing similar elements.`,
   return heuristicDetection(selectedElement);
 }
 
-function parseOpenAIResponse(data: any, element: ElementInfo): AISuggestion[] {
-  const suggestions: AISuggestion[] = [];
-  const content = data.choices?.[0]?.message?.content || '';
-  
+function parseOpenAIResponse(_data: any, element: ElementInfo): AISuggestion[] {
   // Simple parsing - in production, use proper JSON parsing
   // For now, fallback to heuristics
   return heuristicDetection(element);
 }
-
-
-
-
-
-
-
-

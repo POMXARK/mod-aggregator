@@ -42,3 +42,26 @@ try {
 Write-Host ""
 Write-Host "Для браузера откройте: http://localhost:8080" -ForegroundColor Green
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 /**
  * Утилиты для управления состоянием нод
- * 
+ *
  * Централизованная логика синхронизации состояния между компонентами
  */
 
@@ -61,20 +61,16 @@ export function syncNodeState<T>(
   value: T;
   setValue: (value: T) => void;
 } {
-  let value = $state(data[key] ?? defaultValue);
+  // Используем простую переменную для хранения значения
+  let currentValue = data[key] ?? defaultValue;
 
-  $effect(() => {
-    const dataValue = data[key];
-    if (dataValue !== undefined && dataValue !== value) {
-      value = dataValue;
+  return {
+    get value() {
+      return currentValue;
+    },
+    setValue(newValue: T) {
+      currentValue = newValue;
+      data[key] = newValue;
     }
-  });
-
-  function setValue(newValue: T) {
-    value = newValue;
-    data[key] = newValue;
-  }
-
-  return { value, setValue };
+  };
 }
-

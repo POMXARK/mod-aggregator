@@ -79,3 +79,26 @@ if ($curlAfter) {
 Write-Host ""
 Write-Host "Готово!" -ForegroundColor Green
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

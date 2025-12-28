@@ -1,6 +1,6 @@
 /**
  * Фабрика для создания нод с использованием конфигурации
- * 
+ *
  * Уменьшает бойлерплейт код при создании новых нод
  */
 
@@ -40,16 +40,14 @@ export function createNode(
 /**
  * Создать ноду из сохраненной конфигурации
  */
-export function createNodeFromConfig(
-  nodeConfig: {
-    id?: string;
-    type: string;
-    position: { x: number; y: number };
-    data: Record<string, any>;
-  }
-): Node {
+export function createNodeFromConfig(nodeConfig: {
+  id?: string;
+  type: string;
+  position: { x: number; y: number };
+  data: Record<string, any>;
+}): Node {
   const nodeId = nodeConfig.id || `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   return {
     id: nodeId,
     type: 'universal',

@@ -59,3 +59,26 @@ Write-Host ""
 Write-Host "3. Сброс сетевых настроек:" -ForegroundColor White
 Write-Host '   netsh winsock reset && netsh int ip reset && ipconfig /flushdns' -ForegroundColor Gray
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

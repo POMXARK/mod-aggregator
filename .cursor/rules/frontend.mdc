@@ -187,6 +187,88 @@ globs: src/**/*.svelte
 - Используй интерфейсы для сложных объектов
 - Избегай `any`, используй `unknown` если тип неизвестен
 
+## Импорты компонентов
+
+### Использование алиасов путей
+
+**КРИТИЧЕСКИ ВАЖНО**: Всегда используйте алиасы путей (`@/`, `@/lib/`, `@/components/`) вместо относительных путей (`../`, `./`):
+
+#### ✅ Правильно:
+```typescript
+// Использование алиасов
+import { useParserSettings } from '@/lib/composables';
+import ContextMenu from '@/components/ContextMenu.svelte';
+import { detectElementsWithAI } from '@/lib/ai-detector';
+
+// Динамические импорты тоже с алиасами
+const { detectElementsWithAI } = await import('@/lib/ai-detector');
+```
+
+#### ❌ Неправильно:
+```typescript
+// Относительные пути
+import { useParserSettings } from '../../lib/composables';
+import ContextMenu from '../ContextMenu.svelte';
+import { detectElementsWithAI } from '../lib/ai-detector';
+
+// Динамические импорты с относительными путями
+const { detectElementsWithAI } = await import('../lib/ai-detector');
+```
+
+#### Почему это важно:
+- **Консистентность**: Алиасы работают одинаково из любой точки проекта
+- **Поддержка**: Легче перемещать файлы без изменения импортов
+- **Читаемость**: Сразу видно, откуда импортируется модуль
+- **Автодополнение**: IDE лучше понимает структуру проекта
+
+### Расширения файлов
+
+**КРИТИЧЕСКИ ВАЖНО**: В Svelte проектах **все импорты компонентов** должны указывать **расширение файла `.svelte`**:
+
+### ✅ Правильно:
+```typescript
+// Импорт компонентов
+import Component from './Component.svelte';
+import ChildComponent from '../ChildComponent.svelte';
+import NestedComponent from './subfolder/NestedComponent.svelte';
+
+// Экспорты в index.ts
+export { default as Component } from './Component.svelte';
+```
+
+### ❌ Неправильно:
+```typescript
+// Без расширения .svelte
+import Component from './Component';
+import ChildComponent from '../ChildComponent';
+
+// Vite не сможет правильно разрешить импорт
+```
+
+### Почему это важно:
+- Vite требует явного указания расширения для Svelte компонентов
+- Без расширения могут возникать ошибки импорта
+- Обеспечивает консистентность и надежность сборки
+
+## Атрибуты с кавычками
+
+**КРИТИЧЕСКИ ВАЖНО**: При использовании JSON или сложных строк в атрибутах Svelte (например, `placeholder`, `title`, `aria-label`):
+
+- **НЕ используй** одинарные или двойные кавычки, если внутри есть кавычки
+- **ИСПОЛЬЗУЙ** template literals (обратные кавычки) для строк с кавычками внутри
+
+### ❌ Неправильно:
+```svelte
+<textarea placeholder='{"author": "Author Name", "description": "..."}' />
+```
+
+### ✅ Правильно:
+```svelte
+<textarea placeholder={`{"author": "Author Name", "description": "..."}`} />
+```
+
+**Правило**: Если строка содержит кавычки (одинарные или двойные), используй template literal с обратными кавычками `` ` ``.
+
 ## Комментарии и документация
 
 - **ВСЕГДА** пиши комментарии на русском языке

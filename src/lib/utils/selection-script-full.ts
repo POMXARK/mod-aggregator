@@ -17,6 +17,3 @@ export function generateSelectionScript(scriptId: string): string {
     // ... полный код ...
   })();`;
 }
-
-
-
