@@ -28,6 +28,8 @@ export interface UiPreferences {
   windowHeight?: number;
   sidebarCollapsed?: boolean;
   theme?: 'dark' | 'light';
+  currentPage?: string;
+  selectedSiteId?: number | null;
 }
 
 /**
@@ -54,5 +56,18 @@ export interface SessionRestoreResult {
   openCollections: number[];
   selectedFiles: number[];
   warnings: string[]; // предупреждения о недоступных файлах/коллекциях
+  currentPage?: string;
+  selectedSiteId?: number | null;
 }
+
+
+
+
+
+
+
+
+
+
+
 

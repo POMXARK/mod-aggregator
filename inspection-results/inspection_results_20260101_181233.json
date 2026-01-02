@@ -1,0 +1,14 @@
+﻿{
+    "summary":  {
+                    "info":  0,
+                    "errors":  0,
+                    "warnings":  0,
+                    "total":  0
+                },
+    "timestamp":  "2026-01-01T18:12:33Z",
+    "project":  "mod-aggregator",
+    "tool":  "Basic Frontend Analyzer",
+    "problems":  [
+
+                 ]
+}

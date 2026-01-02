@@ -37,26 +37,22 @@ export function useParserSettings(options: UseParserSettingsOptions = {}) {
   let slowMode = $state<boolean>(initialSlowMode);
   let delayPerElement = $state<number>(initialDelayPerElement);
 
-  // Синхронизация с начальными значениями из props
+  // Синхронизация с начальными значениями из props (только при инициализации)
+  let hasInitialized = $state(false);
   $effect(() => {
-    if (options.initialMaxElements !== undefined && maxElements !== options.initialMaxElements) {
+    if (!hasInitialized && options.initialMaxElements !== undefined) {
       maxElements = options.initialMaxElements;
     }
-    if (
-      options.initialTimeoutSeconds !== undefined &&
-      timeoutSeconds !== options.initialTimeoutSeconds
-    ) {
+    if (!hasInitialized && options.initialTimeoutSeconds !== undefined) {
       timeoutSeconds = options.initialTimeoutSeconds;
     }
-    if (options.initialSlowMode !== undefined && slowMode !== options.initialSlowMode) {
+    if (!hasInitialized && options.initialSlowMode !== undefined) {
       slowMode = options.initialSlowMode;
     }
-    if (
-      options.initialDelayPerElement !== undefined &&
-      delayPerElement !== options.initialDelayPerElement
-    ) {
+    if (!hasInitialized && options.initialDelayPerElement !== undefined) {
       delayPerElement = options.initialDelayPerElement;
     }
+    hasInitialized = true;
   });
 
   // Функция для уведомления об изменении настроек
@@ -66,24 +62,24 @@ export function useParserSettings(options: UseParserSettingsOptions = {}) {
     }
   }
 
-  // Автоматически уведомляем об изменении настроек при их изменении в UI
-  let lastSettings = $state<ParserSettings | null>(null);
-  $effect(() => {
-    const currentSettings = { maxElements, timeoutSeconds, slowMode, delayPerElement };
+  // Временно отключаем автоматическое уведомление об изменениях настроек
+  // let lastSettings = $state<ParserSettings | null>(null);
+  // $effect(() => {
+  //   const currentSettings = { maxElements, timeoutSeconds, slowMode, delayPerElement };
 
-    // Проверяем, изменились ли настройки (избегаем вызовов при инициализации)
-    if (
-      lastSettings &&
-      (lastSettings.maxElements !== currentSettings.maxElements ||
-        lastSettings.timeoutSeconds !== currentSettings.timeoutSeconds ||
-        lastSettings.slowMode !== currentSettings.slowMode ||
-        lastSettings.delayPerElement !== currentSettings.delayPerElement)
-    ) {
-      notifySettingsChange();
-    }
+  //   // Проверяем, изменились ли настройки (избегаем вызовов при инициализации)
+  //   if (
+  //     lastSettings &&
+  //     (lastSettings.maxElements !== currentSettings.maxElements ||
+  //       lastSettings.timeoutSeconds !== currentSettings.timeoutSeconds ||
+  //       lastSettings.slowMode !== currentSettings.slowMode ||
+  //       lastSettings.delayPerElement !== currentSettings.delayPerElement)
+  //   ) {
+  //     notifySettingsChange();
+  //   }
 
-    lastSettings = currentSettings;
-  });
+  //   lastSettings = currentSettings;
+  // });
 
   /**
    * Сбрасывает настройки на значения по умолчанию

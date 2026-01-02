@@ -1,5 +1,7 @@
 <script lang="ts">
+  // Force reload: 2026-01-02 01:55 UTC - VERSION 1.0.20
   import { onDestroy } from 'svelte';
+  import { get } from 'svelte/store';
 
   type ResizeDirection = 'vertical' | 'horizontal';
   type ResizeMode = 'left' | 'right' | 'top' | 'bottom';
@@ -9,7 +11,7 @@
     mode?: ResizeMode;
     minValue?: number;
     maxValue?: number;
-    getCurrentValue: () => number;
+    currentValue: number;
     onResize: (newValue: number) => void;
     onResizeStart?: () => void;
     onResizeEnd?: () => void;
@@ -22,7 +24,7 @@
     mode = 'left',
     minValue = 100,
     maxValue = Infinity,
-    getCurrentValue,
+    currentValue,
     onResize,
     onResizeStart,
     onResizeEnd,
@@ -38,7 +40,6 @@
 
   function handlePointerMove(e: PointerEvent) {
     if (!isResizing) {
-      stopResizing();
       return;
     }
 
@@ -47,23 +48,26 @@
       return;
     }
 
+
     let newValue = startValue;
+    let delta;
 
     if (direction === 'vertical') {
-      const delta = e.clientX - startPosition;
+      delta = e.clientX - startPosition;
       if (mode === 'right') {
         newValue = startValue - delta;
       } else {
         newValue = startValue + delta;
       }
     } else {
-      const delta = e.clientY - startPosition;
+      delta = e.clientY - startPosition;
       if (mode === 'bottom') {
         newValue = startValue - delta;
       } else {
         newValue = startValue + delta;
       }
     }
+
 
     // Применяем ограничения
     if (newValue < minValue) {
@@ -73,7 +77,11 @@
       newValue = maxValue;
     }
 
-    onResize(newValue);
+    try {
+      onResize(newValue);
+    } catch (error) {
+      console.error('ResizeHandle: error calling onResize:', error);
+    }
     e.preventDefault();
     e.stopPropagation();
   }
@@ -98,6 +106,16 @@
     stopResizing();
   }
 
+  // Дополнительный обработчик для случаев, когда pointer уходит за пределы документа
+  function handlePointerLeave(e: PointerEvent) {
+    // Если pointer уходит за пределы документа во время resizing, продолжаем обработку
+    // Это предотвратит прерывание resizing при быстрых движениях
+    if (isResizing && pointerId !== null && e.pointerId === pointerId) {
+      // Pointer ушел за пределы, но мы продолжаем отслеживать его
+      // через глобальные обработчики
+    }
+  }
+
   function startResizing(e: PointerEvent) {
     if (e.button !== 0) {
       return;
@@ -110,8 +128,17 @@
       return;
     }
 
-    // Получаем текущее значение через callback
-    startValue = getCurrentValue();
+    // Получаем текущее значение
+    // currentValue может быть числом, $state proxy или Svelte store
+    let rawValue = currentValue;
+
+    // Проверяем тип значения
+    if (typeof rawValue === 'object' && rawValue !== null && 'subscribe' in rawValue) {
+      // Это Svelte store, получаем значение через get()
+      rawValue = get(rawValue as any);
+    }
+
+    startValue = Number(rawValue);
 
     // Сохраняем начальную позицию курсора
     if (direction === 'vertical') {
@@ -123,30 +150,17 @@
     isResizing = true;
     pointerId = e.pointerId;
 
-    // Захватываем pointer для работы даже за пределами элемента
-    try {
-      handleElement.setPointerCapture(e.pointerId);
-    } catch (err) {
-      console.warn('Failed to set pointer capture:', err);
-      stopResizing();
-      return;
-    }
-
     // Добавляем стили для body
     document.body.classList.add('resizing-panel');
     document.body.style.userSelect = 'none';
     document.body.style.cursor = direction === 'vertical' ? 'col-resize' : 'row-resize';
 
-    // При использовании setPointerCapture все события pointer идут через элемент,
-    // который захватил pointer, поэтому добавляем обработчики на него
-    handleElement.addEventListener('pointermove', handlePointerMove, { passive: false });
-    handleElement.addEventListener('pointerup', handlePointerUp, { passive: false });
-    handleElement.addEventListener('pointercancel', handlePointerCancel, { passive: false });
-
-    // Также добавляем на window/document для надежности на случай, если capture не сработает
-    window.addEventListener('pointermove', handlePointerMove, { passive: false });
-    window.addEventListener('pointerup', handlePointerUp, { passive: false });
-    window.addEventListener('pointercancel', handlePointerCancel, { passive: false });
+    // Добавляем обработчики на document для работы даже за пределами элемента
+    // Используем capture фазу для надежной обработки
+    document.addEventListener('pointermove', handlePointerMove, { passive: false, capture: true });
+    document.addEventListener('pointerup', handlePointerUp, { passive: false, capture: true });
+    document.addEventListener('pointercancel', handlePointerCancel, { passive: false, capture: true });
+    document.addEventListener('pointerleave', handlePointerLeave, { passive: false, capture: true });
 
     if (onResizeStart) {
       onResizeStart();
@@ -161,29 +175,13 @@
     }
 
     isResizing = false;
-    const savedPointerId = pointerId;
     pointerId = null;
 
-    // Удаляем обработчики с элемента
-    if (handleElement) {
-      handleElement.removeEventListener('pointermove', handlePointerMove);
-      handleElement.removeEventListener('pointerup', handlePointerUp);
-      handleElement.removeEventListener('pointercancel', handlePointerCancel);
-
-      // Освобождаем capture
-      if (savedPointerId !== null) {
-        try {
-          handleElement.releasePointerCapture(savedPointerId);
-        } catch {
-          // Игнорируем ошибки
-        }
-      }
-    }
-
-    // Удаляем обработчики с window
-    window.removeEventListener('pointermove', handlePointerMove);
-    window.removeEventListener('pointerup', handlePointerUp);
-    window.removeEventListener('pointercancel', handlePointerCancel);
+    // Удаляем обработчики с document
+    document.removeEventListener('pointermove', handlePointerMove, { capture: true });
+    document.removeEventListener('pointerup', handlePointerUp, { capture: true });
+    document.removeEventListener('pointercancel', handlePointerCancel, { capture: true });
+    document.removeEventListener('pointerleave', handlePointerLeave, { capture: true });
 
     // Восстанавливаем стили body
     document.body.classList.remove('resizing-panel');
@@ -218,19 +216,20 @@
     background: transparent;
     transition: background-color 0.2s ease;
     position: relative;
-    z-index: 10;
     touch-action: none;
   }
 
   .resize-handle-vertical {
-    width: 4px;
+    width: 6px;
     cursor: col-resize;
+    margin: 0 0; /* Минимальная область клика */
   }
 
   .resize-handle-horizontal {
-    height: 4px;
+    height: 6px;
     cursor: row-resize;
     width: 100%;
+    margin: 0 0; /* Без расширения для горизонтального */
   }
 
   .resize-handle:hover {
@@ -245,8 +244,8 @@
   .resize-handle-vertical:hover::before {
     content: '';
     position: absolute;
-    left: -2px;
-    right: -2px;
+    left: -1px;
+    right: -1px;
     top: 0;
     bottom: 0;
     background: rgba(14, 165, 233, 0.3);

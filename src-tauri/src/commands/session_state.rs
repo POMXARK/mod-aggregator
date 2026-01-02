@@ -16,6 +16,8 @@ pub struct SessionRestoreResult {
     pub open_collections: Vec<i64>,
     pub selected_files: Vec<i64>,
     pub warnings: Vec<String>,
+    pub current_page: Option<String>,
+    pub selected_site_id: Option<i64>,
 }
 
 /// Получить сохраненное состояние сессии
@@ -328,11 +330,49 @@ pub async fn restore_session() -> Result<SessionRestoreResult, String> {
     Ok(SessionRestoreResult {
         restored: true,
         file_order: valid_file_order,
-        ui_preferences: state.ui_preferences,
+        ui_preferences: state.ui_preferences.clone(),
         open_collections: valid_open_collections,
         selected_files: valid_selected_files,
         warnings,
+        current_page: state.ui_preferences.current_page.clone(),
+        selected_site_id: state.ui_preferences.selected_site_id,
     })
+}
+
+/// Обновить текущую страницу
+#[tauri::command]
+pub async fn update_current_page(page: String) -> Result<(), String> {
+    info!("Updating current page: {}", page);
+
+    let db = Database::new().await.map_err(|e| {
+        error!("Failed to connect to database: {}", e);
+        format!("Database error: {}", e)
+    })?;
+
+    db.update_session_current_page(&page).await.map_err(|e| {
+        error!("Failed to update current page: {}", e);
+        format!("Database error: {}", e)
+    })?;
+
+    Ok(())
+}
+
+/// Обновить выбранный сайт
+#[tauri::command]
+pub async fn update_selected_site(site_id: Option<i64>) -> Result<(), String> {
+    info!("Updating selected site: {:?}", site_id);
+
+    let db = Database::new().await.map_err(|e| {
+        error!("Failed to connect to database: {}", e);
+        format!("Database error: {}", e)
+    })?;
+
+    db.update_session_selected_site(site_id).await.map_err(|e| {
+        error!("Failed to update selected site: {}", e);
+        format!("Database error: {}", e)
+    })?;
+
+    Ok(())
 }
 
 /// Сбросить состояние сессии к значениям по умолчанию

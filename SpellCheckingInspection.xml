@@ -1,0 +1,50 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte</file>
+  <line>257</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Typo</problem_class>
+  <description>Typo: In word 'логируем'</description>
+  <highlighted_element>логируем</highlighted_element>
+  <language>JavaScript</language>
+  <offset>20</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte</file>
+  <line>270</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Typo</problem_class>
+  <description>Typo: In word 'ноду'</description>
+  <highlighted_element>ноду</highlighted_element>
+  <language>JavaScript</language>
+  <offset>26</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte</file>
+  <line>302</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Typo</problem_class>
+  <description>Typo: In word 'нодой'</description>
+  <highlighted_element>нодой</highlighted_element>
+  <language>JavaScript</language>
+  <offset>52</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte</file>
+  <line>400</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte" />
+  <problem_class id="SpellCheckingInspection" severity="TYPO" attribute_key="TYPO">Typo</problem_class>
+  <description>Typo: In word 'парсера'</description>
+  <highlighted_element>парсера</highlighted_element>
+  <language>SvelteTS</language>
+  <offset>61</offset>
+  <length>7</length>
+</problem>
+</problems>

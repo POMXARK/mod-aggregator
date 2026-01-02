@@ -235,6 +235,12 @@
           ondrop={e => handleDrop(file.id, e)}
           ondragend={handleDragEnd}
           onclick={e => handleFileClick(file, e)}
+          onkeydown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleFileClick(file, e);
+            }
+          }}
           role="button"
           tabindex="0"
         >

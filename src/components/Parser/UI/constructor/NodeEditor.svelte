@@ -9,7 +9,7 @@
   import TransformNode from '@/components/nodes/TransformNode.svelte';
   import OutputNode from '@/components/nodes/OutputNode.svelte';
 
-  const nodeTypes: NodeTypes = {
+  const nodeTypes: any = {
     selector: SelectorNode,
     extract: ExtractNode,
     filter: FilterNode,
@@ -29,25 +29,27 @@
     onPaneClick?: (event: MouseEvent) => void;
     onPaneContextMenu?: (event: MouseEvent) => void;
     style?: string;
+    className?: string;
   }
 
   let {
     nodes = $bindable(),
     edges = $bindable(),
-    withViewer = false,
-    withChat = false,
-    withResults = false,
+    withViewer,
+    withChat,
+    withResults,
     onConnect,
     onNodesChange,
     onEdgesChange,
     onPaneClick,
     onPaneContextMenu,
-    style = '',
+    style,
+    className = '',
   }: Props = $props();
 </script>
 
 <div
-  class="node-editor"
+  class="node-editor {className}"
   class:has-viewer={withViewer}
   class:has-chat={withChat}
   class:has-results={withResults}

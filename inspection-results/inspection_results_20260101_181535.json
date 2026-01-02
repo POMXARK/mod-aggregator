@@ -1,0 +1,32 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  0,
+                    "warnings":  1,
+                    "total":  1
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:15:35Z",
+    "problems":  [
+                     {
+                         "line":  3,
+                         "file":  "test-unused-vars.svelte",
+                         "fix":  {
+                                     "fullContent":  "  const { usedVar, unusedVar, alsoUnused } = someFunction();\r  console.log(usedVar); // usedVar РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ\r  // unusedVar Рё alsoUnused РЅРµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ\r\u003c/script\u003e\r\r\u003cdiv\u003e\r  \u003ch1\u003eTest file\u003c/h1\u003e\r\u003c/div\u003e\r",
+                                     "varName":  "usedVar",
+                                     "destructuredVars":  [
+                                                              "usedVar",
+                                                              "unusedVar",
+                                                              "alsoUnused"
+                                                          ],
+                                     "type":  "remove-unused-destructured-var"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "unused-destructured-var",
+                         "severity":  "WARNING",
+                         "message":  "Unused destructured variable: usedVar (from someFunction)",
+                         "column":  11
+                     }
+                 ]
+}

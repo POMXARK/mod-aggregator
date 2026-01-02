@@ -1,0 +1,27 @@
+﻿// Test file with various issues
+import React from 'react'; // May be unused
+import { useState } from 'react';
+
+function TestComponent() {
+  const [count, setCount] = useState(0);
+
+
+  const handleClick = () => {
+    setCount(count + 1);
+    debugger; // Debugger statement
+  };
+
+  return (
+    <div>
+      <h1>Count: {count}</h1>
+      <button onClick={handleClick}>
+        Increment
+      </button>
+      <img src="test.jpg" alt="Test image" />
+      <input type="text" placeholder="Enter value" />
+    </div>
+  );
+}
+
+export default TestComponent;
+

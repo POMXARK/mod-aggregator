@@ -5,22 +5,13 @@
 
 // UI компоненты
 export { default as ParserBuilder } from './UI/ParserBuilder.svelte';
-
-// Конструктор компоненты
-export { default as BrowserPanel } from './UI/constructor/BrowserPanel.svelte';
-export { default as ChatPanel } from './UI/constructor/ChatPanel.svelte';
-export { default as GeneratedCodePanel } from './UI/constructor/GeneratedCodePanel.svelte';
-export { default as NodeEditor } from './UI/constructor/NodeEditor.svelte';
-
-// Runner компоненты
-export { default as ParserRunner } from './UI/constructor/ParserRunner.svelte';
-export * from './UI/constructor/parser-runner.svelte';
+// export * from './UI/constructor/parser-runner'; // TODO: Раскомментировать когда будут созданы компоненты
 
 // Узлы парсера
-export * from './UI/nodes.svelte';
+// export * from './UI/nodes'; // TODO: Раскомментировать когда будут созданы компоненты
 
 // Фреймворк
-export * from './UI/framework.svelte';
+// export * from './UI/framework'; // TODO: Раскомментировать когда будут созданы компоненты
 
 // Data слой (пока пустой, будет содержать модели парсеров)
 // export * from './Data';

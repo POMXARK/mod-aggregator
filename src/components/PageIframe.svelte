@@ -14,15 +14,12 @@
     /** Сообщение об ошибке, если загрузка не удалась */
     error: string | null;
     /** Ссылка на iframe элемент (bindable) */
-    iframeRef?: HTMLIFrameElement | null;
+    iframeRef: HTMLIFrameElement | null;
   }
 
-  let {
-    html,
-    loading,
-    error,
-    iframeRef = $bindable<HTMLIFrameElement | null>(null),
-  }: Props = $props();
+  let { html, loading, error, iframeRef = $bindable(null) }: Props = $props();
+
+  // iframeRef теперь получается из props
 
   let blobUrl: string | null = $state(null);
 
@@ -92,6 +89,13 @@
     class="page-iframe"
     title="Просмотр веб-страницы"
     sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
+    onload={() => {
+      console.log('[PageIframe] iframe loaded');
+      // Отправляем сообщение о готовности iframe
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'iframe-loaded' }, '*');
+      }
+    }}
   ></iframe>
 </div>
 

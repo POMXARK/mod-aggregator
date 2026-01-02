@@ -1,6 +1,7 @@
 import { invoke } from '@/lib/tauri-wrapper';
+import { writable, get } from 'svelte/store';
 import type { Node, Edge } from '@xyflow/svelte';
-import type { ParserSettings } from './useParserSettings';
+import type { ParserSettings } from './useParserSettings.svelte';
 
 export interface ParserResult {
   data: Record<string, any>;
@@ -36,18 +37,19 @@ export interface UseParserRunnerOptions {
  * @returns Объект с состоянием и методами для управления парсером
  */
 export function useParserRunner(options: UseParserRunnerOptions) {
-  const { nodes, edges, currentUrl, siteId, getSettings, onResults, onError } = options;
+  let { nodes, edges, currentUrl, siteId, getSettings, onResults, onError } = options;
 
-  let isRunning = $state(false);
-  let progress = $state('');
-  let error = $state<string | null>(null);
-  let results = $state<ParserResult[]>([]);
-  let diagnostics = $state<any[]>([]);
-  let extractionStats = $state<any>(null);
+  // Создаем реактивные stores
+  const isRunning = writable(false);
+  const progress = writable('');
+  const error = writable<string | null>(null);
+  const results = writable<ParserResult[]>([]);
+  const diagnostics = writable<any[]>([]);
+  const extractionStats = writable<any>(null);
+  const isCancelled = writable(false);
 
   // Для остановки парсера
   let abortController: AbortController | null = null;
-  let isCancelled = $state(false);
 
   /**
    * Останавливает выполнение парсера
@@ -58,14 +60,15 @@ export function useParserRunner(options: UseParserRunnerOptions) {
    * при достижении таймаута или завершении обработки текущих элементов.
    */
   function stopParser() {
-    isCancelled = true;
+    isCancelled.set(true);
     if (abortController) {
       abortController.abort();
       abortController = null;
     }
-    isRunning = false;
-    progress =
-      'Запрос на остановку парсера отправлен. Rust код может продолжить работу до таймаута или завершения текущих элементов.';
+    isRunning.set(false);
+    progress.set(
+      'Запрос на остановку парсера отправлен. Rust код может продолжить работу до таймаута или завершения текущих элементов.'
+    );
   }
 
   /**
@@ -74,7 +77,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
   async function runParser() {
     if (nodes.length === 0) {
       const errMsg = 'Создайте ноды парсера перед тестированием';
-      error = errMsg;
+      error.set(errMsg);
       if (onError) {
         onError(errMsg);
       }
@@ -83,7 +86,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
 
     if (!currentUrl) {
       const errMsg = 'Загрузите страницу для тестирования';
-      error = errMsg;
+      error.set(errMsg);
       if (onError) {
         onError(errMsg);
       }
@@ -91,13 +94,13 @@ export function useParserRunner(options: UseParserRunnerOptions) {
     }
 
     // Сброс состояния
-    isRunning = true;
-    isCancelled = false;
-    error = null;
-    results = [];
-    diagnostics = [];
-    extractionStats = null;
-    progress = 'Получение HTML страницы...';
+    isRunning.set(true);
+    isCancelled.set(false);
+    error.set(null);
+    results.set([]);
+    diagnostics.set([]);
+    extractionStats.set(null);
+    progress.set('Получение HTML страницы...');
 
     // Создаем AbortController для возможности остановки
     abortController = new AbortController();
@@ -105,7 +108,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
 
     try {
       // Получаем HTML с таймаутом
-      progress = 'Получение HTML страницы...';
+      progress.set('Получение HTML страницы...');
 
       // Проверяем отмену перед получением HTML
       if (isCancelled || signal.aborted) {
@@ -137,7 +140,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
         throw new Error('Не удалось получить HTML страницы');
       }
 
-      progress = `HTML получен (${(html.length / 1024).toFixed(1)} KB). Подготовка данных...`;
+      progress.set(`HTML получен (${(html.length / 1024).toFixed(1)} KB). Подготовка данных...`);
 
       // Преобразуем nodes и edges в формат для Tauri
       // const nodesData = nodes.map(node => ({
@@ -151,12 +154,22 @@ export function useParserRunner(options: UseParserRunnerOptions) {
       //   target: edge.target,
       // }));
 
-      progress = 'Запуск парсера...';
+      progress.set('Запуск парсера...');
 
       // Проверяем отмену перед запуском
-      if (isCancelled || signal.aborted) {
-        throw new Error('Операция отменена');
-      }
+      // TODO: нужно получить текущее значение isCancelled из store
+
+      // Преобразуем nodes и edges в формат для Tauri
+      const nodesData = nodes.map(node => ({
+        id: node.id,
+        type: node.type,
+        data: node.data,
+      }));
+
+      const edgesData = edges.map(edge => ({
+        source: edge.source,
+        target: edge.target,
+      }));
 
       // Запускаем парсер с настройками и таймаутом
       const currentSettings = getSettings();
@@ -164,7 +177,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
       const parserTimeoutPromise = new Promise<any>((_, reject) => {
         const timeoutId = setTimeout(() => {
           if (!isCancelled && !signal.aborted) {
-            reject(new Error(`Таймаут выполнения парсера (${settings.timeoutSeconds} секунд)`));
+            reject(new Error(`Таймаут выполнения парсера (${currentSettings.timeoutSeconds} секунд)`));
           }
         }, timeoutMs);
 
@@ -198,7 +211,7 @@ export function useParserRunner(options: UseParserRunnerOptions) {
         throw new Error('Операция отменена');
       }
 
-      progress = 'Обработка результатов...';
+      progress.set('Обработка результатов...');
 
       // Логируем результат для отладки
       console.log('Parser result:', {
@@ -217,18 +230,18 @@ export function useParserRunner(options: UseParserRunnerOptions) {
           data: r,
           expanded: false,
         }));
-        results = newResults;
+        results.set(newResults);
 
-        diagnostics = result.diagnostics || [];
-        extractionStats = result.extraction_stats || null;
+        diagnostics.set(result.diagnostics || []);
+        extractionStats.set(result.extraction_stats || null);
 
         const elementsFound = result.elements_found || 0;
         const executionTime = result.execution_time_ms || 0;
         const processedCount = result.elements_processed || elementsFound;
-        progress = `Готово! Найдено элементов: ${elementsFound}, обработано: ${processedCount}, извлечено данных: ${results.length}, время: ${(executionTime / 1000).toFixed(2)}с`;
+        progress.set(`Готово! Найдено элементов: ${elementsFound}, обработано: ${processedCount}, извлечено данных: ${resultList.length}, время: ${(executionTime / 1000).toFixed(2)}с`);
 
         if (onResults) {
-          onResults(resultList, diagnostics, extractionStats);
+          onResults(resultList, get(diagnostics), get(extractionStats));
         }
 
         // Если нет результатов, но есть элементы на странице
@@ -240,15 +253,15 @@ export function useParserRunner(options: UseParserRunnerOptions) {
             ? `Найдено ${elementsFound} элементов по селектору "${result.selector || 'неизвестен'}", но данные не извлечены. Проверьте конфигурацию extract узлов.`
             : `Найдено ${elementsFound} элементов по селектору "${result.selector || 'неизвестен'}", но данные не извлечены. Добавьте extract узлы для извлечения данных, или проверьте, что элементы содержат текст.`;
 
-          diagnostics.push({
+          diagnostics.update(current => [...current, {
             type: 'warning',
             message: warningMsg,
-          });
+          }]);
         } else if (elementsFound === 0) {
-          diagnostics.push({
+          diagnostics.update(current => [...current, {
             type: 'error',
             message: `Элементы не найдены по селектору "${result.selector || 'неизвестен'}". Проверьте правильность селектора и убедитесь, что страница загружена.`,
-          });
+          }]);
         }
       } else {
         throw new Error(result.error || 'Парсер не вернул результаты');
@@ -258,33 +271,34 @@ export function useParserRunner(options: UseParserRunnerOptions) {
 
       // Если операция была отменена, не показываем ошибку
       if (isCancelled || signal.aborted || err?.message?.includes('отменен')) {
-        progress =
-          'Операция отменена пользователем. Если парсер уже выполнялся в Rust, он остановится при достижении таймаута.';
-        error = null; // Не показываем ошибку при отмене
-        results = [];
-        diagnostics = [];
-        extractionStats = null;
+        progress.set(
+          'Операция отменена пользователем. Если парсер уже выполнялся в Rust, он остановится при достижении таймаута.'
+        );
+        error.set(null); // Не показываем ошибку при отмене
+        results.set([]);
+        diagnostics.set([]);
+        extractionStats.set(null);
         return;
       }
 
       const errorMsg = err.message || err || 'Неизвестная ошибка';
-      error = errorMsg;
-      results = [];
-      diagnostics = [];
-      extractionStats = null;
-      progress = 'Ошибка при выполнении парсера';
+      error.set(errorMsg);
+      results.set([]);
+      diagnostics.set([]);
+      extractionStats.set(null);
+      progress.set('Ошибка при выполнении парсера');
 
       if (onError) {
         onError(errorMsg);
       }
     } finally {
-      isRunning = false;
-      isCancelled = false;
+      isRunning.set(false);
+      isCancelled.set(false);
       abortController = null;
       // Очищаем progress через небольшую задержку
       setTimeout(() => {
         if (!isRunning) {
-          progress = '';
+          progress.set('');
         }
       }, 2000);
     }
@@ -294,11 +308,11 @@ export function useParserRunner(options: UseParserRunnerOptions) {
    * Очищает результаты и ошибки
    */
   function clearResults() {
-    error = null;
-    results = [];
-    diagnostics = [];
-    extractionStats = null;
-    progress = '';
+    error.set(null);
+    results.set([]);
+    diagnostics.set([]);
+    extractionStats.set(null);
+    progress.set('');
   }
 
   return {

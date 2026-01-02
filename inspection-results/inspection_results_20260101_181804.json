@@ -1,0 +1,41 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  0,
+                    "warnings":  2,
+                    "total":  2
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:18:04Z",
+    "problems":  [
+                     {
+                         "line":  6,
+                         "file":  "test-deep-unused.svelte",
+                         "fix":  {
+                                     "fullLine":  "  const unusedVar = \"test\";\r",
+                                     "varName":  "unusedVar",
+                                     "type":  "remove-unused-variable",
+                                     "varType":  "const"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "unused-variable",
+                         "severity":  "WARNING",
+                         "message":  "Unused variable: unusedVar (declared with const)",
+                         "column":  9
+                     },
+                     {
+                         "line":  10,
+                         "file":  "test-deep-unused.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte template",
+                         "column":  3
+                     }
+                 ]
+}

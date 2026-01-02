@@ -1,0 +1,14 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte</file>
+  <line>484</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/ParserWorkspace.svelte" />
+  <problem_class id="JSUnresolvedReference" severity="ERROR" attribute_key="WRONG_REFERENCES_ATTRIBUTES">Unresolved reference</problem_class>
+  <description>Unresolved variable or type addAIMessageToChatForBind #loc</description>
+  <highlighted_element>addAIMessageToChatForBind</highlighted_element>
+  <language>JavaScript</language>
+  <offset>23</offset>
+  <length>25</length>
+</problem>
+</problems>

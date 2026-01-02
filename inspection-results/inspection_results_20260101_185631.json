@@ -1,0 +1,63 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  5,
+                    "warnings":  0,
+                    "total":  5
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:56:31Z",
+    "problems":  [
+                     {
+                         "message":  "Cannot find name \u0027AISettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  1,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-typing-issues.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027ParserSettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  77,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-typing-issues.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027AISettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  1,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-typing-issues.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027ParserSettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  77,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-typing-issues.svelte"
+                     },
+                     {
+                         "line":  32,
+                         "file":  "test-typing-issues.svelte",
+                         "fix":  {
+                                     "type":  "change-variable-type",
+                                     "from":  "AISettings",
+                                     "to":  "Writable\u003cAISettings\u003e"
+                                 },
+                         "category":  "TypeScript",
+                         "rule":  "missing-writable-wrapper",
+                         "severity":  "ERROR",
+                         "message":  "Cannot assign store value to variable of type AISettings",
+                         "column":  1
+                     }
+                 ]
+}

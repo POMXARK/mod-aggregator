@@ -1,0 +1,35 @@
+﻿<script>
+  let count = 0;
+
+  function increment() {
+    count++;
+    debugger; // This should be flagged
+  }
+</script>
+
+<main>
+  <h1>Counter: {count}</h1>
+  <button onclick={increment}>+</button>
+  <img src="image.jpg" /> <!-- Missing alt attribute -->
+  <input type="text" /> <!-- Missing label -->
+</main>
+
+<style>
+  main {
+    margin: 50px; /* Magic number */
+    padding: 20px;
+  }
+
+  button {
+    background: #007bff;
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  /* Very long line that exceeds 120 characters in a CSS rule with multiple properties and values */
+  .very-long-class-name-that-makes-this-line-exceed-the-recommended-length { margin: 0; padding: 0; border: 1px solid #000; background-color: #fff; color: #333; font-size: 16px; line-height: 1.5; }
+</style>
+

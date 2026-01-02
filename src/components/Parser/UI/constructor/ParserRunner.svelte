@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Node, Edge } from '@xyflow/svelte';
-  import { useParserSettings, type ParserSettings, useParserRunner } from '@/lib/composables';
+  import { useParserSettings, type ParserSettings, useParserRunner, type ParserResult } from '@/lib/composables';
   import ParserRunnerControls from './parser-runner/ParserRunnerControls.svelte';
   import ParserSettingsPanel from './parser-runner/ParserSettingsPanel.svelte';
   import ParserProgress from './parser-runner/ParserProgress.svelte';
@@ -13,7 +13,7 @@
     edges: Edge[];
     currentUrl: string;
     siteId?: number | null;
-    onResults?: (results: unknown[], diagnostics: unknown[], stats: unknown) => void;
+    onResults?: (results: ParserResult[], diagnostics: unknown[], stats: unknown) => void;
     onError?: (error: string) => void;
     // Настройки парсера (можно передать извне для синхронизации)
     initialMaxElements?: number;
@@ -65,13 +65,11 @@
   let showSettings = $state(false);
 
   function handleToggleExpand(index: number) {
-    runner.results = runner.results.map((r, i) =>
-      i === index ? { ...r, expanded: !r.expanded } : r
-    );
+    runner.toggleResultExpanded(index);
   }
 
-  function handleUpdateResult(index: number, updater: (result: unknown) => unknown) {
-    runner.results = runner.results.map((r, i) => (i === index ? updater(r) : r));
+  function handleUpdateResult(index: number, updater: (result: ParserResult) => ParserResult) {
+    runner.updateResult(index, updater);
   }
 </script>
 

@@ -111,3 +111,14 @@ npm run lint:fix
 - **Consistent imports:** Ensures all component imports follow the same pattern
 - **Better IDE support:** Explicit extensions help IDEs provide better autocomplete and navigation
 
+
+
+
+
+
+
+
+
+
+
+

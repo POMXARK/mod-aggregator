@@ -1,0 +1,92 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  2,
+                    "errors":  1,
+                    "warnings":  4,
+                    "total":  7
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T17:49:43Z",
+    "problems":  [
+                     {
+                         "message":  "Potential code duplication detected",
+                         "column":  1,
+                         "line":  7,
+                         "rule":  "no-duplicate-code",
+                         "severity":  "INFO",
+                         "category":  "Code Quality",
+                         "file":  "test-sample.js"
+                     },
+                     {
+                         "line":  8,
+                         "file":  "test-sample.js",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log statement found in production code",
+                         "column":  3
+                     },
+                     {
+                         "line":  12,
+                         "file":  "test-sample.js",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove debugger statement"
+                                 },
+                         "category":  "Debugging",
+                         "rule":  "no-debugger",
+                         "severity":  "ERROR",
+                         "message":  "Debugger statement found",
+                         "column":  5
+                     },
+                     {
+                         "line":  3,
+                         "file":  "test-sample.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte component",
+                         "column":  3
+                     },
+                     {
+                         "line":  14,
+                         "file":  "test-sample.svelte",
+                         "fix":  {
+                                     "type":  "add-attribute",
+                                     "description":  "Add alt attribute to img element"
+                                 },
+                         "category":  "Accessibility",
+                         "rule":  "img-alt",
+                         "severity":  "WARNING",
+                         "message":  "Missing alt attribute on img element",
+                         "column":  3
+                     },
+                     {
+                         "message":  "Input element without accessible label",
+                         "column":  3,
+                         "line":  15,
+                         "rule":  "input-label",
+                         "severity":  "WARNING",
+                         "category":  "Accessibility",
+                         "file":  "test-sample.svelte"
+                     },
+                     {
+                         "message":  "Line too long: 198 characters (recommended: 120)",
+                         "column":  1,
+                         "line":  34,
+                         "rule":  "max-line-length",
+                         "severity":  "INFO",
+                         "category":  "Code Style",
+                         "file":  "test-sample.svelte"
+                     }
+                 ]
+}

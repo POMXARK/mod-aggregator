@@ -1522,7 +1522,7 @@ impl Database {
         &self,
     ) -> Result<crate::models::session_state::SessionState, sqlx::Error> {
         let row = sqlx::query(
-            "SELECT id, file_order, ui_preferences, open_collections, selected_files, recent_actions, last_updated FROM session_state WHERE id = 1"
+            "SELECT id, file_order, ui_preferences, open_collections, selected_files, recent_actions, last_updated, current_page, selected_site_id FROM session_state WHERE id = 1"
         )
         .fetch_optional(&self.pool)
         .await?;
@@ -1535,8 +1535,13 @@ impl Database {
             let recent_actions_str: String = r.get(5);
 
             let file_order: Vec<i64> = serde_json::from_str(&file_order_str).unwrap_or_default();
-            let ui_preferences: crate::models::session_state::UiPreferences =
+            let mut ui_preferences: crate::models::session_state::UiPreferences =
                 serde_json::from_str(&ui_prefs_str).unwrap_or_default();
+
+            // Дополняем ui_preferences новыми полями из отдельных столбцов
+            ui_preferences.current_page = r.get(7);
+            ui_preferences.selected_site_id = r.get(8);
+
             let open_collections: Vec<i64> =
                 serde_json::from_str(&open_colls_str).unwrap_or_default();
             let selected_files: Vec<i64> =
@@ -1551,6 +1556,8 @@ impl Database {
                 open_collections,
                 selected_files,
                 recent_actions,
+                current_page: r.get(7),
+                selected_site_id: r.get(8),
                 last_updated: r.get::<String, _>(6).parse().unwrap_or(Utc::now()),
             })
         } else {
@@ -1669,11 +1676,37 @@ impl Database {
         let now = Utc::now().to_rfc3339();
 
         sqlx::query(
-            "UPDATE session_state SET file_order = '[]', ui_preferences = '{}', open_collections = '[]', selected_files = '[]', recent_actions = '[]', last_updated = ? WHERE id = 1"
+            "UPDATE session_state SET file_order = '[]', ui_preferences = '{}', open_collections = '[]', selected_files = '[]', recent_actions = '[]', current_page = NULL, selected_site_id = NULL, last_updated = ? WHERE id = 1"
         )
         .bind(&now)
         .execute(&self.pool)
         .await?;
+
+        Ok(())
+    }
+
+    /// Обновить текущую страницу в сессии
+    pub async fn update_session_current_page(&self, page: &str) -> Result<(), sqlx::Error> {
+        let now = Utc::now().to_rfc3339();
+
+        sqlx::query("UPDATE session_state SET current_page = ?, last_updated = ? WHERE id = 1")
+            .bind(page)
+            .bind(&now)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
+    /// Обновить выбранный сайт в сессии
+    pub async fn update_session_selected_site(&self, site_id: Option<i64>) -> Result<(), sqlx::Error> {
+        let now = Utc::now().to_rfc3339();
+
+        sqlx::query("UPDATE session_state SET selected_site_id = ?, last_updated = ? WHERE id = 1")
+            .bind(site_id)
+            .bind(&now)
+            .execute(&self.pool)
+            .await?;
 
         Ok(())
     }

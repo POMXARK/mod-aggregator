@@ -141,4 +141,120 @@ export const rules = {
   },
 };
 
-export default { rules };
+function checkBindFunction(node, context) {
+  // Only check .svelte files
+  if (!context.getFilename().endsWith('.svelte')) {
+    return;
+  }
+
+  if (node.type === 'SvelteDirective' && node.kind === 'bind' && node.expression) {
+    // Check if the expression is a function call or function reference
+    const expression = node.expression;
+
+    // If it's a function call (like getAddAIMessageToChat())
+    if (expression.type === 'CallExpression') {
+      context.report({
+        node,
+        message: 'Cannot bind to function values. Use regular props instead of bind: for functions.',
+      });
+      return;
+    }
+
+    // If it's an identifier, check if it refers to a function
+    if (expression.type === 'Identifier') {
+      const scope = context.getScope();
+      const variable = scope.variables.find(v => v.name === expression.name);
+
+      if (variable && variable.defs && variable.defs.length > 0) {
+        const def = variable.defs[0];
+        if (def.node.type === 'FunctionDeclaration' ||
+            def.node.type === 'VariableDeclarator' &&
+            def.node.init &&
+            (def.node.init.type === 'FunctionExpression' ||
+             def.node.init.type === 'ArrowFunctionExpression')) {
+          context.report({
+            node,
+            message: 'Cannot bind to function values. Use regular props instead of bind: for functions.',
+          });
+        }
+      }
+    }
+  }
+}
+
+const eslintRules = {
+  'require-svelte-extension': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Require explicit .svelte extension in component imports',
+        category: 'Best Practices',
+        recommended: true,
+      },
+      schema: [],
+      messages: {
+        missingSvelteExtension: 'Svelte component imports must include the .svelte extension. Use "{{fixed}}" instead.',
+        wrongSvelteExtension: 'Incorrect Svelte file extension. Use "{{fixed}}" instead of "{{current}}".',
+        incorrectSvelteImport: 'Incorrect import path. Use "{{fixed}}" instead of "{{current}}" (likely importing a directory).',
+      },
+      fixable: 'code',
+    },
+    create(context) {
+      return {
+        ImportDeclaration(node) {
+          checkImportOrExport(node.source, context);
+        },
+        ExportAllDeclaration(node) {
+          checkImportOrExport(node.source, context);
+        },
+      };
+    },
+  },
+
+  'no-bind-functions': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Disallow binding to function values with bind: directive',
+        category: 'Best Practices',
+        recommended: true,
+      },
+      schema: [],
+      messages: {
+        noBindFunction: 'Cannot bind to function values. Use regular props instead of bind: for functions.',
+      },
+    },
+    create(context) {
+      return {
+        // Use source code analysis to find bind: patterns
+        Program() {
+          const sourceCode = context.sourceCode.getText();
+          const lines = sourceCode.split('\n');
+
+          lines.forEach((line, index) => {
+            // Look for bind: patterns that might contain function calls
+            const bindMatch = line.match(/bind:(\w+)\s*=\s*\{([^}]+)\}/);
+            if (bindMatch) {
+              const propName = bindMatch[1];
+              const expression = bindMatch[2].trim();
+
+              // Check if expression looks like a function call or function reference
+              if (expression.includes('(') && expression.includes(')') ||
+                  expression.match(/\b(function|=>)\b/)) {
+                context.report({
+                  loc: {
+                    start: { line: index + 1, column: line.indexOf(`bind:${propName}`) },
+                    end: { line: index + 1, column: line.indexOf(`bind:${propName}`) + `bind:${propName}={${expression}}`.length }
+                  },
+                  message: 'Cannot bind to function values. Use regular props instead of bind: for functions.',
+                });
+              }
+            }
+          });
+        }
+      };
+    },
+  },
+};
+
+export default { rules: eslintRules };

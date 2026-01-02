@@ -5,6 +5,8 @@
   interface TransformNodeData {
     label: string;
     function: string;
+    width?: number;
+    height?: number;
   }
 
   type Props = NodeProps<TransformNodeData>;

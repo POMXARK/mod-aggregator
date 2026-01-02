@@ -5,6 +5,8 @@
   interface OutputNodeData {
     label: string;
     fields: string[];
+    width?: number;
+    height?: number;
   }
 
   type Props = NodeProps<OutputNodeData>;

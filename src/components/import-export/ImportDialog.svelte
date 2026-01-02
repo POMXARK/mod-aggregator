@@ -23,6 +23,13 @@
 
   let fileInput: HTMLInputElement;
 
+  // Обработчик клавиатуры для доступности
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  }
+
   async function handleFileSelect(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
@@ -102,10 +109,23 @@
   }
 </script>
 
-<div class="modal-overlay" onclick={handleClose}>
-  <div class="modal-content" onclick={e => e.stopPropagation()}>
+<div
+  class="modal-overlay"
+  onclick={handleClose}
+  onkeydown={handleKeydown}
+  role="presentation"
+  tabindex="-1"
+>
+  <div
+    class="modal-content"
+    onclick={e => e.stopPropagation()}
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="import-dialog-title"
+    tabindex="-1"
+  >
     <div class="modal-header">
-      <h2>Импорт файла</h2>
+      <h2 id="import-dialog-title">Импорт файла</h2>
       <button class="btn-close" onclick={handleClose}>
         <XMarkIcon class="icon" />
       </button>

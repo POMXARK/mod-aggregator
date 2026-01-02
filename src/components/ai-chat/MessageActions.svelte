@@ -12,6 +12,7 @@
     onGenerateCode: () => void;
     onRunParser: () => void;
     onCopy: () => void;
+    onCopyText: () => void;
     onDelete: () => void;
   }
 
@@ -26,6 +27,7 @@
     onGenerateCode,
     onRunParser,
     onCopy,
+    onCopyText,
     onDelete,
   }: Props = $props();
 </script>
@@ -65,6 +67,9 @@
     {/if}
     <button class="btn-message-action" onclick={onCopy} title="Копировать сообщение">
       📋 Копировать
+    </button>
+    <button class="btn-message-action" onclick={onCopyText} title="Копировать текст сообщения в буфер обмена">
+      📄 Копировать текст
     </button>
     <button class="btn-delete-message" onclick={onDelete} title="Удалить сообщение"> × </button>
   </div>

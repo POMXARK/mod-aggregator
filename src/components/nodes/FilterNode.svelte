@@ -6,6 +6,8 @@
     label: string;
     condition: string;
     operator: string;
+    width?: number;
+    height?: number;
   }
 
   type Props = NodeProps<FilterNodeData>;

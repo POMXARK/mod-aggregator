@@ -1,0 +1,86 @@
+{
+  "description": "Конфигурация для автоматизации code inspection с WebStorm для фронтенда",
+  "version": "1.0.0",
+  "jetbrains": {
+    "webstormPath": {
+      "linux": "/opt/webstorm/bin/webstorm.sh",
+      "macos": "/Applications/WebStorm.app/Contents/MacOS/webstorm",
+      "windows": "C:\\Program Files\\JetBrains\\WebStorm 2025.2.3\\bin\\webstorm64.exe"
+    },
+    "profiles": {
+      "default": "Frontend Project Default",
+      "strict": "Strict_Frontend_Inspection",
+      "ci": "CI_Profile"
+    }
+  },
+  "inspection": {
+    "defaultProfile": "Frontend Project Default",
+    "outputFormat": "xml",
+    "outputDir": "./inspection-results",
+    "includePatterns": [
+      "**/*.js",
+      "**/*.ts",
+      "**/*.jsx",
+      "**/*.tsx",
+      "**/*.svelte",
+      "**/*.vue",
+      "**/*.html",
+      "**/*.css",
+      "**/*.scss",
+      "**/*.sass",
+      "**/*.less",
+      "**/*.json",
+      "**/*.md"
+    ],
+    "excludePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.svelte-kit/**",
+      "**/.next/**",
+      "**/.nuxt/**",
+      "**/.vuepress/**",
+      "**/.git/**",
+      "**/*.min.js",
+      "**/*.min.css",
+      "**/coverage/**",
+      "**/.nyc_output/**"
+    ]
+  },
+  "hooks": {
+    "preCommit": {
+      "enabled": true,
+      "maxErrors": 0,
+      "maxWarnings": 100,
+      "allowWarnings": true
+    }
+  },
+  "ci": {
+    "failOnError": true,
+    "generateReport": true,
+    "uploadResults": false
+  },
+  "reporting": {
+    "formats": ["xml", "html", "json"],
+    "generateSummary": true,
+    "includeStatistics": true
+  },
+  "notifications": {
+    "onError": true,
+    "onWarningThreshold": 20,
+    "email": false
+  },
+  "frontend": {
+    "frameworks": ["svelte", "react", "vue", "angular"],
+    "linting": {
+      "eslint": true,
+      "stylelint": true,
+      "prettier": true
+    },
+    "testing": {
+      "jest": true,
+      "vitest": true,
+      "cypress": true
+    }
+  }
+}

@@ -1,0 +1,22 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  1,
+                    "warnings":  0,
+                    "total":  1
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:06:02Z",
+    "problems":  [
+                     {
+                         "message":  "Variable typed as Writable\u003cT\u003e. For derived values, use the unwrapped type T instead.",
+                         "column":  3,
+                         "line":  7,
+                         "rule":  "incorrect-writable-typing",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-typing.svelte"
+                     }
+                 ]
+}

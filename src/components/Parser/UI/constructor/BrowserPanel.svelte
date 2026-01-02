@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PageViewer, ResizeHandle } from '@/components';
+  import { PageViewer } from '@/components';
 
   interface Props {
     visible: boolean;
@@ -10,46 +10,37 @@
     onResize?: (newWidth: number) => void;
     onResizeStart?: () => void;
     onResizeEnd?: () => void;
+    onLoadComplete: () => void;
+    className?: string;
   }
 
   let {
-    visible = $bindable(),
-    width = $bindable(),
+    visible,
+    width,
     url = $bindable(),
     siteId,
     onElementSelect,
-    onResize,
-    onResizeStart,
-    onResizeEnd,
+    onLoadComplete = undefined,
+    className = '',
   }: Props = $props();
 
-  function handleResize(newWidth: number) {
-    width = newWidth;
-    if (onResize) {
-      onResize(newWidth);
-    }
-  }
+  // Debug: следим за изменениями url
+  $effect(() => {
+    console.log('📺 BrowserPanel: url changed to:', url);
+  });
+
 </script>
 
 {#if visible}
-  <div class="browser-panel" style="width: {width}px">
+  <div class="browser-panel {className}" style="width: {width}px">
     <PageViewer
       bind:url
       {siteId}
       {onElementSelect}
+      onLoadComplete={onLoadComplete || (() => {})}
       onRefreshCache={() => console.log('Cache refreshed')}
     />
   </div>
-  <ResizeHandle
-    direction="vertical"
-    mode="left"
-    minValue={300}
-    maxValue={window.innerWidth * 0.8}
-    getCurrentValue={() => width}
-    onResize={handleResize}
-    {onResizeStart}
-    {onResizeEnd}
-  />
 {/if}
 
 <style>

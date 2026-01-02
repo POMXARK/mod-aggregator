@@ -1,0 +1,666 @@
+---
+description: Правила для автоматизации code inspection фронтенда с использованием WebStorm
+globs: "**/*.{js,ts,jsx,tsx,svelte,vue,html,css,scss,sass,less,json,md}"
+---
+
+# Автоматизация Code Inspection с WebStorm для фронтенда
+
+## Обзор
+
+Это правило автоматизирует процесс code inspection во фронтенд проектах, используя WebStorm - специализированную IDE для веб-разработки от JetBrains. Автоматически выявляет проблемы в JavaScript, TypeScript, HTML, CSS, Svelte и других веб-технологиях, сохраняя результаты в файлы для дальнейшего анализа.
+
+## Основные возможности
+
+### 1. Автоматический запуск code inspection
+- Интеграция с IntelliJ IDEA командной строкой
+- Поддержка различных форматов вывода (XML, HTML, JSON)
+- Фильтрация по типам проблем и severity
+
+### 2. Глубокий анализ неиспользуемых переменных
+- **Автоматическое выявление** неиспользуемых переменных и импортов
+- **Svelte-aware анализ** - понимает template синтаксис `{variable}`
+- **Многоуровневая проверка** использования в разных контекстах
+- **Автоисправление** - автоматическое удаление неиспользуемого кода
+
+#### Поддерживаемые паттерны:
+```typescript
+// ✅ Находит неиспользуемые переменные
+const unusedVar = "test";  // WARNING: unused-variable
+
+// ✅ Находит неиспользуемые импорты
+import { unusedFunc } from './utils';  // INFO: unused-import
+
+// ✅ Понимает Svelte синтаксис
+const usedInTemplate = "value";  // OK - используется в {usedInTemplate}
+const reactiveVar = $state(0);   // OK - reactive переменная
+```
+
+### 3. Сохранение результатов
+- Автоматическое сохранение отчетов в указанную директорию
+- Генерация имен файлов с timestamp
+- Поддержка различных форматов экспорта
+
+### 4. Интеграция с CI/CD
+- Возможность запуска в automated pipelines
+- Сравнение результатов между запусками
+- Генерация summary отчетов
+
+### 5. Автоочистка кода
+- **Автоматическое исправление** найденных проблем
+- **Безопасные исправления** с созданием бэкапов
+- **Dry-run режим** для предварительного просмотра
+
+## Настройка
+
+### 1. Путь к IntelliJ IDEA
+
+Укажите путь к вашей установке IntelliJ IDEA:
+
+```bash
+# Linux/Mac
+IDEA_PATH="/Applications/IntelliJ IDEA CE.app/Contents/MacOS/idea"
+
+# Windows
+IDEA_PATH="C:\Program Files\JetBrains\IntelliJ IDEA Community Edition\bin\idea64.exe"
+```
+
+### 2. Конфигурация профиля inspection
+
+Создайте или используйте существующий inspection профиль:
+
+```xml
+<!-- .idea/inspectionProfiles/Project_Default.xml -->
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="JavaDocMethod" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="UnusedImport" enabled="true" level="WARNING" enabled_by_default="true" />
+    <!-- ... другие inspection rules ... -->
+  </profile>
+</component>
+```
+
+## Использование
+
+### 1. Базовое сканирование проекта
+
+```bash
+# Запуск полного сканирования проекта
+./scripts/run-inspection.sh --project . --output ./inspection-results --format xml
+
+# Сканирование только Java файлов
+./scripts/run-inspection.sh --project . --output ./inspection-results --format xml --include "*.java"
+```
+
+### 2. Автоматический экспорт в Cursor
+
+При открытии файла или выполнении команды автоматически запускается:
+
+```bash
+# Экспорт результатов в формате, совместимом с Cursor
+./scripts/export-inspection-results.sh --input ./inspection-results/results.xml --output ./cursor-inspection.json
+```
+
+### 3. Глубокий анализ неиспользуемых переменных
+
+```bash
+# Анализ всех Svelte файлов на неиспользуемые переменные
+./scripts/run-code-inspection.ps1 -Include "src/**/*.svelte" -Rules "unused-variable,unused-import" -Format json
+
+# Автоматическая очистка кода (с предварительным просмотром)
+./scripts/fix-code-issues.ps1 -ResultsFile "latest.json" -DryRun
+
+# Автоматическая очистка кода (применение исправлений)
+./scripts/fix-code-issues.ps1 -ResultsFile "latest.json"
+```
+
+### 4. Интеграция с Git hooks
+
+```bash
+# pre-commit hook для автоматической проверки
+#!/bin/bash
+./scripts/run-inspection.sh --project . --output ./inspection-results --format xml --fail-on-error
+```
+
+## Форматы вывода
+
+### XML формат (стандартный)
+```xml
+<problems>
+  <problem>
+    <file>src/Main.java</file>
+    <line>15</line>
+    <description>Unused import statement</description>
+    <severity>WARNING</severity>
+    <category>Declaration redundancy</category>
+  </problem>
+</problems>
+```
+
+### JSON формат (для Cursor)
+```json
+{
+  "timestamp": "2025-01-01T12:00:00Z",
+  "project": "my-project",
+  "problems": [
+    {
+      "file": "src/Main.java",
+      "line": 15,
+      "column": 8,
+      "message": "Unused import statement",
+      "severity": "WARNING",
+      "category": "Declaration redundancy",
+      "inspection": "UnusedImport",
+      "quickFix": "Remove unused import"
+    },
+    {
+      "file": "src/components/MyComponent.svelte",
+      "line": 5,
+      "column": 7,
+      "message": "Unused variable: unusedVar (declared with const)",
+      "severity": "WARNING",
+      "category": "Code Quality",
+      "rule": "unused-variable",
+      "fix": {
+        "type": "remove-unused-variable",
+        "varName": "unusedVar",
+        "varType": "const"
+      }
+    },
+    {
+      "file": "src/utils/helpers.ts",
+      "line": 1,
+      "column": 10,
+      "message": "Unused import: unusedFunction (from ./math)",
+      "severity": "INFO",
+      "category": "Code Quality",
+      "rule": "unused-import",
+      "fix": {
+        "type": "remove-unused-import",
+        "importName": "unusedFunction",
+        "fromModule": "./math"
+      }
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "errors": 0,
+    "warnings": 2,
+    "info": 1
+  }
+}
+```
+
+### HTML формат (для отчетов)
+```html
+<html>
+<head><title>Code Inspection Results</title></head>
+<body>
+  <h1>Code Inspection Results</h1>
+  <div class="summary">
+    <p>Total problems: 1</p>
+    <p>Errors: 0, Warnings: 1, Info: 0</p>
+  </div>
+  <table>
+    <tr><th>File</th><th>Line</th><th>Problem</th><th>Severity</th></tr>
+    <tr><td>src/Main.java</td><td>15</td><td>Unused import statement</td><td>WARNING</td></tr>
+  </table>
+</body>
+</html>
+```
+
+## Скрипты автоматизации
+
+### Основной скрипт запуска inspection
+
+```bash
+#!/bin/bash
+# scripts/run-inspection.sh
+
+set -e
+
+# Конфигурация
+IDEA_PATH="${IDEA_PATH:-/Applications/IntelliJ IDEA CE.app/Contents/MacOS/idea}"
+PROJECT_PATH="${PROJECT_PATH:-.}"
+OUTPUT_DIR="${OUTPUT_DIR:-./inspection-results}"
+FORMAT="${FORMAT:-xml}"
+PROFILE="${PROFILE:-Project_Default}"
+
+# Создание выходной директории
+mkdir -p "$OUTPUT_DIR"
+
+# Определение файла профиля
+PROFILE_PATH="$PROJECT_PATH/.idea/inspectionProfiles/${PROFILE}.xml"
+if [ ! -f "$PROFILE_PATH" ]; then
+    echo "Warning: Profile $PROFILE_PATH not found, using default"
+    PROFILE_PATH=""
+fi
+
+# Запуск inspection
+echo "Running code inspection..."
+echo "Project: $PROJECT_PATH"
+echo "Profile: $PROFILE"
+echo "Output: $OUTPUT_DIR/results.$FORMAT"
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+OUTPUT_FILE="$OUTPUT_DIR/results_$TIMESTAMP.$FORMAT"
+
+"$IDEA_PATH" inspect "$PROJECT_PATH" ${PROFILE_PATH:+"$PROFILE_PATH"} "$OUTPUT_FILE" -v2
+
+if [ $? -eq 0 ]; then
+    echo "Inspection completed successfully"
+    echo "Results saved to: $OUTPUT_FILE"
+
+    # Создание символической ссылки на последний результат
+    ln -sf "$(basename "$OUTPUT_FILE")" "$OUTPUT_DIR/results.$FORMAT"
+else
+    echo "Inspection failed"
+    exit 1
+fi
+```
+
+### Скрипт экспорта в JSON для Cursor
+
+```bash
+#!/bin/bash
+# scripts/export-inspection-results.sh
+
+set -e
+
+INPUT_FILE="$1"
+OUTPUT_FILE="${2:-./cursor-inspection.json}"
+
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: Input file $INPUT_FILE not found"
+    exit 1
+fi
+
+# Конвертация XML в JSON
+python3 -c "
+import xml.etree.ElementTree as ET
+import json
+import sys
+from datetime import datetime
+
+def xml_to_json(xml_file):
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
+
+    problems = []
+    for problem in root.findall('.//problem'):
+        file_elem = problem.find('file')
+        line_elem = problem.find('line')
+        desc_elem = problem.find('description')
+        severity_elem = problem.find('severity')
+        category_elem = problem.find('category')
+
+        problems.append({
+            'file': file_elem.text if file_elem is not None else '',
+            'line': int(line_elem.text) if line_elem is not None and line_elem.text.isdigit() else 0,
+            'message': desc_elem.text if desc_elem is not None else '',
+            'severity': severity_elem.text if severity_elem is not None else 'UNKNOWN',
+            'category': category_elem.text if category_elem is not None else '',
+            'timestamp': datetime.now().isoformat()
+        })
+
+    result = {
+        'timestamp': datetime.now().isoformat(),
+        'problems': problems,
+        'summary': {
+            'total': len(problems),
+            'errors': len([p for p in problems if p['severity'] == 'ERROR']),
+            'warnings': len([p for p in problems if p['severity'] == 'WARNING']),
+            'info': len([p for p in problems if p['severity'] == 'INFO'])
+        }
+    }
+
+    return result
+
+result = xml_to_json('$INPUT_FILE')
+with open('$OUTPUT_FILE', 'w', encoding='utf-8') as f:
+    json.dump(result, f, indent=2, ensure_ascii=False)
+
+print(f'Converted {len(result[\"problems\"])} problems to JSON')
+"
+
+echo "Results exported to: $OUTPUT_FILE"
+```
+
+### Скрипт для Git hooks
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+echo "Running code inspection..."
+
+# Запуск inspection
+./scripts/run-inspection.sh --project . --output ./inspection-results --format xml
+
+# Проверка результатов
+if [ -f "./inspection-results/results.xml" ]; then
+    ERROR_COUNT=$(grep -c 'severity="ERROR"' "./inspection-results/results.xml" 2>/dev/null || echo "0")
+
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "Found $ERROR_COUNT errors. Please fix them before committing."
+        echo "See: ./inspection-results/results.xml"
+        exit 1
+    fi
+
+    WARNING_COUNT=$(grep -c 'severity="WARNING"' "./inspection-results/results.xml" 2>/dev/null || echo "0")
+    if [ "$WARNING_COUNT" -gt 0 ]; then
+        echo "Found $WARNING_COUNT warnings. Consider fixing them."
+    fi
+fi
+
+echo "Code inspection passed"
+```
+
+## Интеграция с различными IDE
+
+### IntelliJ IDEA
+
+```bash
+# Полный путь к исполняемому файлу
+IDEA_PATH="/Applications/IntelliJ IDEA CE.app/Contents/MacOS/idea"
+
+# Запуск inspection
+"$IDEA_PATH" inspect /path/to/project /path/to/profile.xml /path/to/output.xml -v2
+```
+
+### WebStorm
+
+```bash
+# WebStorm использует тот же движок, что и IntelliJ IDEA
+WEBSTORM_PATH="/Applications/WebStorm.app/Contents/MacOS/webstorm"
+
+# Запуск inspection
+"$WEBSTORM_PATH" inspect /path/to/project /path/to/profile.xml /path/to/output.xml -v2
+```
+
+### CLion (для C/C++)
+
+```bash
+CLION_PATH="/Applications/CLion.app/Contents/MacOS/clion"
+
+# Запуск inspection
+"$CLION_PATH" inspect /path/to/project /path/to/profile.xml /path/to/output.xml -v2
+```
+
+### PyCharm (для Python)
+
+```bash
+PYCHARM_PATH="/Applications/PyCharm CE.app/Contents/MacOS/pycharm"
+
+# Запуск inspection
+"$PYCHARM_PATH" inspect /path/to/project /path/to/profile.xml /path/to/output.xml -v2
+```
+
+## Настройка для разных языков
+
+### Java/Kotlin
+
+```xml
+<!-- .idea/inspectionProfiles/java_profile.xml -->
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Java Profile" />
+    <!-- Java specific inspections -->
+    <inspection_tool class="JavaDocMethod" enabled="true" level="WARNING" />
+    <inspection_tool class="UnusedImport" enabled="true" level="WARNING" />
+    <inspection_tool class="ConstantConditions" enabled="true" level="WARNING" />
+    <inspection_tool class="NullPointerException" enabled="true" level="ERROR" />
+  </profile>
+</component>
+```
+
+### JavaScript/TypeScript
+
+```xml
+<!-- .idea/inspectionProfiles/js_profile.xml -->
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="JavaScript Profile" />
+    <!-- JS/TS specific inspections -->
+    <inspection_tool class="JSUnusedGlobalSymbols" enabled="true" level="WARNING" />
+    <inspection_tool class="JSUnresolvedVariable" enabled="true" level="ERROR" />
+    <inspection_tool class="JSHint" enabled="true" level="WARNING" />
+    <inspection_tool class="ES6UnusedImports" enabled="true" level="WARNING" />
+  </profile>
+</component>
+```
+
+### Python
+
+```xml
+<!-- .idea/inspectionProfiles/python_profile.xml -->
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Python Profile" />
+    <!-- Python specific inspections -->
+    <inspection_tool class="PyUnusedLocal" enabled="true" level="WARNING" />
+    <inspection_tool class="PyUnresolvedReferences" enabled="true" level="ERROR" />
+    <inspection_tool class="PyPep8Naming" enabled="true" level="WARNING" />
+  </profile>
+</component>
+```
+
+## Интеграция с CI/CD
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/code-inspection.yml
+name: Code Inspection
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup IntelliJ IDEA
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Download IntelliJ IDEA
+      run: |
+        wget -q https://download.jetbrains.com/idea/ideaIC-2023.3.4.tar.gz
+        tar -xzf ideaIC-2023.3.4.tar.gz
+        echo "IDEA_PATH=$PWD/idea-IC-233.14475.28/bin/idea.sh" >> $GITHUB_ENV
+
+    - name: Create inspection profile
+      run: |
+        mkdir -p .idea/inspectionProfiles
+        cat > .idea/inspectionProfiles/Project_Default.xml << EOF
+        <component name="InspectionProjectProfileManager">
+          <profile version="1.0">
+            <option name="myName" value="Project Default" />
+            <!-- Add your inspection rules here -->
+          </profile>
+        </component>
+        EOF
+
+    - name: Run code inspection
+      run: |
+        chmod +x "$IDEA_PATH"
+        "$IDEA_PATH" inspect . .idea/inspectionProfiles/Project_Default.xml inspection-results.xml -v2
+
+    - name: Upload inspection results
+      uses: actions/upload-artifact@v3
+      with:
+        name: inspection-results
+        path: inspection-results.xml
+
+    - name: Check for errors
+      run: |
+        if grep -q 'severity="ERROR"' inspection-results.xml; then
+          echo "Found errors in code inspection"
+          exit 1
+        fi
+```
+
+### Jenkins Pipeline
+
+```groovy
+// Jenkinsfile
+pipeline {
+    agent any
+
+    stages {
+        stage('Code Inspection') {
+            steps {
+                script {
+                    // Download IntelliJ IDEA if not installed
+                    sh '''
+                        if ! command -v idea.sh &> /dev/null; then
+                            wget -q https://download.jetbrains.com/idea/ideaIC-2023.3.4.tar.gz
+                            tar -xzf ideaIC-2023.3.4.tar.gz
+                            IDEA_PATH="$PWD/idea-IC-233.14475.28/bin/idea.sh"
+                        else
+                            IDEA_PATH="idea.sh"
+                        fi
+
+                        # Run inspection
+                        "$IDEA_PATH" inspect . .idea/inspectionProfiles/Project_Default.xml inspection-results.xml -v2
+                    '''
+
+                    // Archive results
+                    archiveArtifacts artifacts: 'inspection-results.xml', fingerprint: true
+
+                    // Check for errors
+                    sh '''
+                        if grep -q 'severity="ERROR"' inspection-results.xml; then
+                            echo "Found errors in code inspection"
+                            exit 1
+                        fi
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'inspection-results.html',
+                reportName: 'Code Inspection Results'
+            ])
+        }
+    }
+}
+```
+
+## Устранение неполадок
+
+### Проблема: "Command not found" для idea.sh
+
+**Решение:**
+```bash
+# Проверьте путь к IntelliJ IDEA
+find /Applications -name "idea" -type f 2>/dev/null
+
+# Или установите IDEA_PATH в скрипте
+export IDEA_PATH="/Applications/IntelliJ IDEA CE.app/Contents/MacOS/idea"
+```
+
+### Проблема: Inspection не находит профиль
+
+**Решение:**
+```bash
+# Создайте профиль вручную или используйте встроенный
+ls -la .idea/inspectionProfiles/
+
+# Используйте встроенный профиль IDEA
+"$IDEA_PATH" inspect . "" inspection-results.xml -v2
+```
+
+### Проблема: Пустой результат inspection
+
+**Решение:**
+```bash
+# Проверьте, что проект открыт в IDEA и настроен правильно
+# Убедитесь, что файлы индексированы
+"$IDEA_PATH" inspect . .idea/inspectionProfiles/Project_Default.xml inspection-results.xml -v2 -d
+
+# Опция -d включает отладочную информацию
+```
+
+### Проблема: Ошибки прав доступа
+
+**Решение:**
+```bash
+# На Linux/Mac
+chmod +x "$IDEA_PATH"
+
+# Убедитесь, что директория для результатов доступна на запись
+mkdir -p inspection-results
+chmod 755 inspection-results
+```
+
+## Рекомендации по использованию
+
+1. **Регулярные запуски:** Запускайте inspection ежедневно или перед каждым коммитом
+2. **Фиксируйте ошибки:** Всегда исправляйте ошибки перед слиянием в main ветку
+3. **Мониторьте тренды:** Следите за количеством проблем со временем
+4. **Настраивайте профили:** Адаптируйте правила inspection под ваш проект
+5. **Интегрируйте в CI:** Автоматизируйте проверку качества кода
+6. **Очищайте код:** Регулярно запускайте анализ неиспользуемых переменных
+
+### Глубокий анализ неиспользуемого кода
+
+#### Когда использовать:
+- **После рефакторинга** - очистка после изменений
+- **Перед коммитом** - автоматическая чистка
+- **В CI/CD** - обеспечение качества кода
+- **Периодически** - поддержание чистоты кодовой базы
+
+#### Примеры автоматизации:
+
+```bash
+# Pre-commit hook для автоматической очистки
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# Запуск анализа
+./scripts/run-code-inspection.ps1 -Include "src/**/*.{svelte,ts,js}" -Format json
+
+# Автоматическое исправление (только безопасные изменения)
+./scripts/fix-code-issues.ps1 -ResultsFile "latest.json" -SafeOnly
+```
+
+#### Безопасные исправления:
+- ✅ **Unused variables** - всегда безопасно удалять
+- ✅ **Unused imports** - безопасно, если нет side effects
+- ⚠️ **Console.log** - требует ручного рассмотрения
+- ❌ **Debugger statements** - требует ручного рассмотрения
+
+## Производительность
+
+- **Кеширование:** IDEA кеширует результаты inspection, повторные запуски быстрее
+- **Инкрементальный анализ:** Анализируются только измененные файлы
+- **Параллельная обработка:** Используйте опцию `-j` для многопоточной обработки
+- **Фильтры:** Используйте `--include` и `--exclude` для ограничения scope
+
+```bash
+# Быстрый анализ только измененных файлов
+"$IDEA_PATH" inspect . profile.xml results.xml -v2 --include "*.java" --exclude "test/**"
+
+# Многопоточная обработка
+"$IDEA_PATH" inspect . profile.xml results.xml -v2 -j 4
+```
+
+Это правило обеспечивает автоматизированную проверку качества кода с использованием мощного анализатора JetBrains, интегрированного в IntelliJ IDEA и другие IDE компании.

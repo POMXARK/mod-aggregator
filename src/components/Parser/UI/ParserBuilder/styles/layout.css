@@ -1,0 +1,120 @@
+/* Основные стили ParserBuilder - Layout */
+
+.parser-builder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0f172a;
+}
+
+.builder-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Панели */
+.page-viewer-panel {
+  border-right: 1px solid #334155;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.resize-handle-vertical {
+  width: 4px;
+  background: #334155;
+  cursor: col-resize;
+  flex-shrink: 0;
+  position: relative;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: none;
+}
+
+.resize-handle-vertical:hover {
+  background: #0ea5e9;
+}
+
+.resize-handle-vertical::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+}
+
+/* Предотвращаем выделение текста при перетаскивании */
+.builder-content:has(.resize-handle-vertical:hover) {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.flow-panel {
+  flex: 1;
+  position: relative;
+  min-width: 0; /* Позволяет панели сжиматься */
+  z-index: 1;
+}
+
+/* Динамическая ширина flow-panel устанавливается через inline style когда есть viewer */
+.flow-panel.with-viewer {
+  flex: 0 0 auto; /* Отключаем flex-grow и flex-shrink, используем flex-basis из width */
+  /* width устанавливается динамически через inline style */
+}
+
+.flow-panel.with-chat {
+  width: calc(100% - 400px);
+}
+
+.flow-panel.with-results {
+  width: calc(100% - 400px);
+}
+
+/* Динамические ширины для комбинаций с viewer устанавливаются через inline style */
+.flow-panel.with-viewer.with-chat {
+  flex: 0 0 auto;
+  /* width устанавливается динамически через inline style */
+}
+
+.flow-panel.with-viewer.with-results {
+  flex: 0 0 auto;
+  /* width устанавливается динамически через inline style */
+}
+
+.flow-panel.with-chat.with-results:not(.with-viewer) {
+  width: calc(100% - 400px - 200px);
+}
+
+.flow-panel.with-viewer.with-chat.with-results {
+  flex: 0 0 auto;
+  /* width устанавливается динамически через inline style */
+}
+
+.chat-panel {
+  height: 100%;
+  border-left: 1px solid #334155;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Глобальный класс для предотвращения выделения при перетаскивании */
+:global(body.resizing-panel) {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: col-resize !important;
+}
+
+:global(body.resizing-panel *) {
+  cursor: col-resize !important;
+}
+
+
+

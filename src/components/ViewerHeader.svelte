@@ -8,7 +8,6 @@
     recentUrls: string[];
     showRecentUrls: boolean;
     panelCollapsed: boolean;
-    onUrlChange: (url: string) => void;
     onLoad: (forceRefresh: boolean) => void;
     onSelectRecent: (url: string) => void;
     onRefreshRecent: (url: string) => void;
@@ -16,16 +15,17 @@
     onToggleSelection: () => void;
     onToggleCollapse: () => void;
     onShowRecentUrls: (show: boolean) => void;
+    onClearCache?: () => void;
+    onShowCacheStats?: () => void;
   }
 
-  const {
-    url,
+  let {
+    url = $bindable(),
     loading,
     selectionMode,
     recentUrls,
     showRecentUrls,
     panelCollapsed,
-    onUrlChange,
     onLoad,
     onSelectRecent,
     onRefreshRecent,
@@ -33,7 +33,14 @@
     onToggleSelection,
     onToggleCollapse,
     onShowRecentUrls,
+    onClearCache,
+    onShowCacheStats,
   }: Props = $props();
+
+  // Debug: следим за изменениями url
+  $effect(() => {
+    console.log('🎯 ViewerHeader: url changed to:', url);
+  });
 </script>
 
 <div class="viewer-header" class:collapsed={panelCollapsed}>
@@ -50,8 +57,7 @@
       <div class="url-input-wrapper">
         <input
           type="url"
-          value={url}
-          oninput={e => onUrlChange(e.currentTarget.value)}
+          bind:value={url}
           onfocus={() => onShowRecentUrls(recentUrls.length > 0)}
           onkeydown={e => {
             if (e.key === 'Enter') {
@@ -107,6 +113,24 @@
     >
       {selectionMode ? '✓' : '🎯'}
     </button>
+    {#if onShowCacheStats}
+      <button
+        class="btn-cache-stats"
+        onclick={onShowCacheStats}
+        title="Показать статистику кэша HTML"
+      >
+        📊
+      </button>
+    {/if}
+    {#if onClearCache}
+      <button
+        class="btn-clear-cache"
+        onclick={onClearCache}
+        title="Очистить кэш HTML страниц"
+      >
+        🗑️
+      </button>
+    {/if}
     {#if selectionMode}
       <div class="selection-mode-hint">🎯 Режим выделения активен</div>
     {/if}
@@ -229,6 +253,46 @@
   .btn-refresh svg {
     width: 16px;
     height: 16px;
+  }
+
+  .btn-cache-stats {
+    padding: 0.375rem;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 2rem;
+    height: 1.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-cache-stats:hover {
+    background: #047857;
+  }
+
+  .btn-clear-cache {
+    padding: 0.375rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 2rem;
+    height: 1.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-clear-cache:hover {
+    background: #b91c1c;
   }
 
   .btn-select.active {

@@ -1,0 +1,36 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  1,
+                    "errors":  1,
+                    "warnings":  0,
+                    "total":  2
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:08:46Z",
+    "problems":  [
+                     {
+                         "message":  "Line too long: 127 characters (recommended: 120)",
+                         "column":  1,
+                         "line":  7,
+                         "rule":  "max-line-length",
+                         "severity":  "INFO",
+                         "category":  "Code Style",
+                         "file":  "test-typing-issues.svelte"
+                     },
+                     {
+                         "line":  8,
+                         "file":  "test-typing-issues.svelte",
+                         "fix":  {
+                                     "oldType":  "Writable\u003cAISettings\u003e",
+                                     "newType":  "AISettings",
+                                     "type":  "fix-writable-typing"
+                                 },
+                         "category":  "TypeScript",
+                         "rule":  "incorrect-writable-typing",
+                         "severity":  "ERROR",
+                         "message":  "Variable typed as Writable\u003cAISettings\u003e. For derived values, use the unwrapped type AISettings instead.",
+                         "column":  3
+                     }
+                 ]
+}

@@ -30,6 +30,8 @@ pub struct UiPreferences {
     pub window_height: Option<i32>,
     pub sidebar_collapsed: Option<bool>,
     pub theme: Option<String>, // "dark" | "light"
+    pub current_page: Option<String>, // текущая страница ("mods", "sites", etc.)
+    pub selected_site_id: Option<i64>, // ID выбранного сайта
 }
 
 /// Структура данных для состояния сессии
@@ -44,6 +46,8 @@ pub struct SessionState {
     pub open_collections: Vec<i64>,        // collection_ids
     pub selected_files: Vec<i64>,          // file_ids
     pub recent_actions: Vec<RecentAction>, // Максимум 50 записей
+    pub current_page: Option<String>,
+    pub selected_site_id: Option<i64>,
     pub last_updated: DateTime<Utc>,
 }
 
@@ -57,6 +61,8 @@ impl SessionState {
             open_collections: Vec::new(),
             selected_files: Vec::new(),
             recent_actions: Vec::new(),
+            current_page: None,
+            selected_site_id: None,
             last_updated: Utc::now(),
         }
     }
@@ -71,4 +77,15 @@ impl SessionState {
         self.last_updated = Utc::now();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 

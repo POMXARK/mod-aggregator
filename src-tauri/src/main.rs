@@ -2157,7 +2157,9 @@ fn main() {
                 get_recent_actions,
                 clear_recent_actions,
                 restore_session,
-                reset_session_state
+                reset_session_state,
+                update_current_page,
+                update_selected_site
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
@@ -2271,7 +2273,9 @@ fn main() {
                 get_recent_actions,
                 clear_recent_actions,
                 restore_session,
-                reset_session_state
+                reset_session_state,
+                update_current_page,
+                update_selected_site
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");

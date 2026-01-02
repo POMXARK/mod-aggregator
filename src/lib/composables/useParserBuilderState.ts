@@ -5,6 +5,8 @@
  * включая размеры панелей, видимость, активные вкладки и настройки.
  */
 
+import type { Node, Edge } from '@xyflow/svelte';
+
 export interface ParserBuilderUIState {
   version: number;
   pageViewerWidth: number;
@@ -25,10 +27,36 @@ export interface ParserBuilderUIState {
   selectedSiteId: number | null;
   generatedCode: string;
   editedCode: string;
+  // Состояние редактора нод
+  nodes: Node[];
+  edges: Edge[];
+  // Привязка состояния к URL для раздельного хранения
+  stateUrl: string;
+  // Привязка к ID чата для сохранения состояния по контексту чата
+  chatId?: string | null;
 }
 
 const UI_STATE_KEY = 'parser-builder-ui-state';
-const UI_STATE_VERSION = 1;
+const UI_STATE_VERSION = 3;
+
+/**
+ * Генерирует ключ состояния на основе URL страницы и ID чата
+ */
+function generateUIStateKey(url: string, chatId?: string | null): string {
+  if (!url) {
+    return UI_STATE_KEY;
+  }
+  // Нормализуем URL для консистентности
+  const normalizedUrl = url.replace(/\/$/, ''); // Убираем trailing slash
+  const baseKey = `${UI_STATE_KEY}_${btoa(normalizedUrl).replace(/=/g, '')}`;
+
+  // Если указан chatId, добавляем его к ключу
+  if (chatId) {
+    return `${baseKey}_chat_${chatId}`;
+  }
+
+  return baseKey;
+}
 
 const DEFAULT_UI_STATE: ParserBuilderUIState = {
   version: UI_STATE_VERSION,
@@ -50,6 +78,11 @@ const DEFAULT_UI_STATE: ParserBuilderUIState = {
   selectedSiteId: null,
   generatedCode: '',
   editedCode: '',
+  // Состояние редактора нод по умолчанию
+  nodes: [],
+  edges: [],
+  // Привязка состояния к URL
+  stateUrl: '',
 };
 
 /**
@@ -81,6 +114,26 @@ export function migrateUIState(
     }
   }
 
+  // Миграция с версии 1 на версию 2 - добавляем состояние нод и кода
+  if (fromVersion < 2 && toVersion >= 2) {
+    if (migratedState.nodes === undefined) {
+      migratedState.nodes = DEFAULT_UI_STATE.nodes;
+    }
+    if (migratedState.edges === undefined) {
+      migratedState.edges = DEFAULT_UI_STATE.edges;
+    }
+    if (migratedState.stateUrl === undefined) {
+      migratedState.stateUrl = DEFAULT_UI_STATE.stateUrl;
+    }
+  }
+
+  // Миграция с версии 2 на версию 3 - добавляем привязку к чату
+  if (fromVersion < 3 && toVersion >= 3) {
+    if (migratedState.chatId === undefined) {
+      migratedState.chatId = DEFAULT_UI_STATE.chatId;
+    }
+  }
+
   return migratedState as ParserBuilderUIState;
 }
 
@@ -94,7 +147,10 @@ export function saveUIState(state: Partial<ParserBuilderUIState>): void {
       ...DEFAULT_UI_STATE,
       ...state,
     };
-    localStorage.setItem(UI_STATE_KEY, JSON.stringify(fullState));
+
+    // Используем ключ на основе URL и chatId для раздельного хранения состояний
+    const key = generateUIStateKey(fullState.stateUrl, fullState.chatId);
+    localStorage.setItem(key, JSON.stringify(fullState));
   } catch (e) {
     console.error('Failed to save UI state:', e);
   }
@@ -103,11 +159,50 @@ export function saveUIState(state: Partial<ParserBuilderUIState>): void {
 /**
  * Восстанавливает состояние UI из localStorage
  */
-export function restoreUIState(): ParserBuilderUIState | null {
+export function restoreUIState(url?: string, chatId?: string | null): ParserBuilderUIState | null {
   try {
-    const stored = localStorage.getItem(UI_STATE_KEY);
-    if (stored) {
-      const state = JSON.parse(stored);
+    // Сначала пробуем восстановить состояние для комбинации URL + chatId
+    if (url && chatId) {
+      const chatSpecificKey = generateUIStateKey(url, chatId);
+      const chatSpecificStored = localStorage.getItem(chatSpecificKey);
+
+      if (chatSpecificStored) {
+        const state = JSON.parse(chatSpecificStored);
+
+        // Проверяем версию и мигрируем при необходимости
+        const stateVersion = state.version || 0;
+        if (stateVersion !== UI_STATE_VERSION) {
+          const migratedState = migrateUIState(state, stateVersion, UI_STATE_VERSION);
+          return migratedState;
+        }
+
+        return state as ParserBuilderUIState;
+      }
+    }
+
+    // Если не найдено состояние для чата, пробуем для URL
+    if (url) {
+      const urlKey = generateUIStateKey(url);
+      const urlStored = localStorage.getItem(urlKey);
+
+      if (urlStored) {
+        const state = JSON.parse(urlStored);
+
+        // Проверяем версию и мигрируем при необходимости
+        const stateVersion = state.version || 0;
+        if (stateVersion !== UI_STATE_VERSION) {
+          const migratedState = migrateUIState(state, stateVersion, UI_STATE_VERSION);
+          return migratedState;
+        }
+
+        return state as ParserBuilderUIState;
+      }
+    }
+
+    // Наконец, пробуем общее состояние
+    const generalStored = localStorage.getItem(UI_STATE_KEY);
+    if (generalStored) {
+      const state = JSON.parse(generalStored);
 
       // Проверяем версию и мигрируем при необходимости
       const stateVersion = state.version || 0;
@@ -162,32 +257,34 @@ export function importUIState(jsonString: string): ParserBuilderUIState | null {
   }
 }
 
-/**
- * Применяет состояние UI к компоненту
- */
-export function applyUIState(
-  state: Partial<ParserBuilderUIState>,
-  updaters: {
-    setPageViewerWidth: (value: number) => void;
-    setChatPanelWidth: (value: number) => void;
-    setBottomPanelHeight: (value: number) => void;
-    setShowPageViewer: (value: boolean) => void;
-    setShowAIChat: (value: boolean) => void;
-    setShowParserResults: (value: boolean) => void;
-    setShowAISettings: (value: boolean) => void;
-    setShowCodeEditor: (value: boolean) => void;
-    setActiveBottomTab: (value: 'code' | 'results' | 'review' | 'runner' | null) => void;
-    setCurrentUrl: (value: string) => void;
-    setAIModelType: (value: 'ollama' | 'openai' | 'anthropic' | 'google') => void;
-    setAIModelName: (value: string) => void;
-    setAIApiKey: (value: string) => void;
-    setAIOllamaUrl: (value: string) => void;
-    setAIDescription: (value: string) => void;
-    setSelectedSiteId: (value: number | null) => void;
-    setGeneratedCode: (value: string) => void;
-    setEditedCode: (value: string) => void;
-  }
-): void {
+  /**
+   * Применяет состояние UI к компоненту
+   */
+  export function applyUIState(
+    state: Partial<ParserBuilderUIState>,
+    updaters: {
+      setPageViewerWidth: (value: number) => void;
+      setChatPanelWidth: (value: number) => void;
+      setBottomPanelHeight: (value: number) => void;
+      setShowPageViewer: (value: boolean) => void;
+      setShowAIChat: (value: boolean) => void;
+      setShowParserResults: (value: boolean) => void;
+      setShowAISettings: (value: boolean) => void;
+      setShowCodeEditor: (value: boolean) => void;
+      setActiveBottomTab: (value: 'code' | 'results' | 'review' | 'runner' | null) => void;
+      setCurrentUrl: (value: string) => void;
+      setAIModelType: (value: 'ollama' | 'openai' | 'anthropic' | 'google') => void;
+      setAIModelName: (value: string) => void;
+      setAIApiKey: (value: string) => void;
+      setAIOllamaUrl: (value: string) => void;
+      setAIDescription: (value: string) => void;
+      setSelectedSiteId: (value: number | null) => void;
+      setGeneratedCode: (value: string) => void;
+      setEditedCode: (value: string) => void;
+      setNodes: (value: Node[]) => void;
+      setEdges: (value: Edge[]) => void;
+    }
+  ): void {
   // Восстанавливаем размеры панелей
   if (typeof state.pageViewerWidth === 'number') {
     let width = state.pageViewerWidth;
@@ -267,6 +364,14 @@ export function applyUIState(
   }
   if (typeof state.editedCode === 'string') {
     updaters.setEditedCode(state.editedCode);
+  }
+
+  // Восстанавливаем состояние редактора нод
+  if (Array.isArray(state.nodes)) {
+    updaters.setNodes(state.nodes);
+  }
+  if (Array.isArray(state.edges)) {
+    updaters.setEdges(state.edges);
   }
 }
 

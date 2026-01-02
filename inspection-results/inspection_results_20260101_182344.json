@@ -1,0 +1,26 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  0,
+                    "warnings":  1,
+                    "total":  1
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:23:44Z",
+    "problems":  [
+                     {
+                         "line":  5,
+                         "file":  "test-destructure.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte template",
+                         "column":  3
+                     }
+                 ]
+}

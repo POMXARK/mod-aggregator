@@ -63,3 +63,14 @@ CREATE INDEX IF NOT EXISTS idx_collection_logic_rules_collection ON collection_l
 
 
 
+
+
+
+
+
+
+
+
+
+
+

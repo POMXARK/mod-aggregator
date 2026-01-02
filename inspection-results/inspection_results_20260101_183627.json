@@ -1,0 +1,62 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  4,
+                    "warnings":  1,
+                    "total":  5
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:36:27Z",
+    "problems":  [
+                     {
+                         "message":  "Cannot find name \u0027AISettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  5,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-missing-types.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027ParserSettings\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  11,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-missing-types.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027ParserResult\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  16,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-missing-types.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027Test\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  7,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-missing-types.svelte"
+                     },
+                     {
+                         "line":  22,
+                         "file":  "test-missing-types.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte template",
+                         "column":  3
+                     }
+                 ]
+}

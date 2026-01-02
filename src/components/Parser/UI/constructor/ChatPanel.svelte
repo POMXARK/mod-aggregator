@@ -4,7 +4,7 @@
   import type { ParserConfig } from '@/lib/api';
 
   interface Props {
-    visible: boolean;
+    visible?: boolean;
     width: number;
     aiModelType?: 'ollama' | 'openai' | 'anthropic' | 'google';
     aiModelName?: string;
@@ -32,30 +32,37 @@
     onResize?: (newWidth: number) => void;
     onResizeStart?: () => void;
     onResizeEnd?: () => void;
+    onChatChange?: (chatId: string | null) => void;
+    className?: string;
   }
 
   let {
-    visible = $bindable(),
-    width = $bindable(),
-    aiModelType = 'ollama',
-    aiModelName = 'llama3.2:3b',
-    aiApiKey = '',
-    aiOllamaUrl = 'http://localhost:11434',
-    currentUrl = '',
-    nodes = [],
-    edges = [],
+    visible = false,
+    width = $bindable(400),
+    aiModelType,
+    aiModelName,
+    aiApiKey,
+    aiOllamaUrl,
+    currentUrl,
+    nodes,
+    edges,
     onCreateNodes,
     onGenerateCode,
     onTestParser,
     onCheckCodeWithAI,
-    generatedCode = '',
+    generatedCode,
     onApplyCode,
-    selectedElementInfo = null,
+    selectedElementInfo,
     addAIMessage = $bindable(),
     onResize,
     onResizeStart,
     onResizeEnd,
+    onChatChange,
+    className = '',
   }: Props = $props();
+
+
+  // Отслеживание изменений видимости для правильной работы компонента
 
   function handleResize(newWidth: number) {
     width = newWidth;
@@ -66,17 +73,7 @@
 </script>
 
 {#if visible}
-  <ResizeHandle
-    direction="vertical"
-    mode="right"
-    minValue={300}
-    maxValue={window.innerWidth * 0.8}
-    getCurrentValue={() => width}
-    onResize={handleResize}
-    {onResizeStart}
-    {onResizeEnd}
-  />
-  <div class="chat-panel" style="width: {width}px">
+  <div class="chat-panel {className}" style="width: {width || 400}px">
     <AIChat
       {aiModelType}
       {aiModelName}
@@ -93,6 +90,7 @@
       {onApplyCode}
       {selectedElementInfo}
       bind:addAIMessage
+      {onChatChange}
     />
   </div>
 {/if}
@@ -105,5 +103,7 @@
     flex-direction: column;
     border-left: 1px solid #334155;
     background: #1e293b;
+    position: relative;
+    z-index: 1;
   }
 </style>

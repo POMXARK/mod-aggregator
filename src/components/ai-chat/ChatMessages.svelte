@@ -11,6 +11,7 @@
     onGenerateCode: (messageId: string) => void;
     onRunParser: () => void;
     onCopy: (messageId: string) => void;
+    onCopyText: (messageId: string) => void;
     onDelete: (messageId: string) => void;
   }
 
@@ -23,6 +24,7 @@
     onGenerateCode,
     onRunParser,
     onCopy,
+    onCopyText,
     onDelete,
   }: Props = $props();
 
@@ -47,6 +49,7 @@
           onGenerateCode={() => onGenerateCode(message.id)}
           {onRunParser}
           onCopy={() => onCopy(message.id)}
+          onCopyText={() => onCopyText(message.id)}
           onDelete={() => onDelete(message.id)}
         />
       </div>

@@ -25,6 +25,13 @@
   let selectedCollectionId = $state<number | null>(null);
   let forceDelete = $state(false);
 
+  // Обработчик клавиатуры для доступности
+  function handleKeydown(event: KeyboardEvent, closeFn: () => void) {
+    if (event.key === 'Escape') {
+      closeFn();
+    }
+  }
+
   $effect(() => {
     if (selectedFileIds.length > 0) {
       loadCollections();
@@ -260,10 +267,23 @@
 
 <!-- Диалог удаления -->
 {#if showDeleteDialog}
-  <div class="dialog-overlay" onclick={() => (showDeleteDialog = false)}>
-    <div class="dialog" onclick={e => e.stopPropagation()}>
+  <div
+    class="dialog-overlay"
+    onclick={() => (showDeleteDialog = false)}
+    onkeydown={(e) => handleKeydown(e, () => showDeleteDialog = false)}
+    role="presentation"
+    tabindex="-1"
+  >
+    <div
+      class="dialog"
+      onclick={e => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      tabindex="-1"
+    >
       <div class="dialog-header">
-        <h3>Удалить файлы</h3>
+        <h3 id="delete-dialog-title">Удалить файлы</h3>
         <button class="btn-close" onclick={() => (showDeleteDialog = false)}>×</button>
       </div>
       <div class="dialog-content">
@@ -305,10 +325,23 @@
 
 <!-- Диалог перемещения -->
 {#if showMoveDialog}
-  <div class="dialog-overlay" onclick={() => (showMoveDialog = false)}>
-    <div class="dialog" onclick={e => e.stopPropagation()}>
+  <div
+    class="dialog-overlay"
+    onclick={() => (showMoveDialog = false)}
+    onkeydown={(e) => handleKeydown(e, () => showMoveDialog = false)}
+    role="presentation"
+    tabindex="-1"
+  >
+    <div
+      class="dialog"
+      onclick={e => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="move-dialog-title"
+      tabindex="-1"
+    >
       <div class="dialog-header">
-        <h3>Переместить в коллекцию</h3>
+        <h3 id="move-dialog-title">Переместить в коллекцию</h3>
         <button class="btn-close" onclick={() => (showMoveDialog = false)}>×</button>
       </div>
       <div class="dialog-content">

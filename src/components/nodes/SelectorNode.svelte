@@ -5,6 +5,8 @@
   interface SelectorNodeData {
     label: string;
     selector: string;
+    width?: number;
+    height?: number;
   }
 
   type Props = NodeProps<SelectorNodeData>;

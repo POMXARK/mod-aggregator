@@ -1,0 +1,152 @@
+﻿import type { AISettings } from '../types/parser-builder.types';
+
+import type { AISettings } from '../types/parser-builder.types';
+
+
+
+<script lang="ts">
+
+
+
+
+  // РўРµСЃС‚РѕРІС‹Р№ С„Р°Р№Р» СЃ РїСЂРѕР±Р»РµРјР°РјРё С‚РёРїРёР·Р°С†РёРё
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // РџСЂРѕР±Р»РµРјР° 1: РќРµРїСЂР°РІРёР»СЊРЅР°СЏ С‚РёРїРёР·Р°С†РёСЏ - РґРѕР»Р¶РЅР° Р±С‹С‚СЊ AISettings, Р° РЅРµ AISettings
+
+
+
+
+  let wrongType: AISettings = {
+    modelType: 'ollama',
+    modelName: 'llama3.2:3b',
+    apiKey: '',
+    ollamaUrl: 'http://localhost:11434',
+    description: 'test'
+  };
+
+
+
+
+    modelType: 'ollama',
+
+
+
+
+    modelName: 'llama3.2:3b',
+
+
+
+
+    apiKey: '',
+
+
+
+
+    ollamaUrl: 'http://localhost:11434',
+
+
+
+
+    description: 'test'
+
+
+
+
+  });
+
+
+
+
+
+
+
+
+
+  // РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ С‚РёРїР° Р±РµР· РёРјРїРѕСЂС‚Р°
+
+
+
+
+  let settings: ParserSettings = {
+
+
+
+
+    maxElements: 100,
+
+
+
+
+    timeoutSeconds: 60,
+
+
+
+
+    slowMode: false,
+
+
+
+
+    delayPerElement: 500
+
+
+
+
+  };
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+<div>
+
+
+
+
+  <h1>Test file with typing issues</h1>
+
+
+
+
+  <p>This file should show typing problems</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

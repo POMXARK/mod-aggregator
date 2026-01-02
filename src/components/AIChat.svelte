@@ -26,23 +26,25 @@
     generatedCode?: string;
     onApplyCode?: (code: string) => void;
     addAIMessage?: (content: string) => void;
+    onChatChange?: (chatId: string | null) => void;
   }
 
   let {
-    aiModelType = 'ollama',
-    aiModelName = 'llama3.2:3b',
-    aiApiKey = '',
-    aiOllamaUrl = 'http://localhost:11434',
-    currentUrl = '',
-    nodes = [],
-    onCreateNodes = () => {},
-    selectedElementInfo = null,
-    onGenerateCode = () => {},
-    onTestParser = async () => {},
-    onCheckCodeWithAI = async () => {},
-    generatedCode = '',
-    onApplyCode = () => {},
+    aiModelType,
+    aiModelName,
+    aiApiKey,
+    aiOllamaUrl,
+    currentUrl,
+    nodes,
+    onCreateNodes,
+    selectedElementInfo,
+    onGenerateCode,
+    onTestParser,
+    onCheckCodeWithAI,
+    generatedCode,
+    onApplyCode,
     addAIMessage = $bindable(),
+    onChatChange,
   }: Props = $props();
 
   // Управление чатами
@@ -63,6 +65,13 @@
     const chat = chats.find(c => c.id === currentChatId);
     messages = chat?.messages || [];
   }
+
+  // Отслеживаем изменения currentChatId и уведомляем родителя
+  $effect(() => {
+    if (onChatChange) {
+      onChatChange(currentChatId);
+    }
+  });
 
   let inputMessage = $state('');
   let isSending = $state(false);
@@ -475,6 +484,35 @@
       });
   }
 
+  // Копирование только текста сообщения (без кода)
+  function copyMessageText(messageId: string) {
+    if (!currentChatId) {
+      return;
+    }
+
+    const chat = chats.find(c => c.id === currentChatId);
+    const message = chat?.messages.find(m => m.id === messageId);
+    if (!message) {
+      return;
+    }
+
+    // Копируем только чистый текст (без HTML тегов и без кода)
+    const textContent = message.content
+      .replace(/<[^>]*>/g, '') // Удаляем HTML теги
+      .replace(/```[\s\S]*?```/g, '') // Удаляем код блоки
+      .replace(/^\s*[\r\n]+/gm, '') // Удаляем пустые строки
+      .trim();
+
+    navigator.clipboard
+      .writeText(textContent)
+      .then(() => {
+        console.log('Message text copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy message text:', err);
+      });
+  }
+
   // Применение исправления кода от AI
   function applyCodeFix(messageId: string) {
     if (!currentChatId) {
@@ -809,6 +847,17 @@
               updateMessagesFromChat();
               showChatList = false;
             }}
+            onkeydown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                currentChatId = chat.id;
+                updateMessagesFromChat();
+                showChatList = false;
+              }
+            }}
+            role="button"
+            tabindex="0"
+            aria-label={`Выбрать чат: ${chat.title}`}
           >
             <div class="chat-item-title">{chat.title}</div>
             <div class="chat-item-meta">
@@ -890,6 +939,13 @@
               title="Копировать сообщение"
             >
               📋 Копировать
+            </button>
+            <button
+              class="btn-message-action"
+              onclick={() => copyMessageText(message.id)}
+              title="Копировать текст сообщения в буфер обмена"
+            >
+              📄 Копировать текст
             </button>
             <button
               class="btn-delete-message"

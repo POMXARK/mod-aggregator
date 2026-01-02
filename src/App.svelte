@@ -19,7 +19,13 @@
   import { componentsConfig, loadComponentConfig } from '@/config/components';
   import type { Site } from '@/lib/api';
   import { SessionStateManager } from '@/lib/session/session-state';
-  import type { SessionRestoreResult, PageType } from '@/lib/types';
+  import type { SessionRestoreResult } from '@/types/session';
+  import type { PageType } from '@/lib/types';
+
+  // Debounced savers для автоматического сохранения состояния
+  let saveCurrentPage = SessionStateManager.createDebouncedPageSaver();
+  let saveSelectedSite = SessionStateManager.createDebouncedSiteSaver();
+  let saveSidebarState = SessionStateManager.createDebouncedPreferencesSaver();
 
   let currentPage: PageType = $state('mods');
   let sites = $state<Site[]>([]);
@@ -86,11 +92,23 @@
           sidebarOpen = !result.uiPreferences.sidebarCollapsed;
         }
 
+        // Восстанавливаем текущую страницу
+        if (result.currentPage) {
+          currentPage = result.currentPage as PageType;
+        }
+
+        // Восстанавливаем выбранный сайт
+        if (result.selectedSiteId !== undefined) {
+          selectedSiteId = result.selectedSiteId;
+        }
+
         // Можно добавить восстановление других настроек
         console.log('Session restored:', {
           fileOrder: result.fileOrder?.length || 0,
           openCollections: result.openCollections?.length || 0,
           selectedFiles: result.selectedFiles?.length || 0,
+          currentPage: result.currentPage,
+          selectedSiteId: result.selectedSiteId,
           warnings: result.warnings?.length || 0,
         });
       }
@@ -111,19 +129,28 @@
     console.log('App: handlePageChange', page, 'current:', currentPage);
     currentPage = page;
     console.log('App: after update', currentPage);
+
+    // Автоматически сохраняем текущую страницу
+    saveCurrentPage(page);
   }
 
   function handleSiteSelect(siteId: number | null) {
     console.log('App: handleSiteSelect', siteId);
     selectedSiteId = siteId;
-  }
 
-  function handleSiteAdded() {
-    loadSites();
+    // Автоматически сохраняем выбранный сайт
+    saveSelectedSite(siteId);
   }
 
   function toggleSidebar() {
     sidebarOpen = !sidebarOpen;
+
+    // Автоматически сохраняем состояние боковой панели
+    saveSidebarState({ sidebarCollapsed: !sidebarOpen });
+  }
+
+  function handleSiteAdded() {
+    loadSites();
   }
 </script>
 
@@ -147,6 +174,12 @@
       <div
         class="sidebar-overlay"
         onclick={toggleSidebar}
+        onkeydown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleSidebar();
+          }
+        }}
         role="button"
         aria-label="Закрыть меню"
         tabindex="0"
@@ -366,7 +399,7 @@
     transform: scale(0.95);
   }
 
-  .sidebar-toggle-button .icon {
+  .sidebar-toggle-button :global(.icon) {
     width: clamp(1.25rem, 1.75vw, 1.5rem);
     height: clamp(1.25rem, 1.75vw, 1.5rem);
   }

@@ -6,6 +6,8 @@
     label: string;
     attribute: string;
     selector?: string;
+    width?: number;
+    height?: number;
   }
 
   type Props = NodeProps<ExtractNodeData>;

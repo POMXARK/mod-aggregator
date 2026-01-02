@@ -14,6 +14,116 @@ globs: src/**/*.svelte
 3. Анализируй текущий код через codebase_search
 4. Только потом пиши код
 
+## Использование папки skills
+
+**ОБЯЗАТЕЛЬНО** проверяй папку `skills/` перед началом работы над задачей:
+
+- **Читай существующие скилы** из `skills/` директории
+- **Ищи релевантные руководства** по решаемой задаче
+- **Следуй алгоритмам** из найденных скилов
+- **Обновляй скилы** после успешного решения задач
+
+### Доступные скилы:
+- `static-analysis-frontend-skill.md` - комплексное руководство по статическому анализу Svelte 5
+
+### Как использовать скилы:
+1. **Читай скил перед началом** работы над задачей
+2. **Следуй алгоритму** из скила
+3. **Выполняй шаги последовательно** как описано
+4. **Обновляй скил** после успешного решения новой задачи
+5. **Ссылайся на скилы** в ответах пользователю
+
+### Когда обновлять скилы:
+- ✅ **После успешного решения** новой категории задач
+- ✅ **При обнаружении новых паттернов** ошибок
+- ✅ **После создания** новых алгоритмов решения
+- ✅ **При улучшении** существующих процессов
+
+### Структура скила:
+```
+# Название скила
+
+## Описание задачи
+[Что решается]
+
+## Технический стек
+[Инструменты, фреймворки]
+
+## Шаги выполнения
+[Последовательность действий]
+
+## Типичные ошибки и исправление
+[Примеры проблем и решений]
+
+## Лучшие практики
+[Рекомендации]
+
+## Автоматизация
+[CI/CD, pre-commit hooks]
+```
+
+## Запросы на статический анализ
+
+**ОБЯЗАТЕЛЬНО** выполняй статический анализ по запросам пользователя:
+
+### Варианты запросов на анализ:
+```
+"проверь [путь_к_файлу]" - проверить конкретный файл
+"выполни анализ [путь_к_файлу]" - выполнить полный анализ файла
+"проверь [путь_к_файлу] и исправь" - проверить и исправить ошибки
+"проверь [путь_к_файлу] и исправь ошибки, проверяй пока ошибок не останется" - итеративный анализ
+"итеративно запускай стат анализ этого файла, пока не будет всё без ошибок" - полный цикл исправления
+```
+
+### Алгоритм выполнения анализа:
+1. **Запустить анализ** с `--threshold error`
+2. **Найти ошибки** в выводе
+3. **Исправить ошибки** по одной
+4. **Повторить анализ** до полного отсутствия ошибок
+5. **Завершить** только когда exit code = 0
+
+### Примеры команд анализа:
+```bash
+# Анализ конкретного файла
+npx svelte-check --threshold error src/components/Component.svelte
+
+# Анализ директории
+npx svelte-check --threshold error src/components/
+
+# Полный анализ проекта
+npx svelte-check --threshold error
+```
+
+### Приоритеты использования скилов:
+1. **Сначала проверить skills/** - найти существующие решения
+2. **Следовать алгоритму** из скила
+3. **Только потом** использовать web_search и codebase_search
+4. **Обновить скил** после успешного решения
+
+## Использование Context7 MCP для ошибок
+
+**КРИТИЧЕСКИ ВАЖНО: Если в запросе передана ошибка, СНАЧАЛА обратитесь к MCP context7!**
+
+При получении ошибки в приложении:
+1. **НЕ пытайтесь исправить самостоятельно** - используйте `mcp_context7_query-docs`
+2. **Укажите точную ошибку** в запросе к context7
+3. **Ищите документацию** по проблемной библиотеке/фреймворку
+4. **Только после получения информации** от context7 приступайте к исправлению
+
+Примеры использования:
+```typescript
+// Для ошибок SvelteFlow/XYFlow
+mcp_context7_query-docs(libraryId: '/xyflow/svelte', query: "nodes is not iterable error")
+
+// Для ошибок Svelte 5
+mcp_context7_query-docs(libraryId: '/svelte/svelte', query: "fn is not a function in derived")
+
+// Для ошибок Tauri
+mcp_context7_query-docs(libraryId: '/tauri/tauri', query: "invoke error handling")
+```
+
+**Причина:** Context7 имеет актуальную документацию и примеры решений для сложных ошибок, которые не найти в общем поиске.
+
 ## Предотвращение зацикливания
 
 **КРИТИЧЕСКИ ВАЖНО: Если один и тот же запрос на исправление выполняется последовательно несколько раз, ОСТАНОВИСЬ!**
@@ -36,6 +146,75 @@ globs: src/**/*.svelte
 - Неудачные решения → запоминай и не повторяй без изменений
 - Формируй документацию из опыта работы с проектом
 
+## Критические ошибки синтаксиса Svelte 5
+
+**КРИТИЧЕСКИ ВАЖНО: Эти ошибки проверены через Context7 и являются наиболее распространенными при миграции на Svelte 5 runes mode!**
+
+### 1. Legacy Reactive Statements Invalid
+- **Ошибка:** `$: is not allowed in runes mode, use $derived or $effect instead`
+- **Запрещено:** Использовать старый синтаксис reactive statements `$:`
+- **Причина:** В Svelte 5 runes mode старый синтаксис вызывает ошибку `legacy_reactive_statement_invalid`
+
+### 2. Mixed Event Handler Syntaxes
+- **Ошибка:** `Mixing old (on:input) and new syntaxes for event handling is not allowed`
+- **Запрещено:** Смешивать старый синтаксис `on:input` с новым
+- **Правильно:** Использовать только новый синтаксис `oninput={handler}` или полагаться на `bind:value`
+- **Причина:** Svelte 5 требует консистентности в обработке событий
+
+### 3. Runes Outside Svelte Files
+- **Ошибка:** `The $state rune is only available inside .svelte and .svelte.js/ts files`
+- **Запрещено:** Использовать runes в обычных TypeScript файлах
+- **Правильно:** Использовать только Svelte stores (writable, readable) в composables
+- **Причина:** Runes являются частью Svelte компонентной системы
+
+### 4. Store Invalid Shape
+- **Ошибка:** `getNodes is not a store with a subscribe method`
+- **Запрещено:** Возвращать функции вместо stores из composables
+- **Правильно:** Возвращать stores напрямую, а не функции-геттеры
+- **Причина:** Svelte ожидает объекты с `subscribe` методом
+
+### 5. Props Rest Readonly
+- **Ошибка:** `Rest element properties of $props() such as props.currentUrl are readonly`
+- **Запрещено:** Изменять свойства из `$props()` через rest element
+- **Правильно:** Деструктурировать props явно или использовать callback функции
+- **Причина:** Props в Svelte 5 являются readonly по умолчанию
+
+### 6. Global Reference Invalid
+- **Ошибка:** `$currentChatIdStore is an illegal variable name`
+- **Запрещено:** Использовать `$` в начале имен переменных (кроме stores)
+- **Правильно:** Переменные с `$` в начале считаются stores автоматически
+- **Причина:** Svelte резервирует `$` для reactive bindings
+
+### 7. Attribute Duplicate
+- **Ошибка:** `Attributes need to be unique`
+- **Запрещено:** Дублировать атрибуты элементов
+- **Правильно:** Убирать дублирующиеся атрибуты
+- **Причина:** Каждый атрибут должен быть уникальным в элементе
+
+### 8. CSS Unused Selector
+- **Ошибка:** `Unused CSS selector ".sidebar-toggle-button .icon"`
+- **Запрещено:** Использовать селекторы, которые не применяются к элементам
+- **Правильно:** Использовать `:global()` для стилизации компонентов или удалять неиспользуемые селекторы
+- **Причина:** Svelte требует, чтобы все CSS селекторы использовались
+
+### 9. Bind with Derived Values
+- **Ошибка:** `fn is not a function` (при попытке bind с derived)
+- **Запрещено:** Использовать `bind:` с `$derived()` значениями
+- **Правильно:** Передавать stores напрямую или использовать callbacks
+- **Причина:** `$derived()` возвращает readonly значения, которые нельзя изменить через bind
+
+### 10. Bind with Function Values
+- **Ошибка:** `Can only bind to state or props`
+- **Запрещено:** Использовать `bind:` с функциями (function values)
+- **Правильно:** Передавать функции как обычные пропсы без `bind:`
+- **Причина:** Функции нельзя привязывать - они не являются state или bindable props
+
+### 11. $state Proxy Objects in Arithmetic Operations
+- **Ошибка:** `[object Object]` в математических операциях, некорректные вычисления
+- **Запрещено:** Использовать `$bindable` props напрямую в арифметике без конвертации
+- **Правильно:** Принудительно конвертировать в примитивные значения с `Number()`
+- **Причина:** `$bindable` props возвращают `$state` proxy объекты, а не числа
+
 ## Использование Svelte 5 Runes
 
 ### State Management
@@ -44,16 +223,303 @@ globs: src/**/*.svelte
 - Используй `$effect()` для побочных эффектов
 - НЕ используй старый API с `let` и `$:` для реактивности
 
+### Reactive Statements
+- **ЗАПРЕЩЕНО** использовать старый синтаксис reactive statements `$:`
+- Вместо `$: variable = expression` используй `let variable = $derived(expression)`
+- Вместо `$: { statements }` используй `$effect(() => { statements })`
+
 ### Примеры правильного кода:
 
 ```svelte
 <script lang="ts">
   let count = $state(0);
   let doubled = $derived(count * 2);
-  
+
   $effect(() => {
     console.log('Count changed:', count);
   });
+</script>
+```
+
+### Примеры правильного и неправильного кода для каждой ошибки:
+
+#### 1. Legacy Reactive Statements
+**Ошибка:** `legacy_reactive_statement_invalid`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - вызывает legacy_reactive_statement_invalid
+  $: nodes = $nodesStore;
+  $: edges = $edgesStore;
+
+  // ✅ Правильно - используем $derived
+  let nodes = $derived($nodesStore);
+  let edges = $derived($edgesStore);
+</script>
+```
+
+#### 2. Mixed Event Handler Syntaxes
+**Ошибка:** `Mixed event handler syntaxes`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - смешивание синтаксисов
+  <textarea
+    bind:value={code}
+    on:input={(e) => onCodeEdit?.(e.target.value)}
+  />
+
+  // ✅ Правильно - только новый синтаксис
+  <textarea
+    bind:value={code}
+    oninput={(e) => onCodeEdit?.(e.target.value)}
+  />
+
+  // ✅ Правильно - только bind без oninput
+  <textarea bind:value={code} />
+</script>
+```
+
+#### 3. Runes Outside Svelte Files
+**Ошибка:** `rune_outside_svelte`
+```typescript
+// ❌ Неправильно - в composables нельзя использовать runes
+export function useParserState() {
+  const nodesStore = writable<Node[]>([]);
+  let nodes = $state([]); // Ошибка: rune_outside_svelte
+  return { nodesStore };
+}
+
+// ✅ Правильно - используем только Svelte stores
+export function useParserState() {
+  const nodesStore = writable<Node[]>([]);
+  return { nodesStore };
+}
+```
+
+#### 4. Store Invalid Shape
+**Ошибка:** `store_invalid_shape`
+```typescript
+// ❌ Неправильно - возвращаем функции вместо stores
+export function useParserState() {
+  const nodesStore = writable<Node[]>([]);
+  return {
+    getNodes: () => nodesStore, // Ошибка: store_invalid_shape
+  };
+}
+
+// ✅ Правильно - возвращаем stores напрямую
+export function useParserState() {
+  const nodesStore = writable<Node[]>([]);
+  return { nodesStore };
+}
+```
+
+#### 5. Props Rest Readonly
+**Ошибка:** `props_rest_readonly`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - пытаемся изменить readonly props
+  let { ...props }: Props = $props();
+  props.currentUrl = 'new-url'; // Ошибка: props_rest_readonly
+
+  // ✅ Правильно - деструктурируем явно
+  let { currentUrl, showPageViewer, onElementSelect }: Props = $props();
+</script>
+```
+
+#### 6. Global Reference Invalid
+**Ошибка:** `global_reference_invalid`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - $ в начале имени переменной
+  let $currentChatIdStore = $currentChatIdStore; // Ошибка: global_reference_invalid
+
+  // ✅ Правильно - без $ в начале
+  let currentChatId = $currentChatIdStore;
+</script>
+```
+
+#### 7. Attribute Duplicate
+**Ошибка:** `attribute_duplicate`
+```svelte
+<!-- ❌ Неправильно - дублирование атрибутов -->
+<NodeEditor
+  nodes={nodes}
+  edges={edges}
+  onNodesChange={handleNodesChange}
+  onNodesChange={handleOtherChange} <!-- Ошибка: attribute_duplicate -->
+/>
+
+<!-- ✅ Правильно - уникальные атрибуты -->
+<NodeEditor
+  nodes={nodes}
+  edges={edges}
+  onNodesChange={handleNodesChange}
+/>
+```
+
+#### 8. CSS Unused Selector
+**Ошибка:** `css_unused_selector`
+```svelte
+<!-- ❌ Неправильно - неиспользуемый селектор -->
+<style>
+  .sidebar-toggle-button .icon {
+    width: 1rem;
+  } <!-- Ошибка: css_unused_selector -->
+</style>
+
+<button class="sidebar-toggle-button">
+  <MenuIcon /> <!-- Icon не имеет класса .icon -->
+</button>
+
+<!-- ✅ Правильно - используем :global() -->
+<style>
+  .sidebar-toggle-button :global(.icon) {
+    width: 1rem;
+  }
+</style>
+```
+
+#### 9. Bind with Derived Values
+**Ошибка:** `fn is not a function`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - bind с derived (readonly)
+  let nodes = $derived($nodesStore);
+</script>
+<NodeEditor bind:nodes /> <!-- Ошибка: fn is not a function -->
+
+<!-- ✅ Правильно - передаем store напрямую -->
+<NodeEditor nodes={nodesStore} />
+
+<!-- ✅ Правильно - используем callbacks -->
+<NodeEditor
+  nodes={nodes}
+  onNodesChange={(newNodes) => updateNodes(newNodes)}
+/>
+```
+
+#### 10. Bind with Function Values
+**Ошибка:** `Can only bind to state or props`
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - bind с функцией
+  function addMessage(content: string) { /* ... */ }
+</script>
+<ChatPanel bind:addMessage /> <!-- Ошибка: Can only bind to state or props -->
+
+<!-- ✅ Правильно - передаем функцию как обычный пропс -->
+<ChatPanel addMessage={addMessage} />
+
+<!-- ✅ Правильно - передаем функцию напрямую -->
+<ChatPanel addMessage={(content) => handleMessage(content)} />
+```
+
+#### 11. $state Proxy Objects in Arithmetic Operations
+```typescript
+// ❌ Неправильно - прямое использование $bindable prop в арифметике
+<script lang="ts">
+  let { width = $bindable(400) } = $props();
+
+  function getCurrentValue() {
+    return width; // Возвращает proxy объект, а не число!
+  }
+
+  // В арифметике это даст "[object Object]10" вместо 410
+  let delta = 10;
+  let newValue = getCurrentValue() + delta; // ❌ [object Object]10
+</script>
+
+// ✅ Правильно - принудительная конвертация в число
+<script lang="ts">
+  let { width = $bindable(400) } = $props();
+
+  function getCurrentValue() {
+    return Number(width); // Конвертируем proxy в примитивное число
+  }
+
+  // Теперь работает корректно
+  let delta = 10;
+  let newValue = getCurrentValue() + delta; // ✅ 410
+</script>
+
+// ✅ Универсальное решение для reactive значений (рекомендуется для ResizeHandle)
+<script lang="ts">
+  import { get } from 'svelte/store';
+
+  let { currentValue } = $props();
+
+  function startResizing() {
+    let rawValue = currentValue;
+
+    // Обработка разных типов reactive значений
+    if (typeof rawValue === 'object' && rawValue !== null && 'subscribe' in rawValue) {
+      // Это Svelte store, получаем значение через get()
+      rawValue = get(rawValue as any);
+    }
+    // Для $state proxy Number() работает автоматически
+
+    startValue = Number(rawValue);
+    // Теперь startValue - это корректное число
+  }
+</script>
+```
+
+**Почему это происходит:**
+- **$bindable props** возвращают `$state` proxy объекты
+- **Stores из composables** возвращают Svelte stores с методом `subscribe`
+- Оба типа ведут себя как объекты в арифметических операциях
+- JavaScript преобразует их к строке `"[object Object]"` при конкатенации
+
+**Решение:**
+1. **Для Svelte stores:** используйте `get(store)` для получения значения
+2. **Для $state proxy:** используйте `Number(proxy)` - Svelte 5 распакует автоматически
+3. **Для неизвестного типа:** проверяйте наличие метода `subscribe`
+
+**Конкретный пример из ResizeHandle:**
+```svelte
+<!-- В родительском компоненте -->
+<ResizeHandle currentValue={chatPanelWidth} onResize={handleResize} />
+<!-- chatPanelWidth может быть store или $state proxy -->
+
+<!-- В ResizeHandle.svelte -->
+<script lang="ts">
+  import { get } from 'svelte/store';
+
+  let { currentValue, minValue = 100 } = $props();
+
+  function startResizing() {
+    let rawValue = currentValue;
+
+    // Универсальная обработка reactive значений
+    if (typeof rawValue === 'object' && rawValue !== null && 'subscribe' in rawValue) {
+      rawValue = get(rawValue as any); // Для stores
+    }
+
+    startValue = Number(rawValue); // Для всего остального
+  }
+</script>
+```
+
+**Важное дополнение:**
+- Импортируйте `get` из `'svelte/store'` для работы с stores
+- Проверяйте тип объекта перед вызовом методов
+- Используйте fallback значения для безопасности
+
+### Примеры reactive statements:
+
+```svelte
+<script lang="ts">
+  // ✅ Правильно - используем $derived для вычисляемых значений
+  let filteredItems = $derived(items.filter(item => item.active));
+
+  // ✅ Правильно - используем $effect для побочных эффектов
+  $effect(() => {
+    console.log('Items changed:', items.length);
+  });
+
+  // ❌ Неправильно - старый синтаксис reactive statements
+  // $: filteredItems = items.filter(item => item.active);
+  // $: console.log('Items changed:', items.length);
 </script>
 ```
 
@@ -75,10 +541,149 @@ globs: src/**/*.svelte
     title: string;
     onUpdate?: (value: string) => void;
   }
-  
+
   let { title, onUpdate }: Props = $props();
 </script>
 ```
+
+### Binding и Derived Values
+
+**КРИТИЧЕСКИ ВАЖНО: В Svelte 5 нельзя использовать `bind:` с derived значениями!**
+
+#### Запрещенные паттерны:
+```svelte
+<!-- ❌ НЕПРАВИЛЬНО - bind с derived -->
+<script lang="ts">
+  let items = $derived(storeItems);
+</script>
+
+<ChildComponent bind:items />
+```
+
+#### Правильные решения:
+
+**Вариант 1: Передача stores напрямую**
+```svelte
+<!-- ✅ ПРАВИЛЬНО - передача store -->
+<script lang="ts">
+  import type { Writable } from 'svelte/store';
+
+  interface Props {
+    items: Writable<Item[]>;
+  }
+
+  let { items: itemsStore }: Props = $props();
+  $: items = $itemsStore; // reactive statement
+</script>
+
+<ChildComponent items={itemsStore} />
+```
+
+**Вариант 2: Использование callbacks для изменений**
+```svelte
+<!-- ✅ ПРАВИЛЬНО - callbacks для изменений -->
+<script lang="ts">
+  let items = $derived(storeItems);
+</script>
+
+<ChildComponent
+  items={items}
+  onItemsChange={(newItems) => updateStore(newItems)}
+/>
+```
+
+#### Причины запрета:
+- `$derived()` возвращает **readonly** значения
+- `bind:` пытается изменить значение, что невозможно с derived
+- Вызывает ошибку "fn is not a function" в runtime
+- Нарушение принципа unidirectional data flow
+
+#### Когда использовать каждый вариант:
+- **Stores напрямую**: Когда компонент должен иметь полный контроль над данными (например, NodeEditor с XYFlow)
+- **Callbacks**: Когда изменения должны обрабатываться родителем (стандартный подход для большинства компонентов)
+
+### Вызов Derived Stores как функций
+
+**КРИТИЧЕСКИ ВАЖНО: В Svelte 5 derived stores можно вызывать как функции для получения текущего значения, но это НЕ лучший паттерн!**
+
+#### Что такое derived store:
+```typescript
+// ✅ Правильно - derived store
+const myDerived = $derived(someStore);
+
+// ❌ НЕПРАВИЛЬНО - вызов derived как функции
+const value = myDerived(); // Работает, но не рекомендуется
+```
+
+#### Запрещенные паттерны:
+```svelte
+<script lang="ts">
+  // ❌ Неправильно - избыточный вызов
+  const derivedValue = $derived(store);
+  let result = $derived(derivedValue()); // Лишний вызов функции
+
+  // ❌ Неправильно - derived от вызова derived
+  const anotherDerived = $derived(someDerived());
+</script>
+```
+
+#### Правильные решения:
+
+**Вариант 1: Использование derived напрямую**
+```svelte
+<script lang="ts">
+  // ✅ Правильно - derived от store
+  const derivedValue = $derived(store);
+  let result = $derived(derivedValue); // Без вызова функции
+</script>
+```
+
+**Вариант 2: Упрощение - убрать лишние derived**
+```svelte
+<script lang="ts">
+  // ✅ Правильно - один derived вместо двух
+  let result = $derived(store); // Убираем промежуточный derived
+</script>
+```
+
+**Вариант 3: Использование store напрямую**
+```svelte
+<script lang="ts">
+  // ✅ Правильно - store напрямую (самый простой вариант)
+  let result = $derived(store);
+</script>
+```
+
+#### Почему это важно:
+- **Производительность**: Каждый вызов функции создает новую подписку
+- **Память**: Лишние derived увеличивают потребление памяти
+- **Читаемость**: Код становится запутанным и сложным для понимания
+- **Best practices**: Svelte 5 рекомендует использовать stores напрямую
+
+#### Признаки проблемы:
+```typescript
+// 🚨 Подозрительные паттерны:
+$derived(someDerived())     // Вызов derived как функции
+$derived(getter())         // Вызов геттера-функции
+$derived(store())          // Вызов store как функции
+```
+
+#### Правильные паттерны:
+```typescript
+// ✅ Хорошие паттерны:
+$derived(store)            // Store напрямую
+$derived(someDerived)      // Derived напрямую
+$derived(computedValue)    // Переменная напрямую
+```
+
+#### Когда можно использовать вызов функций:
+```typescript
+// ✅ Допустимо только в крайних случаях:
+const currentValue = derivedStore(); // Для отладки или логирования
+console.log('Current value:', derivedStore()); // Для инспекции состояния
+```
+
+**Запомните: Если вы вызываете derived как функцию - подумайте, можно ли упростить код!**
 
 ## Размер файлов
 
@@ -132,6 +737,46 @@ globs: src/**/*.svelte
 - Изолируй стили в `<style>` блоке только для уникальных стилей компонента
 - Используй CSS переменные для темизации
 - Следуй темной теме проекта (#0f172a, #1e293b, #334155)
+
+### Дизайн интерактивных элементов
+
+#### ResizeHandle (слайдеры изменения размера)
+- **Ширина:** 6px для вертикальных слайдеров (минимальная для точного позиционирования)
+- **Область клика:** без расширения (`margin: 0 0`) для предотвращения пересечения с соседними слайдерами
+- **Hover эффект:** минимальный (`left: -1px, right: -1px`) для визуальной обратной связи
+- **Структура:** только в родительском контейнере (ParserWorkspace), не в дочерних компонентах
+- **Причина:** предотвращает дублирование слайдеров и конфликты управления
+
+**Архитектура слайдеров:**
+```
+ParserWorkspace:
+├── BrowserPanel (bind:width)
+├── ResizeHandle (управляет pageViewerWidth) [только если showPageViewer]
+├── NodeEditor (динамическая ширина)
+├── ResizeHandle (управляет chatPanelWidth) [только если showAIChat]
+└── ChatPanel (bind:width) [только если showAIChat]
+```
+
+**Логика ширины NodeEditor:**
+- **Без браузера, без чата:** `width: 100%`
+- **С браузером, без чата:** `width: calc(100% - (pageViewerWidth || 600)px - 4px)`
+- **Без браузера, с чатом:** `width: calc(100% - (chatPanelWidth || 400)px)`
+- **С браузером и чатом:** `width: calc(100% - (pageViewerWidth || 600)px - 8px - (chatPanelWidth || 400)px)`
+
+**Обработка undefined значений:**
+- Создаются реактивные переменные с fallback: `let effectiveWidth = $state(width || defaultValue)`
+- Синхронизация через `$effect`: изменения пропсов обновляют эффективные переменные
+- Bind работает только с идентификаторами: `bind:width={effectiveWidth}`
+- ResizeHandle получает `currentValue={effectiveWidth}`
+
+**Важно:** Нельзя использовать выражения в bind: `bind:width={width || 400}` → ошибка компиляции
+
+**Порядок рендеринга критически важен:**
+1. **ResizeHandle** следует сразу за управляемой панелью
+2. **NodeEditor** рассчитывает свою ширину на основе всех открытых панелей
+3. **ChatPanel** рендерится ПОСЛЕ NodeEditor
+
+**Важно:** Компоненты типа BrowserPanel и ChatPanel НЕ должны содержать свои ResizeHandle - управление должно быть централизованным в родительском контейнере.
 
 ### Длинные CSS и BEM методология:
 
@@ -436,5 +1081,64 @@ npm run test:all
 - Используй `@vitest/coverage-v8` для проверки покрытия
 - Стремись к минимум 70% покрытия для критичных компонентов
 - Минимум 50% покрытия для всего проекта
+
+## Статический анализ и проверка ошибок
+
+### КРИТИЧЕСКИ ВАЖНО: Проверка фронта на ошибки ПЕРЕД окончанием выполнения запроса!
+
+**ОБЯЗАТЕЛЬНО** проверяй каждый измененный файл на ошибки перед окончанием работы над запросом/задачей:
+
+#### Для Svelte 5 файлов (.svelte):
+```bash
+# Проверка конкретного файла
+npx svelte-check --threshold error src/components/Component.svelte
+
+# Проверка директории
+npx svelte-check --threshold error src/components/
+
+# Проверка всего проекта
+npx svelte-check --threshold error
+```
+
+#### Правила проверки:
+1. **Запускай анализ ПОСЛЕ каждого изменения файла**
+2. **Используй `--threshold error`** для показа только настоящих ошибок
+3. **Исправляй ВСЕ ошибки** перед окончанием работы
+4. **НЕ завершаай запрос с ошибками типизации**
+
+#### Итеративный процесс исправления:
+```
+1. Изменяешь файл
+2. Запускаешь: npx svelte-check --threshold error <file>
+3. Исправляешь найденные ошибки
+4. Повторяешь шаг 2 до тех пор, пока нет ошибок (exit code 0)
+5. Только тогда завершаешь работу над запросом
+```
+
+#### Примеры команд:
+```bash
+# После изменения компонента
+npx svelte-check --threshold error src/components/ParserWorkspace.svelte
+
+# После изменения composable
+npx svelte-check --threshold error src/lib/composables/useParserState.ts
+
+# Проверка всей директории компонентов
+npx svelte-check --threshold error src/components/
+```
+
+#### CI/CD интеграция:
+```yaml
+# .github/workflows/ci.yml
+- run: npx svelte-check --threshold error
+```
+
+#### Pre-commit hook (рекомендуется):
+```bash
+# .husky/pre-commit
+npx svelte-check --threshold error
+```
+
+**Запомни**: Качество кода начинается с отсутствия ошибок типизации! Проверяй перед окончанием каждого запроса.
 
 

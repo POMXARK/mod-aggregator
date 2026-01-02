@@ -1,0 +1,10 @@
+﻿        // Migration 006: Adding fields for saving current page and selected site
+        sqlx::query("ALTER TABLE session_state ADD COLUMN current_page TEXT")
+            .execute(&self.pool)
+            .await
+            .ok(); // Ignore error if column already exists
+
+        sqlx::query("ALTER TABLE session_state ADD COLUMN selected_site_id INTEGER")
+            .execute(&self.pool)
+            .await
+            .ok(); // Ignore error if column already exists

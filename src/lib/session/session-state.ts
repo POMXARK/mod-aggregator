@@ -185,6 +185,30 @@ export class SessionStateManager {
   }
 
   /**
+   * Обновить текущую страницу
+   */
+  static async updateCurrentPage(page: string): Promise<void> {
+    try {
+      await invoke('update_current_page', { page });
+    } catch (e: any) {
+      console.error('Failed to update current page:', e);
+      throw new Error(`Не удалось обновить текущую страницу: ${e?.toString() ?? 'Неизвестная ошибка'}`);
+    }
+  }
+
+  /**
+   * Обновить выбранный сайт
+   */
+  static async updateSelectedSite(siteId: number | null): Promise<void> {
+    try {
+      await invoke('update_selected_site', { site_id: siteId });
+    } catch (e: any) {
+      console.error('Failed to update selected site:', e);
+      throw new Error(`Не удалось обновить выбранный сайт: ${e?.toString() ?? 'Неизвестная ошибка'}`);
+    }
+  }
+
+  /**
    * Сохранить настройки UI с debounce
    */
   static createDebouncedPreferencesSaver(
@@ -206,6 +230,54 @@ export class SessionStateManager {
           currentPreferences = {};
         } catch (e) {
           console.error('Failed to save UI preferences:', e);
+        }
+      }, delay);
+    };
+  }
+
+  /**
+   * Сохранить текущую страницу с debounce
+   */
+  static createDebouncedPageSaver(delay: number = 300): (page: string) => void {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let currentPage = '';
+
+    return (page: string) => {
+      currentPage = page;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(async () => {
+        try {
+          await this.updateCurrentPage(currentPage);
+        } catch (e) {
+          console.error('Failed to save current page:', e);
+        }
+      }, delay);
+    };
+  }
+
+  /**
+   * Сохранить выбранный сайт с debounce
+   */
+  static createDebouncedSiteSaver(delay: number = 300): (siteId: number | null) => void {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let currentSiteId: number | null = null;
+
+    return (siteId: number | null) => {
+      currentSiteId = siteId;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(async () => {
+        try {
+          await this.updateSelectedSite(currentSiteId);
+        } catch (e) {
+          console.error('Failed to save selected site:', e);
         }
       }, delay);
     };

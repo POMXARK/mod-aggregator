@@ -2,6 +2,7 @@
   import { ResizeHandle } from '@/components';
   import ParserRunner from './ParserRunner.svelte';
   import type { Node, Edge } from '@xyflow/svelte';
+  import type { ParserResult } from '../ParserBuilder/types/parser-builder.types';
 
   interface Props {
     visible: boolean;
@@ -29,6 +30,7 @@
     onHeightChangeEnd?: () => void;
     onClose?: () => void;
     onTabChange?: (tab: 'code' | 'results' | 'review' | 'runner' | null) => void;
+    onCodeEdit?: (code: string) => void;
     onCodeApply?: (code: string) => void;
     onCodeCancel?: () => void;
     onToggleEditor?: () => void;
@@ -36,7 +38,7 @@
     onCheckCodeWithAI?: () => void;
     onToggleResultExpansion?: (index: number) => void;
     onClearReview?: () => void;
-    onRunnerResults?: (results: unknown[], diagnostics: unknown[], stats: unknown) => void;
+    onRunnerResults?: (results: ParserResult[], diagnostics: unknown[], stats: unknown) => void;
     onRunnerError?: (error: string) => void;
     // Настройки парсера для синхронизации
     parserMaxElements?: number;
@@ -53,30 +55,31 @@
 
   let {
     visible = $bindable(),
-    height = $bindable(),
-    generatedCode = '',
+    height = $bindable(300),
+    generatedCode,
     editedCode = $bindable(''),
     showCodeEditor = $bindable(false),
-    showParserResults = false,
-    parserResults = [],
-    parserTestError = null,
-    parserDiagnostics = [],
-    parserExtractionStats = null,
-    aiCodeReview = null,
+    showParserResults,
+    parserResults,
+    parserTestError,
+    parserDiagnostics,
+    parserExtractionStats,
+    aiCodeReview,
     activeBottomTab = $bindable(null),
-    isCheckingCodeWithAI = false,
-    aiApiKey = '',
-    aiModelType = 'ollama',
-    showAIChat = false,
-    nodes = [],
-    edges = [],
-    currentUrl = '',
-    siteId = null,
+    isCheckingCodeWithAI,
+    aiApiKey,
+    aiModelType,
+    showAIChat,
+    nodes,
+    edges,
+    currentUrl,
+    siteId,
     onHeightChange,
     onHeightChangeStart,
     onHeightChangeEnd,
     onClose,
     onTabChange,
+    onCodeEdit,
     onCodeApply,
     onCodeCancel,
     onToggleEditor,
@@ -179,6 +182,18 @@
       <div class="bottom-tabs-spacer"></div>
       <button class="bottom-tab-close" onclick={handleClose} title="Закрыть панель"> × </button>
     </div>
+
+    <ResizeHandle
+      direction="horizontal"
+      mode="bottom"
+      minValue={150}
+      maxValue={window.innerHeight * 0.7}
+      currentValue={height}
+      onResize={handleHeightChange}
+      onResizeStart={onHeightChangeStart}
+      onResizeEnd={onHeightChangeEnd}
+      className="resize-handle"
+    />
 
     <div class="bottom-panel-content">
       {#if (activeBottomTab === 'code' || (activeBottomTab === null && generatedCode)) && generatedCode}
@@ -435,18 +450,6 @@
         </div>
       {/if}
     </div>
-
-    <ResizeHandle
-      direction="horizontal"
-      mode="bottom"
-      minValue={150}
-      maxValue={window.innerHeight * 0.7}
-      getCurrentValue={() => height}
-      onResize={handleHeightChange}
-      onResizeStart={onHeightChangeStart}
-      onResizeEnd={onHeightChangeEnd}
-      className="resize-handle"
-    />
   </div>
 {/if}
 
@@ -925,9 +928,14 @@
   }
 
   .resize-handle {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
+    height: 4px;
+    background: transparent;
+    cursor: row-resize;
+    margin: 0;
+  }
+
+  .resize-handle:hover {
+    background: rgba(14, 165, 233, 0.2);
   }
 </style>

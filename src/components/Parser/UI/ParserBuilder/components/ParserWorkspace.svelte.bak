@@ -1,0 +1,510 @@
+<script lang="ts">
+  import type { Connection } from '@xyflow/svelte';
+  import type { Site } from '@/lib/api';
+
+  // Тип для изменений узлов (адаптирован из React Flow)
+  type NodeChange = {
+    id: string;
+    type: string;
+    dragging?: boolean;
+    position?: { x: number; y: number };
+  };
+  import BrowserPanel from '../../constructor/BrowserPanel.svelte';
+  import NodeEditor from '../../constructor/NodeEditor.svelte';
+  import ChatPanel from '../../constructor/ChatPanel.svelte';
+  import GeneratedCodePanel from '../../constructor/GeneratedCodePanel.svelte';
+  import type {
+    BottomTabType,
+    ParserSettings,
+    ParserResult
+  } from '../types/parser-builder.types';
+  import { useParserState } from '../composables/useParserState';
+  import { useUIState } from '../composables/useUIState';
+  import { useAISettings } from '../composables/useAISettings';
+  import { useParserOperations } from '../composables/useParserOperations';
+
+  // Props от родительского компонента
+  interface Props {
+    // Состояние
+    selectedSite: Site | null;
+    currentUrl: string;
+    currentChatId: string | null;
+    showPageViewer: boolean;
+    showAIChat: boolean;
+    showParserResults: boolean;
+    activeBottomTab: BottomTabType;
+    bottomPanelHeight: number;
+    pageViewerWidth: number;
+    chatPanelWidth: number;
+
+    // Callbacks
+    onElementSelect: (selector: string, element: HTMLElement | null, elementData?: unknown) => void;
+    onPaneClick: (event: MouseEvent) => void;
+    onContextMenu: (event: MouseEvent) => void;
+    onAddNode: (type: string) => void;
+    onConnect: (connection: Connection) => void;
+    onNodesChange: (changes: NodeChange[]) => void;
+    onResizePageViewer: (width: number) => void;
+    onResizePageViewerStart: () => void;
+    onResizePageViewerEnd: () => void;
+    onResizeChat: (width: number) => void;
+    onResizeChatStart: () => void;
+    onResizeChatEnd: () => void;
+    onChatChange: (chatId: string | null) => void;
+    onLoadComplete?: () => void;
+    onCodeGeneration: () => void;
+    onTestParser: () => Promise<void>;
+    onCheckCodeWithAI: () => Promise<void>;
+    onApplyCode: (code: string) => void;
+    onTabChange: (tab: BottomTabType) => void;
+    onCodeEdit: (code: string) => void;
+    onCodeApply: (code: string) => void;
+    onCodeCancel: () => void;
+    onToggleEditor: () => void;
+    onCopyCode: () => void;
+    onToggleResultExpansion: (index: number) => void;
+    onClearReview: () => void;
+    onParserSettingsChange: (settings: ParserSettings) => void;
+    onRunnerResults: (results: ParserResult[], diagnostics: unknown[], stats: unknown) => void;
+    onRunnerError: (error: string) => void;
+    onHeightChange: (height: number) => void;
+    onHeightChangeStart: () => void;
+    onHeightChangeEnd: () => void;
+    onClose: () => void;
+  }
+
+  let {
+    selectedSite,
+    currentUrl,
+    currentChatId,
+    showPageViewer,
+    showAIChat,
+    showParserResults,
+    activeBottomTab,
+    bottomPanelHeight,
+    pageViewerWidth,
+    chatPanelWidth,
+    onElementSelect,
+    onPaneClick,
+    onContextMenu,
+    onConnect,
+    onNodesChange,
+    onRunnerResults,
+    onRunnerError,
+    }: Props = $props();
+
+  // Логирование полученных значений UI состояния
+  $effect(() => {
+    console.log('ParserWorkspace received UI state:', {
+      showPageViewer,
+      showAIChat,
+      showParserResults
+    });
+  });
+
+  // Используем composables для управления состоянием
+  const {
+    nodesStore,
+    edgesStore,
+    generatedCodeStore,
+    editedCodeStore,
+    parserResultsStore,
+    parserTestErrorStore,
+    parserDiagnosticsStore,
+    parserExtractionStatsStore,
+    isCheckingCodeWithAIStore,
+    aiCodeReviewStore,
+    parserSettingsStore,
+    selectedElementInfoStore,
+    setNodes,
+    setEdges,
+    setGeneratedCode,
+    setEditedCode,
+    connectNodes,
+    updateNodes,
+    selectElement,
+  } = useParserState();
+
+  const {
+    restoreUIState,
+    saveCurrentState,
+  } = useUIState(() => currentUrl, () => currentChatId);
+
+  const {
+    aiSettingsStore,
+    getAddAIMessageToChat,
+    checkCodeWithAI,
+  } = useAISettings();
+
+  const {
+    generateParserCode,
+    testParser,
+  } = useParserOperations();
+
+  // Локальные переменные для удобства доступа
+  let nodes: Node[] = $state([]);
+  let edges: Edge[] = $state([]);
+  let generatedCode: string = $state('');
+  let editedCode: string = $state('');
+  let parserResults: ParserResult[] = $state([]);
+  let parserTestError: string | null = $state(null);
+  let parserDiagnostics: unknown[] = $state([]);
+  let parserExtractionStats: unknown = $state(null);
+  let isCheckingCodeWithAI: boolean = $state(false);
+  let aiCodeReview: string | null = $state(null);
+  let parserSettings: ParserSettings = $state({
+    maxElements: 100,
+    timeoutSeconds: 60,
+    slowMode: false,
+    delayPerElement: 500
+  });
+  let aiSettings: AISettings = $state({
+    modelType: 'ollama',
+    modelName: 'llama3.2:3b',
+    apiKey: '',
+    ollamaUrl: 'http://localhost:11434',
+    description: 'Извлеки информацию о модах: название, ссылка, описание, изображение'
+  });
+  let selectedElementInfo: SelectedElementInfo | null = $state(null);
+
+  // Синхронизация с stores - просто присваиваем значения
+  $effect(() => {
+    nodes = $nodesStore;
+  });
+  $effect(() => {
+    edges = $edgesStore;
+  });
+  $effect(() => generatedCode = $generatedCodeStore);
+  $effect(() => editedCode = $editedCodeStore);
+  $effect(() => parserResults = $parserResultsStore);
+  $effect(() => parserTestError = $parserTestErrorStore);
+  $effect(() => parserDiagnostics = $parserDiagnosticsStore);
+  $effect(() => parserExtractionStats = $parserExtractionStatsStore);
+  $effect(() => isCheckingCodeWithAI = $isCheckingCodeWithAIStore);
+  $effect(() => aiCodeReview = $aiCodeReviewStore);
+  $effect(() => parserSettings = $parserSettingsStore);
+  $effect(() => aiSettings = $aiSettingsStore);
+  $effect(() => selectedElementInfo = $selectedElementInfoStore);
+
+  // Callback функция для чата - не используем derived для функций
+  let addAIMessageToChat = getAddAIMessageToChat();
+
+  // Для bind:addAIMessage нужна переменная, а не выражение
+
+
+
+  // Обработчики событий
+  function handleElementSelect(selector: string, element: HTMLElement | null, elementData?: unknown) {
+    selectElement(selector, element, elementData);
+    onElementSelect(selector, element, elementData);
+  }
+
+  function handleConnect(connection: Connection) {
+    connectNodes(connection);
+    onConnect(connection);
+  }
+
+  function handleNodesChange(changes: unknown[]) {
+    updateNodes(changes as NodeChange[]);
+    onNodesChange(changes as NodeChange[]);
+  }
+
+  function handlePaneClick(event: MouseEvent) {
+    onPaneClick(event);
+  }
+
+  function handleContextMenu(event: MouseEvent) {
+    onContextMenu(event);
+  }
+
+  function handleLoadComplete() {
+    console.log('onLoadComplete called, current state:', {
+      currentUrl: currentUrl,
+      currentChatId: currentChatId,
+      nodesLength: nodes.length,
+      edgesLength: edges.length,
+      hasGeneratedCode: !!generatedCode,
+      hasEditedCode: !!editedCode
+    });
+
+    // Восстановление состояния теперь происходит в onMount ParserBuilder,
+    // здесь только логируем текущее состояние
+    console.log('Page loaded successfully for URL:', currentUrl);
+  }
+
+  // Функция создания нод из AI конфига
+  function createNodesFromConfig(config: any) {
+    console.log('Creating nodes from AI config:', config);
+
+    const newNodes: Node[] = [];
+    const newEdges: Edge[] = [];
+
+
+    try {
+      // Создаем selector node
+      if (config.list_selector) {
+        const selectorNode: Node = {
+          id: `selector-${nodeIdCounter++}`,
+          type: 'selector',
+          position: { x: 100, y: 100 },
+          data: {
+            label: 'List Selector',
+            selector: config.list_selector,
+          },
+        };
+        newNodes.push(selectorNode);
+
+        // Создаем extract ноды для каждого селектора
+        const extractSelectors = Object.keys(config).filter(key =>
+          key.endsWith('_selector') && key !== 'list_selector' && config[key]
+        );
+
+        extractSelectors.forEach((selectorKey, index) => {
+
+          const extractNode: Node = {
+            id: `extract-${nodeIdCounter++}`,
+            type: 'extract',
+            position: { x: 100, y: 200 + index * 100 },
+            data: {
+              label: `${attribute.charAt(0).toUpperCase() + attribute.slice(1)} Extract`,
+              attribute: attribute,
+              selector: config[selectorKey],
+            },
+          };
+          newNodes.push(extractNode);
+
+          // Создаем связь между selector и extract node
+          const edge: Edge = {
+            id: `edge-${selectorNode.id}-${extractNode.id}`,
+            source: selectorNode.id,
+            target: extractNode.id,
+            type: 'smoothstep',
+          };
+          newEdges.push(edge);
+        });
+      }
+
+      // Добавляем ноды в store
+      if (newNodes.length > 0) {
+        setNodes(newNodes);
+        console.log('Created nodes from config:', newNodes.length);
+      }
+      if (newEdges.length > 0) {
+        setEdges(newEdges);
+        console.log('Created edges from config:', newEdges.length);
+      }
+
+      // Генерируем код
+      if (newNodes.length > 0) {
+        generateParserCode(newNodes, newEdges, parserSettings, (code) => {
+          setGeneratedCode(code);
+          console.log('Generated code from config, length:', code.length);
+
+          // Сохраняем состояние после создания нод и кода
+          setTimeout(() => {
+            // Получаем актуальные значения URL и chatId
+            const currentUrlValue = currentUrl || '';
+            const currentChatIdValue = currentChatId;
+            console.log('Saving state after creating nodes from config:', {
+              url: currentUrlValue,
+              chatId: currentChatIdValue,
+              nodesCount: newNodes.length,
+              edgesCount: newEdges.length,
+              codeLength: code.length
+            });
+            saveCurrentState(currentUrlValue, currentChatIdValue, {
+              nodes: newNodes,
+              edges: newEdges,
+              generatedCode: code,
+              editedCode: code
+            });
+            console.log('State saved successfully');
+
+            // Также обновляем UI состояние, чтобы показать чат (если он был открыт)
+            // Обновляем состояние с chatId, чтобы показать чат
+            try {
+              const stateKey = `parser-builder-ui-state${currentUrlValue ? `_${btoa(currentUrlValue)}` : ''}${currentChatIdValue ? `_chat_${currentChatIdValue}` : ''}`;
+              const existingState = JSON.parse(localStorage.getItem(stateKey) || '{}');
+              if (existingState) {
+                existingState.showAIChat = true; // Показываем чат, поскольку конфигурация восстановлена из чата
+                localStorage.setItem(stateKey, JSON.stringify(existingState));
+                console.log('Updated UI state to show chat for state key:', stateKey);
+              }
+            } catch (e) {
+              console.error('Error updating UI state:', e);
+            }
+          }, 100);
+        });
+      }
+
+    } catch (error: unknown) {
+      console.error('Error creating nodes from config:', error);
+
+      if (addAIMessageToChat) {
+        addAIMessageToChat(`❌ Ошибка создания нод из конфига: ${errorMessage}`);
+      }
+    }
+  }
+
+  async function handleTestParser() {
+    await testParser(
+      currentUrl,
+      nodes,
+      parserSettings,
+      (results: ParserResult[], diagnostics, stats) => {
+        onRunnerResults(results, diagnostics, stats);
+      },
+      (error) => {
+        onRunnerError(error);
+      }
+    );
+  }
+
+  async function handleCheckCodeWithAI() {
+    let codeToCheck = editedCode || generatedCode;
+
+    if (!codeToCheck || codeToCheck.trim().length === 0) {
+      generateParserCode(nodes, edges, parserSettings, (code) => {
+        setGeneratedCode(code);
+        codeToCheck = code;
+      });
+    }
+
+    if (!codeToCheck || codeToCheck.trim().length === 0) {
+      alert('Нет кода для проверки. Сначала сгенерируйте код парсера.');
+      return;
+    }
+
+    const parserConfig = { /* generateParserConfig() */ };
+
+    await checkCodeWithAI(
+      codeToCheck,
+      parserConfig,
+      (message) => {
+        if (addAIMessageToChat) {
+          addAIMessageToChat(message);
+        }
+      },
+      (error) => {
+        if (addAIMessageToChat) {
+          addAIMessageToChat(`❌ ${error}`);
+        }
+      }
+    );
+  }
+</script>
+
+<div
+  class="builder-content"
+  style="padding-bottom: {generatedCode || showParserResults || aiCodeReview
+    ? bottomPanelHeight + 'px'
+    : '0'}"
+>
+  <BrowserPanel
+    bind:visible={showPageViewer}
+    bind:width={pageViewerWidth}
+    bind:url={currentUrl}
+    siteId={selectedSite?.id || null}
+    onElementSelect={handleElementSelect}
+    onResize={onResizePageViewer}
+    onResizeStart={onResizePageViewerStart}
+    onResizeEnd={onResizePageViewerEnd}
+    onLoadComplete={handleLoadComplete}
+  />
+
+  <NodeEditor
+    nodes={nodes}
+    edges={edges}
+    onNodesChange={handleNodesChange}
+    withViewer={showPageViewer}
+    withChat={showAIChat}
+    withResults={showParserResults}
+    onConnect={handleConnect}
+    onPaneClick={handlePaneClick}
+    onPaneContextMenu={handleContextMenu}
+    style={showPageViewer
+      ? showAIChat && showParserResults
+        ? `flex: 1 1 auto; width: calc(100% - ${pageViewerWidth}px - 4px - ${chatPanelWidth}px - 200px); min-width: 0`
+        : showAIChat
+          ? `flex: 1 1 auto; width: calc(100% - ${pageViewerWidth}px - 4px - ${chatPanelWidth}px); min-width: 0`
+          : showParserResults
+            ? `flex: 1 1 auto; width: calc(100% - ${pageViewerWidth}px - 4px - 200px); min-width: 0`
+            : `flex: 1 1 auto; width: calc(100% - ${pageViewerWidth}px - 4px); min-width: 0`
+      : showAIChat
+        ? `width: calc(100% - ${chatPanelWidth}px)`
+        : ''}
+  />
+
+  <ChatPanel
+    visible={showAIChat}
+    bind:width={chatPanelWidth}
+    aiModelType={aiSettings.modelType}
+    aiModelName={aiSettings.modelName}
+    aiApiKey={aiSettings.apiKey}
+    aiOllamaUrl={aiSettings.ollamaUrl}
+    currentUrl={currentUrl}
+    nodes={nodes}
+    edges={edges}
+    onCreateNodes={(config) => {
+      // Обработка создания нод из AI
+      createNodesFromConfig(config);
+    }}
+    onGenerateCode={onCodeGeneration}
+    onTestParser={handleTestParser}
+    onCheckCodeWithAI={handleCheckCodeWithAI}
+    generatedCode={generatedCode}
+    onApplyCode={onApplyCode}
+    selectedElementInfo={selectedElementInfo}
+    bind:addAIMessage={addAIMessageToChatForBind}
+    onResize={onResizeChat}
+    onResizeStart={onResizeChatStart}
+    onResizeEnd={onResizeChatEnd}
+    onChatChange={onChatChange}
+  />
+
+  <GeneratedCodePanel
+    visible={!!(generatedCode ||
+      showParserResults ||
+      (aiCodeReview && !showAIChat) ||
+      activeBottomTab === 'runner')}
+    bind:height={bottomPanelHeight}
+    generatedCode={generatedCode}
+    bind:editedCode
+    showCodeEditor={false}
+    showParserResults={showParserResults}
+    parserResults={parserResults}
+    parserTestError={parserTestError}
+    parserDiagnostics={parserDiagnostics}
+    parserExtractionStats={parserExtractionStats}
+    aiCodeReview={aiCodeReview}
+    bind:activeBottomTab={activeBottomTab}
+    isCheckingCodeWithAI={isCheckingCodeWithAI}
+    aiApiKey={aiSettings.apiKey}
+    aiModelType={aiSettings.modelType}
+    showAIChat={showAIChat}
+    nodes={nodes}
+    edges={edges}
+    currentUrl={currentUrl}
+    siteId={selectedSite?.id || null}
+    parserMaxElements={parserSettings.maxElements}
+    parserTimeoutSeconds={parserSettings.timeoutSeconds}
+    parserSlowMode={parserSettings.slowMode}
+    parserDelayPerElement={parserSettings.delayPerElement}
+    onParserSettingsChange={onParserSettingsChange}
+    onRunnerResults={onRunnerResults}
+    onRunnerError={onRunnerError}
+    onHeightChange={onHeightChange}
+    onHeightChangeStart={onHeightChangeStart}
+    onHeightChangeEnd={onHeightChangeEnd}
+    onClose={onClose}
+    onTabChange={onTabChange}
+    onCodeEdit={onCodeEdit}
+    onCodeApply={onCodeApply}
+    onCodeCancel={onCodeCancel}
+    onToggleEditor={onToggleEditor}
+    onCopyCode={onCopyCode}
+    onCheckCodeWithAI={handleCheckCodeWithAI}
+    onToggleResultExpansion={onToggleResultExpansion}
+    onClearReview={onClearReview}
+  />
+</div>

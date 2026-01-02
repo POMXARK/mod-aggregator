@@ -1,0 +1,44 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  0,
+                    "warnings":  2,
+                    "total":  2
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:25:11Z",
+    "problems":  [
+                     {
+                         "line":  3,
+                         "file":  "test-destructure.svelte",
+                         "fix":  {
+                                     "fullContent":  "  const { usedVar, unusedVar } = someFunction();\r",
+                                     "varName":  "unusedVar",
+                                     "destructuredVars":  [
+                                                              "usedVar",
+                                                              "unusedVar"
+                                                          ],
+                                     "type":  "remove-unused-destructured-var"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "unused-destructured-var",
+                         "severity":  "WARNING",
+                         "message":  "Unused destructured variable: unusedVar (from someFunction)",
+                         "column":  20
+                     },
+                     {
+                         "line":  5,
+                         "file":  "test-destructure.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte template",
+                         "column":  3
+                     }
+                 ]
+}

@@ -97,3 +97,14 @@ export interface BatchValidationResult {
   affectedDependencies: AffectedDependency[];
 }
 
+
+
+
+
+
+
+
+
+
+
+

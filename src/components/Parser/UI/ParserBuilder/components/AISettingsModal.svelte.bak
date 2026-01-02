@@ -1,0 +1,197 @@
+<script lang="ts">
+  import { useAISettings } from '../composables/useAISettings';
+  import type { AISettings } from '../types/parser-builder.types';
+
+  // Props от родительского компонента
+  interface Props {
+    visible: boolean;
+    onClose: () => void;
+  }
+
+  let { visible, onClose }: Props = $props();
+
+  // Обработчик клавиатуры для доступности
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  }
+
+  // Используем composable для управления состоянием AI
+  const {
+    aiSettingsStore,
+    getOllamaState,
+    checkOllama,
+    handleAIModelTypeChange,
+  } = useAISettings();
+
+  // Локальные переменные для удобства доступа
+  let aiSettings = $aiSettingsStore;
+  let ollamaState = $derived(getOllamaState());
+
+  // Обработчики
+  async function handleModelTypeChange() {
+    await handleAIModelTypeChange();
+  }
+</script>
+
+{#if visible}
+  <div
+    class="ai-modal-overlay"
+    onclick={onClose}
+    onkeydown={handleKeydown}
+    role="presentation"
+    tabindex="-1"
+  >
+    <div
+      class="ai-modal"
+      onclick={e => e.stopPropagation()}
+      onkeydown={e => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ai-modal-title"
+      tabindex="-1"
+    >
+      <div class="ai-modal-header">
+        <h3 id="ai-modal-title">Настройки AI</h3>
+        <button class="ai-modal-close" onclick={onClose} title="Закрыть">
+          ×
+        </button>
+      </div>
+      <div class="ai-modal-content">
+        <div class="ai-setting-group">
+          <label class="ai-radio-label">
+            <input
+              type="radio"
+              bind:group={aiSettings.modelType}
+              value="ollama"
+              onchange={handleModelTypeChange}
+            />
+            <span>Ollama (локально)</span>
+          </label>
+          <label class="ai-radio-label">
+            <input type="radio" bind:group={aiSettings.modelType} value="openai" />
+            <span>OpenAI API</span>
+          </label>
+          <label class="ai-radio-label">
+            <input type="radio" bind:group={aiSettings.modelType} value="anthropic" />
+            <span>Anthropic API</span>
+          </label>
+          <label class="ai-radio-label">
+            <input type="radio" bind:group={aiSettings.modelType} value="google" />
+            <span>Google AI</span>
+          </label>
+        </div>
+
+        {#if aiSettings.modelType === 'ollama'}
+          <div class="ai-setting-group">
+            <label>
+              URL Ollama:
+              <input
+                type="text"
+                bind:value={aiSettings.ollamaUrl}
+                placeholder="http://localhost:11434"
+                onblur={checkOllama}
+              />
+            </label>
+            <button
+              class="btn-secondary btn-small"
+              onclick={checkOllama}
+              disabled={ollamaState.status === 'checking'}
+            >
+              {#if ollamaState.status === 'checking'}
+                Проверка...
+              {:else if ollamaState.status === 'connected'}
+                ✓ Обновить модели
+              {:else}
+                Проверить Ollama
+              {/if}
+            </button>
+
+            {#if ollamaState.status === 'error'}
+              <div class="ollama-error">
+                ❌ {ollamaState.error || 'Не удалось подключиться к Ollama'}
+              </div>
+            {/if}
+
+            {#if ollamaState.status === 'connected'}
+              <label>
+                Модель:
+                {#if ollamaState.models.length > 0}
+                  <select bind:value={aiSettings.modelName} class="ai-model-select">
+                    {#each ollamaState.models as model (model)}
+                      <option value={model}>{model}</option>
+                    {/each}
+                  </select>
+                {:else}
+                  <input type="text" bind:value={aiSettings.modelName} placeholder="llama3.2:3b" />
+                  <span class="ollama-hint">
+                    Модели не найдены. Установите модель: <code>ollama pull llama3.2:3b</code>
+                  </span>
+                {/if}
+              </label>
+            {:else if ollamaState.status === 'checking'}
+              <div class="ollama-status">Проверка подключения к Ollama...</div>
+            {:else}
+              <label>
+                Модель:
+                <input type="text" bind:value={aiSettings.modelName} placeholder="llama3.2:3b" />
+                <span class="ollama-hint">
+                  Нажмите "Проверить Ollama" для загрузки списка моделей
+                </span>
+              </label>
+            {/if}
+          </div>
+        {:else if aiSettings.modelType === 'openai'}
+          <div class="ai-setting-group">
+            <label>
+              Модель:
+              <input type="text" bind:value={aiSettings.modelName} placeholder="gpt-4o-mini" />
+            </label>
+            <label>
+              API ключ:
+              <input type="password" bind:value={aiSettings.apiKey} placeholder="sk-..." />
+            </label>
+          </div>
+        {:else if aiSettings.modelType === 'anthropic'}
+          <div class="ai-setting-group">
+            <label>
+              Модель:
+              <input type="text" bind:value={aiSettings.modelName} placeholder="claude-3-haiku-20240307" />
+            </label>
+            <label>
+              API ключ:
+              <input type="password" bind:value={aiSettings.apiKey} placeholder="sk-ant-..." />
+            </label>
+          </div>
+        {:else if aiSettings.modelType === 'google'}
+          <div class="ai-setting-group">
+            <label>
+              Модель:
+              <input type="text" bind:value={aiSettings.modelName} placeholder="gemini-pro" />
+            </label>
+            <label>
+              API ключ:
+              <input type="password" bind:value={aiSettings.apiKey} placeholder="AIza..." />
+            </label>
+          </div>
+        {/if}
+
+        <div class="ai-setting-group">
+          <label>
+            Описание данных для извлечения:
+            <textarea
+              bind:value={aiSettings.description}
+              placeholder="Извлеки информацию о модах: название, ссылка, описание, изображение"
+              rows="4"
+            ></textarea>
+          </label>
+        </div>
+      </div>
+      <div class="ai-modal-footer">
+        <button class="btn-secondary" onclick={onClose}> Отмена </button>
+        <button class="btn-primary" onclick={onClose}> Сохранить </button>
+      </div>
+    </div>
+  </div>
+{/if}

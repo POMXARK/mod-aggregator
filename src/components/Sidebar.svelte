@@ -12,14 +12,15 @@
   import type { Site } from '@/lib/api';
   // import Tooltip from './Tooltip.svelte'; // Временно отключен для тестирования
   import type { AppComponents } from '../config/components';
+  import type { PageType } from '@/lib/types';
 
   interface Props {
-    currentPage: string;
+    currentPage: PageType;
     sites: Site[];
     selectedSiteId: number | null;
     isOpen: boolean;
     componentsConfig: AppComponents;
-    onPageChange: (page: string) => void;
+    onPageChange: (page: PageType) => void;
     onSiteSelect: (siteId: number | null) => void;
     onToggle: () => void;
   }
@@ -35,7 +36,7 @@
     onToggle,
   }: Props = $props();
 
-  function handlePageClick(page: string) {
+  function handlePageClick(page: PageType) {
     onPageChange(page);
   }
 

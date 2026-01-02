@@ -1,0 +1,14 @@
+[
+  {
+    "file": "test-shorthand-problem.svelte",
+    "fixes_applied": 1,
+    "fixes": [
+      {
+        "type": "fix-shorthand-property-undefined",
+        "variable": "undefinedVar",
+        "line": 6,
+        "reason": "Changed shorthand property undefinedVar to undefinedVar: undefined"
+      }
+    ]
+  }
+]

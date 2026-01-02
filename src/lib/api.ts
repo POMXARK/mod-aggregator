@@ -1,6 +1,8 @@
 import { invoke } from './tauri-wrapper';
 import type { ParserConfig } from './types';
 
+export type { ParserConfig };
+
 export interface Site {
   id: number;
   name: string;

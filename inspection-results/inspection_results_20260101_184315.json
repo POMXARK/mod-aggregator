@@ -1,0 +1,44 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  0,
+                    "errors":  2,
+                    "warnings":  1,
+                    "total":  3
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T18:43:15Z",
+    "problems":  [
+                     {
+                         "message":  "Cannot find name \u0027NonExistentType\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  3,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-type-error.svelte"
+                     },
+                     {
+                         "message":  "Cannot find name \u0027NonExistentType\u0027. Did you mean to import it from types file?",
+                         "column":  1,
+                         "line":  3,
+                         "rule":  "missing-type-reference",
+                         "severity":  "ERROR",
+                         "category":  "TypeScript",
+                         "file":  "test-type-error.svelte"
+                     },
+                     {
+                         "line":  7,
+                         "file":  "test-type-error.svelte",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove console.log statement"
+                                 },
+                         "category":  "Code Quality",
+                         "rule":  "no-console",
+                         "severity":  "WARNING",
+                         "message":  "Console.log in Svelte template",
+                         "column":  3
+                     }
+                 ]
+}

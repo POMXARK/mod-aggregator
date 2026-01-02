@@ -1,0 +1,14 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/AISettingsModal.svelte</file>
+  <line>22</line>
+  <module>mod-aggregator</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/src/components/Parser/UI/ParserBuilder/components/AISettingsModal.svelte" />
+  <problem_class id="JSUnusedGlobalSymbols" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Unused global symbol</problem_class>
+  <description>Unused constant $getAISettings</description>
+  <highlighted_element>$getAISettings</highlighted_element>
+  <language>JavaScript</language>
+  <offset>4</offset>
+  <length>14</length>
+</problem>
+</problems>

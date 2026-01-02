@@ -1,0 +1,57 @@
+﻿{
+    "tool":  "Basic Frontend Analyzer",
+    "summary":  {
+                    "info":  1,
+                    "errors":  1,
+                    "warnings":  2,
+                    "total":  4
+                },
+    "project":  "mod-aggregator",
+    "timestamp":  "2026-01-01T17:50:18Z",
+    "problems":  [
+                     {
+                         "line":  11,
+                         "file":  "test-sample.js",
+                         "fix":  {
+                                     "type":  "remove",
+                                     "description":  "Remove debugger statement"
+                                 },
+                         "category":  "Debugging",
+                         "rule":  "no-debugger",
+                         "severity":  "ERROR",
+                         "message":  "Debugger statement found",
+                         "column":  5
+                     },
+                     {
+                         "line":  13,
+                         "file":  "test-sample.svelte",
+                         "fix":  {
+                                     "type":  "add-attribute",
+                                     "description":  "Add alt attribute to img element"
+                                 },
+                         "category":  "Accessibility",
+                         "rule":  "img-alt",
+                         "severity":  "WARNING",
+                         "message":  "Missing alt attribute on img element",
+                         "column":  3
+                     },
+                     {
+                         "message":  "Input element without accessible label",
+                         "column":  3,
+                         "line":  14,
+                         "rule":  "input-label",
+                         "severity":  "WARNING",
+                         "category":  "Accessibility",
+                         "file":  "test-sample.svelte"
+                     },
+                     {
+                         "message":  "Line too long: 200 characters (recommended: 120)",
+                         "column":  1,
+                         "line":  33,
+                         "rule":  "max-line-length",
+                         "severity":  "INFO",
+                         "category":  "Code Style",
+                         "file":  "test-sample.svelte"
+                     }
+                 ]
+}

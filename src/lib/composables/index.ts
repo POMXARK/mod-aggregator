@@ -7,7 +7,7 @@ export * from './useNotifications';
 export * from './usePageLoader.svelte.ts';
 export * from './useParserBuilderState';
 export * from './useParserCodeGenerator';
-export * from './useParserRunner';
+export * from './useParserRunner.svelte.ts';
 export * from './useParserSettings.svelte.ts';
 export * from './useRecentUrls.svelte.ts';
 export * from './useSelection.svelte.ts';
