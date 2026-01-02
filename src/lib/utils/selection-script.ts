@@ -47,7 +47,7 @@ export function getSelectionStyles(): string {
     62
   );
   const hoverBoxCss =
-    '#parser-hover-box {position: absolute !important; pointer-events: none !important; z-index: 2147483647 !important; border: 2px solid #4285f4 !important; background: rgba(66, 133, 244, 0.15) !important; box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3) !important; transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1) !important; display: none !important; box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; opacity: 1 !important;}';
+    '#parser-hover-box {position: fixed !important; pointer-events: none !important; z-index: 2147483647 !important; border: 3px solid #ff0000 !important; background: rgba(255, 0, 0, 0.2) !important; box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.6), 0 0 20px rgba(255, 0, 0, 0.5) !important; transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1) !important; display: none !important; box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; visibility: visible !important; opacity: 1 !important;}';
   const overlayCss =
     '#parser-info-overlay {position: fixed !important; background: #1e1e1e !important; color: #d4d4d4 !important; padding: 6px 10px !important; border-radius: 3px !important; font-size: 11px !important; font-family: "Consolas", "Monaco", "Courier New", monospace !important; pointer-events: none !important; z-index: 2147483647 !important; border: 1px solid #4285f4 !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important; display: none !important; line-height: 1.4 !important; max-width: 300px !important; word-wrap: break-word !important; margin: 0 !important; visibility: visible !important; opacity: 1 !important;}';
   const highlightCss =
@@ -155,12 +155,12 @@ export function getSelectionScriptContent(): string {
         if (!hoverBox) {
           hoverBox = document.createElement('div');
           hoverBox.id = 'parser-hover-box';
-          hoverBox.style.setProperty('position', 'absolute', 'important');
+          hoverBox.style.setProperty('position', 'fixed', 'important');
           hoverBox.style.setProperty('pointer-events', 'none', 'important');
           hoverBox.style.setProperty('z-index', '2147483647', 'important');
-          hoverBox.style.setProperty('border', borderWidth + 'px solid #4285f4', 'important');
-          hoverBox.style.setProperty('background', 'rgba(66, 133, 244, 0.15)', 'important');
-          hoverBox.style.setProperty('box-shadow', '0 0 0 2px rgba(66, 133, 244, 0.4), 0 0 12px rgba(66, 133, 244, 0.3)', 'important');
+          hoverBox.style.setProperty('border', borderWidth + 'px solid #ff0000', 'important');
+          hoverBox.style.setProperty('background', 'rgba(255, 0, 0, 0.2)', 'important');
+          hoverBox.style.setProperty('box-shadow', '0 0 0 3px rgba(255, 0, 0, 0.6), 0 0 20px rgba(255, 0, 0, 0.5)', 'important');
           hoverBox.style.setProperty('transition', 'all 100ms cubic-bezier(0.4, 0, 0.2, 1)', 'important');
           hoverBox.style.setProperty('display', 'none', 'important');
           hoverBox.style.setProperty('box-sizing', 'border-box', 'important');
@@ -227,16 +227,16 @@ export function getSelectionScriptContent(): string {
     if (!hoverBox || !element) return;
     try {
       const rect = element.getBoundingClientRect();
-      const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
-      const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-      
+
       hoverBox.style.setProperty('display', 'block', 'important');
-      hoverBox.style.setProperty('left', (rect.left + scrollX) + 'px', 'important');
-      hoverBox.style.setProperty('top', (rect.top + scrollY) + 'px', 'important');
+      hoverBox.style.setProperty('left', rect.left + 'px', 'important');
+      hoverBox.style.setProperty('top', rect.top + 'px', 'important');
       hoverBox.style.setProperty('width', rect.width + 'px', 'important');
       hoverBox.style.setProperty('height', rect.height + 'px', 'important');
       hoverBox.style.setProperty('visibility', 'visible', 'important');
       hoverBox.style.setProperty('opacity', '1', 'important');
+
+      log('Hover box updated: left=' + rect.left + ', top=' + rect.top + ', width=' + rect.width + ', height=' + rect.height);
     } catch (e) {
       log('Error updating hoverBox: ' + e);
     }
@@ -429,8 +429,9 @@ export function getSelectionScriptContent(): string {
       log('Selection mode already enabled');
       return;
     }
-    
+
     log('Enabling selection mode');
+    alert('Enabling selection mode in iframe!');
     isSelectionMode = true;
     
     if (!initialized) {
