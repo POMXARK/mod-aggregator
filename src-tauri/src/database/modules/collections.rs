@@ -6,6 +6,7 @@
 use crate::database::modules::base::Database;
 use crate::models::collection::Collection;
 use crate::models::file::File;
+use sqlx::Row;
 
 /// Получить все коллекции
 ///

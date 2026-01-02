@@ -6,6 +6,7 @@
 use crate::database::modules::base::Database;
 use crate::models::Notification;
 use chrono::Utc;
+use sqlx::Row;
 
 /// Получить список всех уведомлений
 ///

@@ -6,6 +6,7 @@
 // Модули базы данных
 pub mod modules;
 
+use crate::database::modules::*;
 use crate::models::collection::Collection;
 use crate::models::collection_logic::{Action, CollectionLogicRule, ConditionType};
 use crate::models::dependency::{DependencyType, FileDependency};
@@ -170,6 +171,244 @@ impl Database {
                 updated_at: row.get::<String, _>(5).parse().unwrap_or(Utc::now()),
             })
             .collect())
+    }
+
+    // ===== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ СОВМЕСТИМОСТИ =====
+
+    // Методы для совместимости с существующим кодом
+    pub async fn run_migrations(&self) -> Result<(), sqlx::Error> {
+        self.inner().run_migrations().await
+    }
+
+    pub async fn get_sites(&self) -> Result<Vec<crate::models::Site>, sqlx::Error> {
+        sites::get_sites(self.inner()).await
+    }
+
+    pub async fn get_site(&self, id: i64) -> Result<crate::models::Site, sqlx::Error> {
+        sites::get_site(self.inner(), id).await?
+            .ok_or(sqlx::Error::RowNotFound)
+    }
+
+    pub async fn add_site(
+        &self,
+        name: &str,
+        url: &str,
+        parser_config: &serde_json::Value,
+    ) -> Result<crate::models::Site, sqlx::Error> {
+        sites::add_site(self.inner(), name, url, parser_config).await
+    }
+
+    pub async fn update_site(
+        &self,
+        id: i64,
+        name: &str,
+        url: &str,
+        parser_config: &serde_json::Value,
+    ) -> Result<(), sqlx::Error> {
+        sites::update_site(self.inner(), id, name, url, parser_config).await
+    }
+
+    pub async fn delete_site(&self, id: i64) -> Result<(), sqlx::Error> {
+        sites::delete_site(self.inner(), id).await
+    }
+
+    pub async fn get_mods(&self, site_id: Option<i64>) -> Result<Vec<crate::models::Mod>, sqlx::Error> {
+        mods::get_mods(self.inner(), site_id).await
+    }
+
+    pub async fn get_mod_by_url(&self, url: &str) -> Result<Option<crate::models::Mod>, sqlx::Error> {
+        mods::get_mod_by_url(self.inner(), url).await
+    }
+
+    pub async fn add_mod(&self, mod_item: &crate::models::Mod) -> Result<crate::models::Mod, sqlx::Error> {
+        mods::add_mod(self.inner(), mod_item).await
+    }
+
+    pub async fn update_mod(&self, id: i64, mod_item: &crate::models::Mod) -> Result<(), sqlx::Error> {
+        mods::update_mod(self.inner(), id, mod_item).await
+    }
+
+    pub async fn get_notifications(&self) -> Result<Vec<crate::models::Notification>, sqlx::Error> {
+        notifications::get_notifications(self.inner()).await
+    }
+
+    pub async fn add_notification(&self, notification: &crate::models::Notification) -> Result<(), sqlx::Error> {
+        notifications::add_notification(self.inner(), notification).await
+    }
+
+    pub async fn mark_notification_read(&self, id: i64) -> Result<(), sqlx::Error> {
+        notifications::mark_notification_read(self.inner(), id).await
+    }
+
+    pub async fn save_page_for_site(
+        &self,
+        site_id: i64,
+        url: &str,
+        folder_path: &str,
+        version_timestamp: &str,
+    ) -> Result<(), sqlx::Error> {
+        pages::save_page_for_site(self.inner(), site_id, url, folder_path, version_timestamp).await
+    }
+
+    pub async fn get_saved_page(
+        &self,
+        site_id: i64,
+        url: &str,
+    ) -> Result<Option<(i64, String, String)>, sqlx::Error> {
+        pages::get_saved_page(self.inner(), site_id, url).await
+    }
+
+    pub async fn get_saved_page_versions(
+        &self,
+        site_id: i64,
+        url: &str,
+    ) -> Result<Vec<serde_json::Value>, sqlx::Error> {
+        pages::get_saved_page_versions(self.inner(), site_id, url).await
+    }
+
+    pub async fn delete_saved_page_version(&self, page_id: i64) -> Result<(), sqlx::Error> {
+        pages::delete_saved_page_version(self.inner(), page_id).await
+    }
+
+    pub async fn get_file(&self, id: i64) -> Result<Option<crate::models::file::File>, sqlx::Error> {
+        files::get_file(self.inner(), id).await
+    }
+
+    pub async fn get_file_by_name_version(
+        &self,
+        name: &str,
+        version: &str,
+    ) -> Result<Option<crate::models::file::File>, sqlx::Error> {
+        files::get_file_by_name_version(self.inner(), name, version).await
+    }
+
+    pub async fn get_file_versions(&self, name: &str) -> Result<Vec<crate::models::file::File>, sqlx::Error> {
+        files::get_file_versions(self.inner(), name).await
+    }
+
+    pub async fn create_file(&self, file: &crate::models::file::File) -> Result<crate::models::file::File, sqlx::Error> {
+        files::create_file(self.inner(), file).await
+    }
+
+    pub async fn update_file(&self, file: &crate::models::file::File) -> Result<(), sqlx::Error> {
+        files::update_file(self.inner(), file).await
+    }
+
+    pub async fn delete_file(&self, id: i64) -> Result<(), sqlx::Error> {
+        files::delete_file(self.inner(), id).await
+    }
+
+    pub async fn get_all_files(&self) -> Result<Vec<crate::models::file::File>, sqlx::Error> {
+        files::get_all_files(self.inner()).await
+    }
+
+    pub async fn get_file_dependencies(&self, file_id: i64) -> Result<Vec<crate::models::FileDependency>, sqlx::Error> {
+        dependencies::get_file_dependencies(self.inner(), file_id).await
+    }
+
+    pub async fn add_file_dependency(&self, dependency: &crate::models::FileDependency) -> Result<crate::models::FileDependency, sqlx::Error> {
+        dependencies::add_file_dependency(self.inner(), dependency).await
+    }
+
+    pub async fn remove_file_dependency(&self, dependency_id: i64) -> Result<(), sqlx::Error> {
+        dependencies::remove_file_dependency(self.inner(), dependency_id).await
+    }
+
+    pub async fn get_dependent_files(&self, file: &crate::models::file::File) -> Result<Vec<crate::models::file::File>, sqlx::Error> {
+        dependencies::get_dependent_files(self.inner(), file).await
+    }
+
+    pub async fn get_collections(&self) -> Result<Vec<crate::models::collection::Collection>, sqlx::Error> {
+        collections::get_collections(self.inner()).await
+    }
+
+    pub async fn get_collection(&self, id: i64) -> Result<Option<crate::models::collection::Collection>, sqlx::Error> {
+        collections::get_collection(self.inner(), id).await
+    }
+
+    pub async fn get_collection_by_name(&self, name: &str) -> Result<Option<crate::models::collection::Collection>, sqlx::Error> {
+        collections::get_collection_by_name(self.inner(), name).await
+    }
+
+    pub async fn create_collection(&self, collection: &crate::models::collection::Collection) -> Result<crate::models::collection::Collection, sqlx::Error> {
+        collections::create_collection(self.inner(), collection).await
+    }
+
+    pub async fn update_collection(&self, collection: &crate::models::collection::Collection) -> Result<(), sqlx::Error> {
+        collections::update_collection(self.inner(), collection).await
+    }
+
+    pub async fn delete_collection(&self, id: i64) -> Result<(), sqlx::Error> {
+        collections::delete_collection(self.inner(), id).await
+    }
+
+    pub async fn get_collection_files(&self, collection_id: i64) -> Result<Vec<(crate::models::file::File, i64)>, sqlx::Error> {
+        collections::get_collection_files(self.inner(), collection_id).await
+    }
+
+    pub async fn add_file_to_collection(
+        &self,
+        collection_id: i64,
+        file_id: i64,
+        logic_rule_id: Option<i64>,
+    ) -> Result<(), sqlx::Error> {
+        collections::add_file_to_collection(self.inner(), collection_id, file_id, logic_rule_id).await
+    }
+
+    pub async fn remove_file_from_collection(&self, collection_id: i64, file_id: i64) -> Result<(), sqlx::Error> {
+        collections::remove_file_from_collection(self.inner(), collection_id, file_id).await
+    }
+
+    pub async fn reorder_collection_files(
+        &self,
+        collection_id: i64,
+        file_orders: &[(i64, i64)],
+    ) -> Result<(), sqlx::Error> {
+        collections::reorder_collection_files(self.inner(), collection_id, file_orders).await
+    }
+
+    pub async fn get_session_state(&self) -> Result<serde_json::Value, sqlx::Error> {
+        session::get_session_state(self.inner()).await
+    }
+
+    pub async fn update_session_file_order(&self, file_order: &[i64]) -> Result<(), sqlx::Error> {
+        session::update_session_file_order(self.inner(), file_order).await
+    }
+
+    pub async fn update_session_ui_preferences(&self, ui_preferences: &serde_json::Value) -> Result<(), sqlx::Error> {
+        session::update_session_ui_preferences(self.inner(), ui_preferences).await
+    }
+
+    pub async fn update_session_open_collections(&self, open_collections: &[i64]) -> Result<(), sqlx::Error> {
+        session::update_session_open_collections(self.inner(), open_collections).await
+    }
+
+    pub async fn update_session_selected_files(&self, file_ids: &[i64]) -> Result<(), sqlx::Error> {
+        session::update_session_selected_files(self.inner(), file_ids).await
+    }
+
+    pub async fn add_recent_action(&self, action: &serde_json::Value) -> Result<(), sqlx::Error> {
+        session::add_recent_action(self.inner(), action).await
+    }
+
+    pub async fn get_recent_actions(&self) -> Result<Vec<serde_json::Value>, sqlx::Error> {
+        session::get_recent_actions(self.inner()).await
+    }
+
+    pub async fn clear_recent_actions(&self) -> Result<(), sqlx::Error> {
+        session::clear_recent_actions(self.inner()).await
+    }
+
+    pub async fn reset_session_state(&self) -> Result<(), sqlx::Error> {
+        session::reset_session_state(self.inner()).await
+    }
+
+    pub async fn update_session_current_page(&self, page: &str) -> Result<(), sqlx::Error> {
+        session::update_session_current_page(self.inner(), page).await
+    }
+
+    pub async fn update_session_selected_site(&self, site_id: Option<i64>) -> Result<(), sqlx::Error> {
+        session::update_session_selected_site(self.inner(), site_id).await
     }
 }
 

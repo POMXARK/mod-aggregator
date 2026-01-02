@@ -6,6 +6,7 @@
 use crate::database::modules::base::Database;
 use crate::models::file::File;
 use chrono::Utc;
+use sqlx::Row;
 
 /// Получить файл по ID
 ///

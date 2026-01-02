@@ -3,7 +3,7 @@
 //! Модуль содержит основные методы для инициализации подключения к базе данных,
 //! создания схемы и выполнения миграций.
 
-use sqlx::sqlite::SqlitePool;
+use sqlx::{sqlite::SqlitePool, Row};
 
 /// Структура для работы с базой данных SQLite
 ///
@@ -142,7 +142,7 @@ impl Database {
     ///
     /// # Возвращает
     /// Пустой результат при успехе или ошибку
-    async fn run_migrations(&self) -> Result<(), sqlx::Error> {
+    pub async fn run_migrations(&self) -> Result<(), sqlx::Error> {
         // Миграция 003: Добавление поддержки зависимостей
         // Создаем таблицу files (универсальная таблица для файлов/модов)
         sqlx::query(

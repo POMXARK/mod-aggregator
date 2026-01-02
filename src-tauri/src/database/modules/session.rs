@@ -4,6 +4,7 @@
 //! предпочтения UI, порядок файлов, открытые коллекции и т.д.
 
 use crate::database::modules::base::Database;
+use sqlx::Row;
 
 /// Получить состояние сессии
 ///
