@@ -1,8 +1,10 @@
 // Library crate for mod-aggregator
 // This allows tests to import modules
 
+pub mod ai_parser;
 pub mod commands;
 pub mod database;
+pub mod handlers;
 pub mod models;
 pub mod notification;
 pub mod parser;
