@@ -413,7 +413,7 @@ pub async fn get_saved_page_for_site(
     let db = Database::new().await.map_err(|e| e.to_string())?;
 
     match db.get_saved_page(site_id, &url).await {
-        Ok(Some(folder_path)) => {
+        Ok(Some((_id, folder_path, _timestamp))) => {
             info!(
                 "[DB_CACHE] Found saved page in database for site {}: {} -> folder: {}",
                 site_id, url, folder_path
@@ -481,16 +481,7 @@ pub async fn get_saved_page_versions(
     let db = Database::new().await.map_err(|e| e.to_string())?;
 
     match db.get_saved_page_versions(site_id, &url).await {
-        Ok(versions) => Ok(versions
-            .iter()
-            .map(|(id, folder_path, timestamp)| {
-                serde_json::json!({
-                    "id": id,
-                    "folder_path": folder_path,
-                    "timestamp": timestamp
-                })
-            })
-            .collect()),
+        Ok(versions) => Ok(versions),
         Err(e) => {
             warn!("Failed to get saved page versions: {}", e);
             Ok(vec![])

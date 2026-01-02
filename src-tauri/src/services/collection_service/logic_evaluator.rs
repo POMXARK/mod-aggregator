@@ -49,7 +49,7 @@ impl CollectionLogicEvaluator {
         // Получаем файлы коллекции
         let collection_files = self
             .db
-            .get_collection_files(collection_id)
+            .get_collection_files_detailed(collection_id)
             .await
             .map_err(|e| {
                 error!("Failed to get collection files: {}", e);
@@ -91,7 +91,7 @@ impl CollectionLogicEvaluator {
                         {
                             let collection_files = self
                                 .db
-                                .get_collection_files(collection_id_val)
+                                .get_collection_files_detailed(collection_id_val)
                                 .await
                                 .map_err(|e| {
                                     error!("Failed to check collection: {}", e);

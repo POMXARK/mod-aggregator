@@ -73,7 +73,7 @@ pub async fn export_collection(collection_id: i64) -> Result<String, String> {
         })?;
 
     // Получаем файлы коллекции
-    let collection_files = db.get_collection_files(collection_id).await.map_err(|e| {
+    let collection_files = db.get_collection_files_detailed(collection_id).await.map_err(|e| {
         error!("Failed to get collection files: {}", e);
         format!("Database error: {}", e)
     })?;
@@ -443,14 +443,18 @@ pub async fn import_collection(json_data: String) -> Result<ImportResult, String
                     ConditionType::from_str(&rule.condition_type).unwrap_or(ConditionType::Boolean);
                 let action = Action::from_str(&rule.action).unwrap_or(Action::Enable);
 
+                let rule_to_create = crate::models::collection_logic::CollectionLogicRule {
+                    id: 0, // будет присвоено базой данных
+                    collection_id,
+                    name: rule.name.clone(),
+                    condition_type,
+                    condition_params: rule.condition_params.clone(),
+                    action,
+                    created_at: chrono::Utc::now(),
+                };
+
                 let created_rule = db
-                    .create_collection_logic_rule(
-                        collection_id,
-                        &rule.name,
-                        condition_type,
-                        &rule.condition_params,
-                        action,
-                    )
+                    .create_collection_logic_rule(&rule_to_create)
                     .await
                     .map_err(|e| {
                         error!("Failed to create logic rule: {}", e);
@@ -466,7 +470,6 @@ pub async fn import_collection(json_data: String) -> Result<ImportResult, String
                 collection_id,
                 file.id,
                 logic_rule_id,
-                Some(exported_file.order_index),
             )
             .await
             .map_err(|e| {

@@ -241,7 +241,7 @@ pub async fn batch_move_files_to_collection(
             .get_collection_files(collection_id)
             .await
             .unwrap_or_default();
-        let already_in_collection = collection_files.iter().any(|cf| cf.file_id == file_id);
+        let already_in_collection = collection_files.iter().any(|cf| cf.0.id == file_id);
 
         if already_in_collection {
             warnings.push(format!("File {} is already in collection", file_id));
@@ -256,7 +256,7 @@ pub async fn batch_move_files_to_collection(
 
         // Добавляем файл в коллекцию
         match db
-            .add_file_to_collection(collection_id, file_id, None, None)
+            .add_file_to_collection(collection_id, file_id, None)
             .await
         {
             Ok(_) => {

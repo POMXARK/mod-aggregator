@@ -31,7 +31,13 @@ pub async fn get_session_state() -> Result<SessionState, String> {
     })?;
 
     match db.get_session_state().await {
-        Ok(state) => Ok(state),
+        Ok(state_json) => {
+            let state: SessionState = serde_json::from_value(state_json).map_err(|e| {
+                error!("Failed to parse session state from database: {}", e);
+                format!("Database state parsing error: {}", e)
+            })?;
+            Ok(state)
+        },
         Err(e) => {
             error!("Failed to get session state: {}", e);
             // Возвращаем состояние по умолчанию
@@ -87,7 +93,8 @@ pub async fn update_ui_preferences(preferences: serde_json::Value) -> Result<(),
         format!("Invalid preferences format: {}", e)
     })?;
 
-    db.update_session_ui_preferences(&ui_prefs)
+    let ui_prefs_json = serde_json::to_value(&ui_prefs).map_err(|e| format!("Serialization error: {}", e))?;
+    db.update_session_ui_preferences(&ui_prefs_json)
         .await
         .map_err(|e| {
             error!("Failed to update UI preferences: {}", e);
@@ -206,7 +213,8 @@ pub async fn add_recent_action(
         timestamp: Utc::now(),
     };
 
-    db.add_recent_action(&action).await.map_err(|e| {
+    let action_json = serde_json::to_value(&action).map_err(|e| format!("Serialization error: {}", e))?;
+    db.add_recent_action(&action_json).await.map_err(|e| {
         error!("Failed to add recent action: {}", e);
         format!("Database error: {}", e)
     })?;
@@ -225,10 +233,17 @@ pub async fn get_recent_actions(limit: Option<usize>) -> Result<Vec<RecentAction
         format!("Database error: {}", e)
     })?;
 
-    let actions = db.get_recent_actions(limit).await.map_err(|e| {
+    let actions_json = db.get_recent_actions(limit).await.map_err(|e| {
         error!("Failed to get recent actions: {}", e);
         format!("Database error: {}", e)
     })?;
+
+    let actions: Vec<RecentAction> = actions_json
+        .iter()
+        .filter_map(|action_json| {
+            serde_json::from_value(action_json.clone()).ok()
+        })
+        .collect();
 
     Ok(actions)
 }
@@ -270,47 +285,63 @@ pub async fn restore_session() -> Result<SessionRestoreResult, String> {
 
     // Проверяем существование файлов в file_order
     let mut valid_file_order = Vec::new();
-    for file_id in &state.file_order {
-        let file = db.get_file(*file_id).await.ok().flatten();
-        if file.is_some() {
-            valid_file_order.push(*file_id);
-        } else {
-            warnings.push(format!("File {} not found, removed from order", file_id));
+    if let Some(file_order) = state["file_order"].as_array() {
+        for file_id_value in file_order {
+            if let Some(file_id) = file_id_value.as_i64() {
+                let file = db.get_file(file_id).await.ok().flatten();
+                if file.is_some() {
+                    valid_file_order.push(file_id);
+                } else {
+                    warnings.push(format!("File {} not found, removed from order", file_id));
+                }
+            }
         }
     }
 
     // Проверяем существование коллекций в open_collections
     let mut valid_open_collections = Vec::new();
-    for collection_id in &state.open_collections {
-        let collection = db.get_collection(*collection_id).await.ok().flatten();
-        if collection.is_some() {
-            valid_open_collections.push(*collection_id);
-        } else {
-            warnings.push(format!(
-                "Collection {} not found, removed from open collections",
-                collection_id
-            ));
+    if let Some(open_collections) = state["open_collections"].as_array() {
+        for collection_id_value in open_collections {
+            if let Some(collection_id) = collection_id_value.as_i64() {
+                let collection = db.get_collection(collection_id).await.ok().flatten();
+                if collection.is_some() {
+                    valid_open_collections.push(collection_id);
+                } else {
+                    warnings.push(format!(
+                        "Collection {} not found, removed from open collections",
+                        collection_id
+                    ));
+                }
+            }
         }
     }
 
     // Проверяем существование файлов в selected_files
     let mut valid_selected_files = Vec::new();
-    for file_id in &state.selected_files {
-        let file = db.get_file(*file_id).await.ok().flatten();
-        if file.is_some() {
-            valid_selected_files.push(*file_id);
-        } else {
-            warnings.push(format!(
-                "File {} not found, removed from selected files",
-                file_id
-            ));
+    if let Some(selected_files) = state["selected_files"].as_array() {
+        for file_id_value in selected_files {
+            if let Some(file_id) = file_id_value.as_i64() {
+                let file = db.get_file(file_id).await.ok().flatten();
+                if file.is_some() {
+                    valid_selected_files.push(file_id);
+                } else {
+                    warnings.push(format!(
+                        "File {} not found, removed from selected files",
+                        file_id
+                    ));
+                }
+            }
         }
     }
 
     // Обновляем состояние, если были удалены несуществующие элементы
-    if valid_file_order.len() != state.file_order.len()
-        || valid_open_collections.len() != state.open_collections.len()
-        || valid_selected_files.len() != state.selected_files.len()
+    let original_file_order_len = state["file_order"].as_array().map(|a| a.len()).unwrap_or(0);
+    let original_open_collections_len = state["open_collections"].as_array().map(|a| a.len()).unwrap_or(0);
+    let original_selected_files_len = state["selected_files"].as_array().map(|a| a.len()).unwrap_or(0);
+
+    if valid_file_order.len() != original_file_order_len
+        || valid_open_collections.len() != original_open_collections_len
+        || valid_selected_files.len() != original_selected_files_len
     {
         if !valid_file_order.is_empty() {
             db.update_session_file_order(&valid_file_order).await.ok();
@@ -327,15 +358,17 @@ pub async fn restore_session() -> Result<SessionRestoreResult, String> {
         }
     }
 
+    let ui_preferences: UiPreferences = serde_json::from_value(state["ui_preferences"].clone()).unwrap_or_default();
+
     Ok(SessionRestoreResult {
         restored: true,
         file_order: valid_file_order,
-        ui_preferences: state.ui_preferences.clone(),
+        ui_preferences: ui_preferences.clone(),
         open_collections: valid_open_collections,
         selected_files: valid_selected_files,
         warnings,
-        current_page: state.ui_preferences.current_page.clone(),
-        selected_site_id: state.ui_preferences.selected_site_id,
+        current_page: ui_preferences.current_page.clone(),
+        selected_site_id: ui_preferences.selected_site_id,
     })
 }
 

@@ -259,7 +259,7 @@ pub async fn get_collection_files(collection_id: i64) -> Result<Vec<CollectionFi
             "Collection not found".to_string()
         })?;
 
-    let collection_files = db.get_collection_files(collection_id).await.map_err(|e| {
+    let collection_files = db.get_collection_files_detailed(collection_id).await.map_err(|e| {
         error!("Failed to get collection files: {}", e);
         format!("Database error: {}", e)
     })?;
@@ -375,7 +375,6 @@ pub async fn add_file_to_collection(
             params.collection_id,
             params.file_id,
             params.logic_rule_id,
-            params.order_index,
         )
         .await
         .map_err(|e| {
@@ -385,7 +384,7 @@ pub async fn add_file_to_collection(
 
     // Получаем добавленный файл
     let collection_files = db
-        .get_collection_files(params.collection_id)
+        .get_collection_files_detailed(params.collection_id)
         .await
         .map_err(|e| {
             error!("Failed to get collection files: {}", e);
@@ -394,11 +393,11 @@ pub async fn add_file_to_collection(
 
     let collection_file = collection_files
         .iter()
-        .find(|cf| cf.id == collection_file_id)
+        .find(|cf| cf.file_id == params.file_id)
         .ok_or_else(|| {
             error!(
-                "Collection file not found after creation: {}",
-                collection_file_id
+                "Collection file not found after creation: file_id={}",
+                params.file_id
             );
             "Collection file not found".to_string()
         })?;
@@ -638,14 +637,18 @@ pub async fn create_collection_logic_rule(
     validate_condition_params(&condition_type, &params.condition_params, &db).await?;
 
     // Создаем правило
+    let rule_to_create = CollectionLogicRule {
+        id: 0, // будет присвоено базой данных
+        collection_id: params.collection_id,
+        name: params.name.clone(),
+        condition_type,
+        condition_params: params.condition_params.clone(),
+        action,
+        created_at: chrono::Utc::now(),
+    };
+
     let rule = db
-        .create_collection_logic_rule(
-            params.collection_id,
-            &params.name,
-            condition_type,
-            &params.condition_params,
-            action,
-        )
+        .create_collection_logic_rule(&rule_to_create)
         .await
         .map_err(|e| {
             error!("Failed to create logic rule: {}", e);
@@ -815,14 +818,19 @@ pub async fn update_collection_logic_rule(
         validate_condition_params(ct, &current_rule.condition_params, &db).await?;
     }
 
+    // Создаем обновленное правило
+    let updated_rule = CollectionLogicRule {
+        id: params.id,
+        collection_id: current_rule.collection_id,
+        name: params.name.clone().unwrap_or_else(|| current_rule.name.clone()),
+        condition_type: condition_type.unwrap_or(current_rule.condition_type),
+        condition_params: params.condition_params.clone().unwrap_or_else(|| current_rule.condition_params.clone()),
+        action: action.unwrap_or(current_rule.action),
+        created_at: current_rule.created_at,
+    };
+
     // Обновляем правило
-    db.update_collection_logic_rule(
-        params.id,
-        params.name.as_deref(),
-        condition_type,
-        params.condition_params.as_ref(),
-        action,
-    )
+    db.update_collection_logic_rule(&updated_rule)
     .await
     .map_err(|e| {
         error!("Failed to update logic rule: {}", e);
@@ -1016,7 +1024,7 @@ pub async fn combine_collections(params: CombineCollectionsParams) -> Result<Col
     let mut file_orders = Vec::new();
 
     for collection_id in &params.source_collection_ids {
-        let collection_files = db.get_collection_files(*collection_id).await.map_err(|e| {
+        let collection_files = db.get_collection_files_detailed(*collection_id).await.map_err(|e| {
             error!("Failed to get collection files: {}", e);
             format!("Database error: {}", e)
         })?;
@@ -1063,7 +1071,6 @@ pub async fn combine_collections(params: CombineCollectionsParams) -> Result<Col
             new_collection.id,
             *file_id,
             None, // Логика не копируется
-            Some(index as i64),
         )
         .await
         .map_err(|e| {
@@ -1130,7 +1137,7 @@ pub async fn get_files_from_multiple_collections(
                 "Collection not found".to_string()
             })?;
 
-        let collection_files = db.get_collection_files(*collection_id).await.map_err(|e| {
+        let collection_files = db.get_collection_files_detailed(*collection_id).await.map_err(|e| {
             error!("Failed to get collection files: {}", e);
             format!("Database error: {}", e)
         })?;

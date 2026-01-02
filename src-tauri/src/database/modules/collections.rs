@@ -3,10 +3,12 @@
 //! Модуль содержит методы для работы с коллекциями:
 //! получение, создание, обновление коллекций и управление файлами в коллекциях.
 
-use crate::database::modules::base::Database;
+use crate::database::Database;
 use crate::models::collection::Collection;
+use crate::models::collection_logic::{CollectionLogicRule, ConditionType, Action};
 use crate::models::file::File;
 use sqlx::Row;
+use chrono::{DateTime, Utc};
 
 /// Получить все коллекции
 ///
@@ -179,6 +181,82 @@ pub async fn get_collection_files(db: &Database, collection_id: i64) -> Result<V
         .collect())
 }
 
+/// Получить полную информацию о файлах коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `collection_id` - ID коллекции
+///
+/// # Возвращает
+/// Вектор структур с полной информацией о файлах в коллекции
+pub async fn get_collection_files_detailed(db: &Database, collection_id: i64) -> Result<Vec<crate::database::CollectionFileData>, sqlx::Error> {
+    let rows = sqlx::query(
+        "SELECT cf.id, cf.collection_id, cf.file_id, cf.logic_rule_id, cf.order_index, cf.created_at,
+                f.id as f_id, f.name, f.version, f.path, f.metadata, f.created_at as f_created_at, f.updated_at,
+                clr.id as clr_id, clr.name as clr_name, clr.condition_type, clr.condition_params, clr.action, clr.created_at as clr_created_at
+         FROM collection_files cf
+         INNER JOIN files f ON cf.file_id = f.id
+         LEFT JOIN collection_logic_rules clr ON cf.logic_rule_id = clr.id
+         WHERE cf.collection_id = ?
+         ORDER BY cf.order_index",
+    )
+    .bind(collection_id)
+    .fetch_all(&db.pool)
+    .await?;
+
+    let mut result = Vec::new();
+
+    for row in rows {
+        let file = File {
+            id: row.get("f_id"),
+            name: row.get("name"),
+            version: row.get("version"),
+            path: row.get("path"),
+            metadata: serde_json::from_str(row.get::<String, _>("metadata").as_str()).unwrap_or(serde_json::json!({})),
+            created_at: row.get::<DateTime<Utc>, _>("f_created_at"),
+            updated_at: row.get::<DateTime<Utc>, _>("f_updated_at"),
+        };
+
+        let logic_rule = if let Some(clr_id) = row.get::<Option<i64>, _>("clr_id") {
+            Some(CollectionLogicRule {
+                id: clr_id,
+                collection_id: row.get("collection_id"),
+                name: row.get("clr_name"),
+                condition_type: match row.get::<String, _>("condition_type").as_str() {
+                    "boolean" => ConditionType::Boolean,
+                    "collection_check" => ConditionType::CollectionCheck,
+                    "file_check" => ConditionType::FileCheck,
+                    "and" => ConditionType::And,
+                    "or" => ConditionType::Or,
+                    _ => ConditionType::Boolean,
+                },
+                condition_params: row.get("condition_params"),
+                action: match row.get::<String, _>("action").as_str() {
+                    "enable" => Action::Enable,
+                    "disable" => Action::Disable,
+                    _ => Action::Enable,
+                },
+                created_at: row.get::<DateTime<Utc>, _>("clr_created_at"),
+            })
+        } else {
+            None
+        };
+
+        result.push(crate::database::CollectionFileData {
+            id: row.get("id"),
+            collection_id: row.get("collection_id"),
+            file_id: row.get("file_id"),
+            file,
+            logic_rule_id: row.get("logic_rule_id"),
+            logic_rule,
+            order_index: row.get("order_index"),
+            created_at: row.get::<DateTime<Utc>, _>("created_at"),
+        });
+    }
+
+    Ok(result)
+}
+
 /// Добавить файл в коллекцию
 ///
 /// # Параметры
@@ -257,6 +335,195 @@ pub async fn reorder_collection_files(
         .await?;
     }
     Ok(())
+}
+
+/// Получить логическое правило коллекции по ID
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `rule_id` - ID правила
+///
+/// # Возвращает
+/// Правило или None, если не найдено
+pub async fn get_collection_logic_rule(db: &Database, rule_id: i64) -> Result<Option<CollectionLogicRule>, sqlx::Error> {
+    let row = sqlx::query("SELECT * FROM collection_logic_rules WHERE id = ?")
+        .bind(rule_id)
+        .fetch_optional(&db.pool)
+        .await?;
+
+    Ok(row.map(|r| CollectionLogicRule {
+        id: r.get(0),
+        collection_id: r.get(1),
+        name: r.get(2),
+        condition_type: match r.get::<String, _>(3).as_str() {
+            "boolean" => ConditionType::Boolean,
+            "collection_check" => ConditionType::CollectionCheck,
+            "file_check" => ConditionType::FileCheck,
+            "and" => ConditionType::And,
+            "or" => ConditionType::Or,
+            _ => ConditionType::Boolean,
+        },
+        condition_params: r.get(4),
+        action: match r.get::<String, _>(5).as_str() {
+            "enable" => Action::Enable,
+            "disable" => Action::Disable,
+            _ => Action::Enable,
+        },
+        created_at: r.get::<DateTime<Utc>, _>(6),
+    }))
+}
+
+/// Получить все логические правила коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `collection_id` - ID коллекции
+///
+/// # Возвращает
+/// Вектор правил коллекции
+pub async fn get_collection_logic_rules(db: &Database, collection_id: i64) -> Result<Vec<CollectionLogicRule>, sqlx::Error> {
+    let rows = sqlx::query("SELECT * FROM collection_logic_rules WHERE collection_id = ?")
+        .bind(collection_id)
+        .fetch_all(&db.pool)
+        .await?;
+
+    Ok(rows
+        .iter()
+        .map(|r| CollectionLogicRule {
+            id: r.get(0),
+            collection_id: r.get(1),
+            name: r.get(2),
+            condition_type: match r.get::<String, _>(3).as_str() {
+                "boolean" => ConditionType::Boolean,
+                "collection_check" => ConditionType::CollectionCheck,
+                "file_check" => ConditionType::FileCheck,
+                "and" => ConditionType::And,
+                "or" => ConditionType::Or,
+                _ => ConditionType::Boolean,
+            },
+            condition_params: r.get(4),
+            action: match r.get::<String, _>(5).as_str() {
+                "enable" => Action::Enable,
+                "disable" => Action::Disable,
+                _ => Action::Enable,
+            },
+            created_at: r.get::<DateTime<Utc>, _>(6),
+        })
+        .collect())
+}
+
+/// Создать логическое правило коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `rule` - правило для создания
+///
+/// # Возвращает
+/// Созданное правило с присвоенным ID или ошибку
+pub async fn create_collection_logic_rule(db: &Database, rule: &CollectionLogicRule) -> Result<CollectionLogicRule, sqlx::Error> {
+    let condition_type_str = match rule.condition_type {
+        ConditionType::Boolean => "boolean",
+        ConditionType::CollectionCheck => "collection_check",
+        ConditionType::FileCheck => "file_check",
+        ConditionType::And => "and",
+        ConditionType::Or => "or",
+    };
+
+    let action_str = match rule.action {
+        Action::Enable => "enable",
+        Action::Disable => "disable",
+    };
+
+    sqlx::query(
+        "INSERT INTO collection_logic_rules (collection_id, name, condition_type, condition_params, action, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    )
+    .bind(rule.collection_id)
+    .bind(&rule.name)
+    .bind(condition_type_str)
+    .bind(&rule.condition_params)
+    .bind(action_str)
+    .bind(rule.created_at)
+    .execute(&db.pool)
+    .await?;
+
+    let id = sqlx::query("SELECT last_insert_rowid()")
+        .fetch_one(&db.pool)
+        .await?
+        .get(0);
+
+    Ok(CollectionLogicRule { id, ..rule.clone() })
+}
+
+/// Обновить логическое правило коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `rule` - правило с обновленными данными
+///
+/// # Возвращает
+/// Пустой результат при успехе или ошибку
+pub async fn update_collection_logic_rule(db: &Database, rule: &CollectionLogicRule) -> Result<(), sqlx::Error> {
+    let condition_type_str = match rule.condition_type {
+        ConditionType::Boolean => "boolean",
+        ConditionType::CollectionCheck => "collection_check",
+        ConditionType::FileCheck => "file_check",
+        ConditionType::And => "and",
+        ConditionType::Or => "or",
+    };
+
+    let action_str = match rule.action {
+        Action::Enable => "enable",
+        Action::Disable => "disable",
+    };
+
+    sqlx::query(
+        "UPDATE collection_logic_rules SET name = ?, condition_type = ?, condition_params = ?, action = ? WHERE id = ?",
+    )
+    .bind(&rule.name)
+    .bind(condition_type_str)
+    .bind(&rule.condition_params)
+    .bind(action_str)
+    .bind(rule.id)
+    .execute(&db.pool)
+    .await?;
+
+    Ok(())
+}
+
+/// Удалить логическое правило коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `rule_id` - ID правила для удаления
+///
+/// # Возвращает
+/// Пустой результат при успехе или ошибку
+pub async fn delete_collection_logic_rule(db: &Database, rule_id: i64) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM collection_logic_rules WHERE id = ?")
+        .bind(rule_id)
+        .execute(&db.pool)
+        .await?;
+    Ok(())
+}
+
+/// Проверить, находится ли файл в коллекции
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `collection_id` - ID коллекции
+/// * `file_id` - ID файла
+///
+/// # Возвращает
+/// true если файл находится в коллекции
+pub async fn file_in_collection(db: &Database, collection_id: i64, file_id: i64) -> Result<bool, sqlx::Error> {
+    let count: i64 = sqlx::query("SELECT COUNT(*) FROM collection_files WHERE collection_id = ? AND file_id = ?")
+        .bind(collection_id)
+        .bind(file_id)
+        .fetch_one(&db.pool)
+        .await?
+        .get(0);
+
+    Ok(count > 0)
 }
 
 #[cfg(test)]
