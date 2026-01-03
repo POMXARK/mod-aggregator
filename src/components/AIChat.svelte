@@ -1,7 +1,8 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type { Node } from '@xyflow/svelte';
   import { invoke } from '../lib/tauri-wrapper';
   import type { Chat, ChatMessage, ParserConfig, AIModelConfig } from '../lib/types';
+  import { ChatHeader, ChatInput, ChatList, ChatMessages } from './ai-chat';
 
   interface Props {
     aiModelType?: AIModelConfig['type'];
@@ -47,16 +48,16 @@
     onChatChange,
   }: Props = $props();
 
-  // Управление чатами
+  // РЈРїСЂР°РІР»РµРЅРёРµ С‡Р°С‚Р°РјРё
   const STORAGE_KEY = 'ai_chats';
   let chats = $state<Chat[]>([]);
   let currentChatId = $state<string | null>(null);
   let showChatList = $state(false);
 
-  // Текущий чат - используем $state для избежания циклических обновлений
+  // РўРµРєСѓС‰РёР№ С‡Р°С‚ - РёСЃРїРѕР»СЊР·СѓРµРј $state РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ С†РёРєР»РёС‡РµСЃРєРёС… РѕР±РЅРѕРІР»РµРЅРёР№
   let messages = $state<ChatMessage[]>([]);
 
-  // Функция для обновления сообщений из текущего чата
+  // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРѕРѕР±С‰РµРЅРёР№ РёР· С‚РµРєСѓС‰РµРіРѕ С‡Р°С‚Р°
   function updateMessagesFromChat() {
     if (!currentChatId) {
       messages = [];
@@ -66,7 +67,7 @@
     messages = chat?.messages || [];
   }
 
-  // Отслеживаем изменения currentChatId и уведомляем родителя
+  // РћС‚СЃР»РµР¶РёРІР°РµРј РёР·РјРµРЅРµРЅРёСЏ currentChatId Рё СѓРІРµРґРѕРјР»СЏРµРј СЂРѕРґРёС‚РµР»СЏ
   $effect(() => {
     if (onChatChange) {
       onChatChange(currentChatId);
@@ -78,28 +79,28 @@
   let chatContainer: HTMLDivElement;
   let attachedElement = $state<ChatMessage['attachedElement'] | null>(null);
 
-  // Системный промпт для AI
-  const systemPrompt = `Ты эксперт по парсингу веб-страниц. Твоя задача - анализировать HTML элементы и создавать конфигурации парсеров.
+  // РЎРёСЃС‚РµРјРЅС‹Р№ РїСЂРѕРјРїС‚ РґР»СЏ AI
+  const systemPrompt = `РўС‹ СЌРєСЃРїРµСЂС‚ РїРѕ РїР°СЂСЃРёРЅРіСѓ РІРµР±-СЃС‚СЂР°РЅРёС†. РўРІРѕСЏ Р·Р°РґР°С‡Р° - Р°РЅР°Р»РёР·РёСЂРѕРІР°С‚СЊ HTML СЌР»РµРјРµРЅС‚С‹ Рё СЃРѕР·РґР°РІР°С‚СЊ РєРѕРЅС„РёРіСѓСЂР°С†РёРё РїР°СЂСЃРµСЂРѕРІ.
 
-ВАЖНО: ВСЕГДА отвечай ТОЛЬКО в формате JSON. Никакого дополнительного текста до или после JSON.
+Р’РђР–РќРћ: Р’РЎР•Р“Р”Рђ РѕС‚РІРµС‡Р°Р№ РўРћР›Р¬РљРћ РІ С„РѕСЂРјР°С‚Рµ JSON. РќРёРєР°РєРѕРіРѕ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ С‚РµРєСЃС‚Р° РґРѕ РёР»Рё РїРѕСЃР»Рµ JSON.
 
-Формат ответа (строго соблюдай):
+Р¤РѕСЂРјР°С‚ РѕС‚РІРµС‚Р° (СЃС‚СЂРѕРіРѕ СЃРѕР±Р»СЋРґР°Р№):
 {
-  "list_selector": "CSS селектор для списка всех похожих элементов (например: div.filekmod)",
-  "title_selector": "CSS селектор для заголовка внутри каждого элемента списка (относительный, например: h3, .title, a)",
-  "url_selector": "CSS селектор для ссылки (относительный, например: a[href], .link)",
-  "description_selector": "CSS селектор для описания (относительный, например: .description, p, span)",
-  "image_selector": "CSS селектор для изображения (относительный, например: img, .thumb img)"
+  "list_selector": "CSS СЃРµР»РµРєС‚РѕСЂ РґР»СЏ СЃРїРёСЃРєР° РІСЃРµС… РїРѕС…РѕР¶РёС… СЌР»РµРјРµРЅС‚РѕРІ (РЅР°РїСЂРёРјРµСЂ: div.filekmod)",
+  "title_selector": "CSS СЃРµР»РµРєС‚РѕСЂ РґР»СЏ Р·Р°РіРѕР»РѕРІРєР° РІРЅСѓС‚СЂРё РєР°Р¶РґРѕРіРѕ СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР° (РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Р№, РЅР°РїСЂРёРјРµСЂ: h3, .title, a)",
+  "url_selector": "CSS СЃРµР»РµРєС‚РѕСЂ РґР»СЏ СЃСЃС‹Р»РєРё (РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Р№, РЅР°РїСЂРёРјРµСЂ: a[href], .link)",
+  "description_selector": "CSS СЃРµР»РµРєС‚РѕСЂ РґР»СЏ РѕРїРёСЃР°РЅРёСЏ (РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Р№, РЅР°РїСЂРёРјРµСЂ: .description, p, span)",
+  "image_selector": "CSS СЃРµР»РµРєС‚РѕСЂ РґР»СЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ (РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Р№, РЅР°РїСЂРёРјРµСЂ: img, .thumb img)"
 }
 
-Правила:
-1. list_selector должен находить ВСЕ похожие элементы на странице
-2. Остальные селекторы должны быть ОТНОСИТЕЛЬНЫМИ (без указания list_selector в начале)
-3. Если пользователь прикрепил элемент, используй его селектор как основу для list_selector
-4. Если селектор не определен, используй пустую строку ""
-5. Отвечай ТОЛЬКО JSON, без объяснений и дополнительного текста`;
+РџСЂР°РІРёР»Р°:
+1. list_selector РґРѕР»Р¶РµРЅ РЅР°С…РѕРґРёС‚СЊ Р’РЎР• РїРѕС…РѕР¶РёРµ СЌР»РµРјРµРЅС‚С‹ РЅР° СЃС‚СЂР°РЅРёС†Рµ
+2. РћСЃС‚Р°Р»СЊРЅС‹Рµ СЃРµР»РµРєС‚РѕСЂС‹ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РћРўРќРћРЎРРўР•Р›Р¬РќР«РњР (Р±РµР· СѓРєР°Р·Р°РЅРёСЏ list_selector РІ РЅР°С‡Р°Р»Рµ)
+3. Р•СЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РїСЂРёРєСЂРµРїРёР» СЌР»РµРјРµРЅС‚, РёСЃРїРѕР»СЊР·СѓР№ РµРіРѕ СЃРµР»РµРєС‚РѕСЂ РєР°Рє РѕСЃРЅРѕРІСѓ РґР»СЏ list_selector
+4. Р•СЃР»Рё СЃРµР»РµРєС‚РѕСЂ РЅРµ РѕРїСЂРµРґРµР»РµРЅ, РёСЃРїРѕР»СЊР·СѓР№ РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ ""
+5. РћС‚РІРµС‡Р°Р№ РўРћР›Р¬РљРћ JSON, Р±РµР· РѕР±СЉСЏСЃРЅРµРЅРёР№ Рё РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ С‚РµРєСЃС‚Р°`;
 
-  // Загрузка чатов из localStorage
+  // Р—Р°РіСЂСѓР·РєР° С‡Р°С‚РѕРІ РёР· localStorage
   function loadChats() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -120,15 +121,15 @@
 
         chats = loadedChats;
 
-        // Если есть чаты, выбираем последний
+        // Р•СЃР»Рё РµСЃС‚СЊ С‡Р°С‚С‹, РІС‹Р±РёСЂР°РµРј РїРѕСЃР»РµРґРЅРёР№
         if (chats.length > 0) {
           currentChatId = chats[chats.length - 1].id;
         } else {
-          // Если нет чатов, создаем первый
+          // Р•СЃР»Рё РЅРµС‚ С‡Р°С‚РѕРІ, СЃРѕР·РґР°РµРј РїРµСЂРІС‹Р№
           createNewChat();
         }
       } else {
-        // Если нет сохраненных чатов, создаем первый
+        // Р•СЃР»Рё РЅРµС‚ СЃРѕС…СЂР°РЅРµРЅРЅС‹С… С‡Р°С‚РѕРІ, СЃРѕР·РґР°РµРј РїРµСЂРІС‹Р№
         createNewChat();
       }
     } catch (e) {
@@ -137,7 +138,7 @@
     }
   }
 
-  // Сохранение чатов в localStorage
+  // РЎРѕС…СЂР°РЅРµРЅРёРµ С‡Р°С‚РѕРІ РІ localStorage
   function saveChats() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
@@ -146,17 +147,17 @@
     }
   }
 
-  // Создание нового чата
+  // РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕРіРѕ С‡Р°С‚Р°
   function createNewChat() {
     const newChat: Chat = {
       id: `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      title: `Чат ${chats.length + 1}`,
+      title: `Р§Р°С‚ ${chats.length + 1}`,
       messages: [
         {
           id: `msg-${Date.now()}`,
           role: 'assistant',
           content:
-            'Привет! Я помогу тебе создать парсер для извлечения данных с сайтов. Опиши, какие данные нужно извлечь, и я создам конфигурацию парсера.',
+            'РџСЂРёРІРµС‚! РЇ РїРѕРјРѕРіСѓ С‚РµР±Рµ СЃРѕР·РґР°С‚СЊ РїР°СЂСЃРµСЂ РґР»СЏ РёР·РІР»РµС‡РµРЅРёСЏ РґР°РЅРЅС‹С… СЃ СЃР°Р№С‚РѕРІ. РћРїРёС€Рё, РєР°РєРёРµ РґР°РЅРЅС‹Рµ РЅСѓР¶РЅРѕ РёР·РІР»РµС‡СЊ, Рё СЏ СЃРѕР·РґР°Рј РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РїР°СЂСЃРµСЂР°.',
           timestamp: new Date(),
         },
       ],
@@ -170,7 +171,7 @@
     saveChats();
   }
 
-  // Удаление чата
+  // РЈРґР°Р»РµРЅРёРµ С‡Р°С‚Р°
   function deleteChat(chatId: string) {
     chats = chats.filter(c => c.id !== chatId);
     if (currentChatId === chatId) {
@@ -184,7 +185,7 @@
     saveChats();
   }
 
-  // Обновление чата
+  // РћР±РЅРѕРІР»РµРЅРёРµ С‡Р°С‚Р°
   function updateChat(chatId: string, updater: (chat: Chat) => Chat) {
     chats = chats.map(chat => {
       if (chat.id === chatId) {
@@ -195,7 +196,7 @@
       return chat;
     });
 
-    // Обновляем сообщения, если обновлен текущий чат
+    // РћР±РЅРѕРІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёСЏ, РµСЃР»Рё РѕР±РЅРѕРІР»РµРЅ С‚РµРєСѓС‰РёР№ С‡Р°С‚
     if (chatId === currentChatId) {
       updateMessagesFromChat();
     }
@@ -203,7 +204,7 @@
     saveChats();
   }
 
-  // Функция для добавления сообщения от AI (для использования извне)
+  // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ AI (РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РёР·РІРЅРµ)
   function addAIMessageToChat(content: string) {
     if (!currentChatId) {
       createNewChat();
@@ -222,12 +223,12 @@
     }));
   }
 
-  // Экспортируем функцию через bindable
+  // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј С„СѓРЅРєС†РёСЋ С‡РµСЂРµР· bindable
   $effect(() => {
     addAIMessage = addAIMessageToChat;
   });
 
-  // Прикрепление элемента
+  // РџСЂРёРєСЂРµРїР»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р°
   function attachElement() {
     if (selectedElementInfo) {
       attachedElement = {
@@ -239,12 +240,12 @@
     }
   }
 
-  // Удаление прикрепленного элемента
+  // РЈРґР°Р»РµРЅРёРµ РїСЂРёРєСЂРµРїР»РµРЅРЅРѕРіРѕ СЌР»РµРјРµРЅС‚Р°
   function removeAttachedElement() {
     attachedElement = null;
   }
 
-  // Удаление сообщения
+  // РЈРґР°Р»РµРЅРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ
   function deleteMessage(messageId: string) {
     if (!currentChatId) {
       return;
@@ -256,15 +257,15 @@
     }));
   }
 
-  // Извлечение кода из сообщения AI
+  // РР·РІР»РµС‡РµРЅРёРµ РєРѕРґР° РёР· СЃРѕРѕР±С‰РµРЅРёСЏ AI
   function extractCodeFromMessage(content: string): string | null {
-    // Ищем код в markdown блоках
+    // РС‰РµРј РєРѕРґ РІ markdown Р±Р»РѕРєР°С…
     const codeBlockMatch = content.match(/```(?:rust|rs)?\s*([\s\S]*?)```/);
     if (codeBlockMatch) {
       return codeBlockMatch[1].trim();
     }
 
-    // Ищем код между тегами <code>
+    // РС‰РµРј РєРѕРґ РјРµР¶РґСѓ С‚РµРіР°РјРё <code>
     const htmlCodeMatch = content.match(/<code>([\s\S]*?)<\/code>/);
     if (htmlCodeMatch) {
       return htmlCodeMatch[1].trim();
@@ -273,10 +274,10 @@
     return null;
   }
 
-  // Извлечение JSON конфигурации из сообщения AI
+  // РР·РІР»РµС‡РµРЅРёРµ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёРё РёР· СЃРѕРѕР±С‰РµРЅРёСЏ AI
   function extractJSONConfigFromMessage(content: string): ParserConfig | null {
     try {
-      // Стратегия 1: Поиск JSON блока между ```json и ```
+      // РЎС‚СЂР°С‚РµРіРёСЏ 1: РџРѕРёСЃРє JSON Р±Р»РѕРєР° РјРµР¶РґСѓ ```json Рё ```
       const jsonBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
       if (jsonBlockMatch) {
         try {
@@ -285,11 +286,11 @@
             return parsed;
           }
         } catch {
-          // Невалидный JSON - просто игнорируем, не логируем
+          // РќРµРІР°Р»РёРґРЅС‹Р№ JSON - РїСЂРѕСЃС‚Рѕ РёРіРЅРѕСЂРёСЂСѓРµРј, РЅРµ Р»РѕРіРёСЂСѓРµРј
         }
       }
 
-      // Стратегия 2: Поиск первого JSON объекта с list_selector (более точный паттерн)
+      // РЎС‚СЂР°С‚РµРіРёСЏ 2: РџРѕРёСЃРє РїРµСЂРІРѕРіРѕ JSON РѕР±СЉРµРєС‚Р° СЃ list_selector (Р±РѕР»РµРµ С‚РѕС‡РЅС‹Р№ РїР°С‚С‚РµСЂРЅ)
       const jsonMatch = content.match(/\{[^{}]*"list_selector"[^{}]*\}/);
       if (jsonMatch) {
         try {
@@ -298,17 +299,17 @@
             return parsed;
           }
         } catch {
-          // Невалидный JSON - просто игнорируем, не логируем
+          // РќРµРІР°Р»РёРґРЅС‹Р№ JSON - РїСЂРѕСЃС‚Рѕ РёРіРЅРѕСЂРёСЂСѓРµРј, РЅРµ Р»РѕРіРёСЂСѓРµРј
         }
       }
 
-      // Стратегия 3: Попытка найти JSON объект с более умным парсингом
-      // Ищем объект, который начинается с { и содержит list_selector
+      // РЎС‚СЂР°С‚РµРіРёСЏ 3: РџРѕРїС‹С‚РєР° РЅР°Р№С‚Рё JSON РѕР±СЉРµРєС‚ СЃ Р±РѕР»РµРµ СѓРјРЅС‹Рј РїР°СЂСЃРёРЅРіРѕРј
+      // РС‰РµРј РѕР±СЉРµРєС‚, РєРѕС‚РѕСЂС‹Р№ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃ { Рё СЃРѕРґРµСЂР¶РёС‚ list_selector
       const jsonPattern = /\{[\s\S]{0,2000}?"list_selector"[\s\S]{0,2000}?\}/;
       const anyJsonMatch = content.match(jsonPattern);
       if (anyJsonMatch) {
         try {
-          // Пытаемся найти закрывающую скобку
+          // РџС‹С‚Р°РµРјСЃСЏ РЅР°Р№С‚Рё Р·Р°РєСЂС‹РІР°СЋС‰СѓСЋ СЃРєРѕР±РєСѓ
           let jsonStr = anyJsonMatch[0];
           let braceCount = 0;
           let endIndex = -1;
@@ -334,17 +335,17 @@
             }
           }
         } catch {
-          // Невалидный JSON - просто игнорируем, не логируем
+          // РќРµРІР°Р»РёРґРЅС‹Р№ JSON - РїСЂРѕСЃС‚Рѕ РёРіРЅРѕСЂРёСЂСѓРµРј, РЅРµ Р»РѕРіРёСЂСѓРµРј
         }
       }
     } catch {
-      // Общая ошибка - не логируем, просто возвращаем null
+      // РћР±С‰Р°СЏ РѕС€РёР±РєР° - РЅРµ Р»РѕРіРёСЂСѓРµРј, РїСЂРѕСЃС‚Рѕ РІРѕР·РІСЂР°С‰Р°РµРј null
     }
 
     return null;
   }
 
-  // Восстановление конфигурации парсера из сообщения
+  // Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРё РїР°СЂСЃРµСЂР° РёР· СЃРѕРѕР±С‰РµРЅРёСЏ
   function restoreConfigFromMessage(messageId: string) {
     if (!currentChatId) {
       return;
@@ -356,15 +357,15 @@
       return;
     }
 
-    // Пытаемся извлечь JSON конфигурацию
+    // РџС‹С‚Р°РµРјСЃСЏ РёР·РІР»РµС‡СЊ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ
     const config = extractJSONConfigFromMessage(message.content);
 
     if (config && config.list_selector) {
-      // Если есть JSON конфигурация, создаем узлы из неё (как при "повтори")
+      // Р•СЃР»Рё РµСЃС‚СЊ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ, СЃРѕР·РґР°РµРј СѓР·Р»С‹ РёР· РЅРµС‘ (РєР°Рє РїСЂРё "РїРѕРІС‚РѕСЂРё")
       try {
         if (onCreateNodes) {
           onCreateNodes(config);
-          // onCreateNodes автоматически вызовет generateParserCode, но для надежности вызываем onGenerateCode тоже
+          // onCreateNodes Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·РѕРІРµС‚ generateParserCode, РЅРѕ РґР»СЏ РЅР°РґРµР¶РЅРѕСЃС‚Рё РІС‹Р·С‹РІР°РµРј onGenerateCode С‚РѕР¶Рµ
           setTimeout(() => {
             if (onGenerateCode) {
               onGenerateCode();
@@ -377,26 +378,26 @@
           }
         }
 
-        // Добавляем сообщение об успехе
+        // Р”РѕР±Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕР± СѓСЃРїРµС…Рµ
         if (addAIMessage) {
-          addAIMessage('✅ Конфигурация парсера восстановлена из сообщения (узлы и код созданы)');
+          addAIMessage('вњ… РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РїР°СЂСЃРµСЂР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅР° РёР· СЃРѕРѕР±С‰РµРЅРёСЏ (СѓР·Р»С‹ Рё РєРѕРґ СЃРѕР·РґР°РЅС‹)');
         }
       } catch (error: unknown) {
         console.error('Failed to restore config from message:', error);
         if (addAIMessage) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          addAIMessage(`❌ Ошибка восстановления конфигурации: ${errorMessage}`);
+          addAIMessage(`вќЊ РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РєРѕРЅС„РёРіСѓСЂР°С†РёРё: ${errorMessage}`);
         }
       }
     } else {
-      // Если нет JSON конфигурации, сообщаем об этом
+      // Р•СЃР»Рё РЅРµС‚ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёРё, СЃРѕРѕР±С‰Р°РµРј РѕР± СЌС‚РѕРј
       if (addAIMessage) {
-        addAIMessage('❌ В этом сообщении не найдена JSON конфигурация парсера');
+        addAIMessage('вќЊ Р’ СЌС‚РѕРј СЃРѕРѕР±С‰РµРЅРёРё РЅРµ РЅР°Р№РґРµРЅР° JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ РїР°СЂСЃРµСЂР°');
       }
     }
   }
 
-  // Генерация кода из старого сообщения (работает как "повтори")
+  // Р“РµРЅРµСЂР°С†РёСЏ РєРѕРґР° РёР· СЃС‚Р°СЂРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ (СЂР°Р±РѕС‚Р°РµС‚ РєР°Рє "РїРѕРІС‚РѕСЂРё")
   function generateCodeFromMessage(messageId: string) {
     if (!currentChatId) {
       return;
@@ -408,15 +409,15 @@
       return;
     }
 
-    // Пытаемся извлечь JSON конфигурацию
+    // РџС‹С‚Р°РµРјСЃСЏ РёР·РІР»РµС‡СЊ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ
     const config = extractJSONConfigFromMessage(message.content);
 
     if (config && config.list_selector) {
-      // Если есть JSON конфигурация, создаем узлы из неё (как при "повтори")
+      // Р•СЃР»Рё РµСЃС‚СЊ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ, СЃРѕР·РґР°РµРј СѓР·Р»С‹ РёР· РЅРµС‘ (РєР°Рє РїСЂРё "РїРѕРІС‚РѕСЂРё")
       try {
         if (onCreateNodes) {
           onCreateNodes(config);
-          // onCreateNodes автоматически вызовет generateParserCode, но для надежности вызываем onGenerateCode тоже
+          // onCreateNodes Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р·РѕРІРµС‚ generateParserCode, РЅРѕ РґР»СЏ РЅР°РґРµР¶РЅРѕСЃС‚Рё РІС‹Р·С‹РІР°РµРј onGenerateCode С‚РѕР¶Рµ
           setTimeout(() => {
             if (onGenerateCode) {
               onGenerateCode();
@@ -429,33 +430,33 @@
           }
         }
 
-        // Добавляем сообщение об успехе
+        // Р”РѕР±Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РѕР± СѓСЃРїРµС…Рµ
         if (addAIMessage) {
-          addAIMessage('✅ Узлы и код восстановлены из сообщения');
+          addAIMessage('вњ… РЈР·Р»С‹ Рё РєРѕРґ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅС‹ РёР· СЃРѕРѕР±С‰РµРЅРёСЏ');
         }
       } catch (error: unknown) {
         console.error('Failed to create nodes from message:', error);
-        // Если не удалось создать узлы, просто генерируем код из существующих узлов
+        // Р•СЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СѓР·Р»С‹, РїСЂРѕСЃС‚Рѕ РіРµРЅРµСЂРёСЂСѓРµРј РєРѕРґ РёР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… СѓР·Р»РѕРІ
         if (onGenerateCode) {
           onGenerateCode();
         }
         if (addAIMessage) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          addAIMessage(`❌ Ошибка восстановления: ${errorMessage}`);
+          addAIMessage(`вќЊ РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ: ${errorMessage}`);
         }
       }
     } else {
-      // Если нет JSON конфигурации, просто генерируем код из существующих узлов
+      // Р•СЃР»Рё РЅРµС‚ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёРё, РїСЂРѕСЃС‚Рѕ РіРµРЅРµСЂРёСЂСѓРµРј РєРѕРґ РёР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… СѓР·Р»РѕРІ
       if (onGenerateCode) {
         onGenerateCode();
         if (addAIMessage) {
-          addAIMessage('⚠️ JSON конфигурация не найдена. Код сгенерирован из существующих узлов.');
+          addAIMessage('вљ пёЏ JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ РЅРµ РЅР°Р№РґРµРЅР°. РљРѕРґ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ РёР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… СѓР·Р»РѕРІ.');
         }
       }
     }
   }
 
-  // Копирование содержимого сообщения
+  // РљРѕРїРёСЂРѕРІР°РЅРёРµ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
   function copyMessageContent(messageId: string) {
     if (!currentChatId) {
       return;
@@ -467,16 +468,16 @@
       return;
     }
 
-    // Копируем текст сообщения (без HTML тегов)
+    // РљРѕРїРёСЂСѓРµРј С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ (Р±РµР· HTML С‚РµРіРѕРІ)
     const textContent = message.content
-      .replace(/<[^>]*>/g, '') // Удаляем HTML теги
-      .replace(/```[\s\S]*?```/g, match => match) // Оставляем код блоки
+      .replace(/<[^>]*>/g, '') // РЈРґР°Р»СЏРµРј HTML С‚РµРіРё
+      .replace(/```[\s\S]*?```/g, match => match) // РћСЃС‚Р°РІР»СЏРµРј РєРѕРґ Р±Р»РѕРєРё
       .trim();
 
     navigator.clipboard
       .writeText(textContent)
       .then(() => {
-        // Можно показать уведомление об успешном копировании
+        // РњРѕР¶РЅРѕ РїРѕРєР°Р·Р°С‚СЊ СѓРІРµРґРѕРјР»РµРЅРёРµ РѕР± СѓСЃРїРµС€РЅРѕРј РєРѕРїРёСЂРѕРІР°РЅРёРё
         console.log('Message copied to clipboard');
       })
       .catch(err => {
@@ -484,7 +485,7 @@
       });
   }
 
-  // Копирование только текста сообщения (без кода)
+  // РљРѕРїРёСЂРѕРІР°РЅРёРµ С‚РѕР»СЊРєРѕ С‚РµРєСЃС‚Р° СЃРѕРѕР±С‰РµРЅРёСЏ (Р±РµР· РєРѕРґР°)
   function copyMessageText(messageId: string) {
     if (!currentChatId) {
       return;
@@ -496,11 +497,11 @@
       return;
     }
 
-    // Копируем только чистый текст (без HTML тегов и без кода)
+    // РљРѕРїРёСЂСѓРµРј С‚РѕР»СЊРєРѕ С‡РёСЃС‚С‹Р№ С‚РµРєСЃС‚ (Р±РµР· HTML С‚РµРіРѕРІ Рё Р±РµР· РєРѕРґР°)
     const textContent = message.content
-      .replace(/<[^>]*>/g, '') // Удаляем HTML теги
-      .replace(/```[\s\S]*?```/g, '') // Удаляем код блоки
-      .replace(/^\s*[\r\n]+/gm, '') // Удаляем пустые строки
+      .replace(/<[^>]*>/g, '') // РЈРґР°Р»СЏРµРј HTML С‚РµРіРё
+      .replace(/```[\s\S]*?```/g, '') // РЈРґР°Р»СЏРµРј РєРѕРґ Р±Р»РѕРєРё
+      .replace(/^\s*[\r\n]+/gm, '') // РЈРґР°Р»СЏРµРј РїСѓСЃС‚С‹Рµ СЃС‚СЂРѕРєРё
       .trim();
 
     navigator.clipboard
@@ -513,7 +514,7 @@
       });
   }
 
-  // Применение исправления кода от AI
+  // РџСЂРёРјРµРЅРµРЅРёРµ РёСЃРїСЂР°РІР»РµРЅРёСЏ РєРѕРґР° РѕС‚ AI
   function applyCodeFix(messageId: string) {
     if (!currentChatId) {
       return;
@@ -531,13 +532,13 @@
     }
   }
 
-  // Проверка генерации кода
+  // РџСЂРѕРІРµСЂРєР° РіРµРЅРµСЂР°С†РёРё РєРѕРґР°
   async function checkGeneration() {
     if (!generatedCode) {
       const errorMsg: ChatMessage = {
         id: `msg-${Date.now()}`,
         role: 'assistant',
-        content: '❌ Код еще не сгенерирован. Сначала сгенерируйте код парсера.',
+        content: 'вќЊ РљРѕРґ РµС‰Рµ РЅРµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ. РЎРЅР°С‡Р°Р»Р° СЃРіРµРЅРµСЂРёСЂСѓР№С‚Рµ РєРѕРґ РїР°СЂСЃРµСЂР°.',
         timestamp: new Date(),
       };
       updateChat(currentChatId!, chat => ({
@@ -550,12 +551,12 @@
     await onCheckCodeWithAI();
   }
 
-  // Запуск парсера из чата - просто открывает вкладку runner, где пользователь может запустить парсер
+  // Р—Р°РїСѓСЃРє РїР°СЂСЃРµСЂР° РёР· С‡Р°С‚Р° - РїСЂРѕСЃС‚Рѕ РѕС‚РєСЂС‹РІР°РµС‚ РІРєР»Р°РґРєСѓ runner, РіРґРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РјРѕР¶РµС‚ Р·Р°РїСѓСЃС‚РёС‚СЊ РїР°СЂСЃРµСЂ
   function runParserFromChat() {
     if (nodes.length === 0) {
       if (addAIMessage) {
         addAIMessage(
-          '❌ Нет нод парсера. Сначала создайте парсер через AI или восстановите из сообщения.'
+          'вќЊ РќРµС‚ РЅРѕРґ РїР°СЂСЃРµСЂР°. РЎРЅР°С‡Р°Р»Р° СЃРѕР·РґР°Р№С‚Рµ РїР°СЂСЃРµСЂ С‡РµСЂРµР· AI РёР»Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚Рµ РёР· СЃРѕРѕР±С‰РµРЅРёСЏ.'
         );
       }
       return;
@@ -563,31 +564,31 @@
 
     if (!currentUrl) {
       if (addAIMessage) {
-        addAIMessage('❌ Нет загруженной страницы. Сначала загрузите страницу для тестирования.');
+        addAIMessage('вќЊ РќРµС‚ Р·Р°РіСЂСѓР¶РµРЅРЅРѕР№ СЃС‚СЂР°РЅРёС†С‹. РЎРЅР°С‡Р°Р»Р° Р·Р°РіСЂСѓР·РёС‚Рµ СЃС‚СЂР°РЅРёС†Сѓ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ.');
       }
       return;
     }
 
-    // Открываем вкладку runner через callback, если он есть
-    // В ParserBuilder это обработается и откроется вкладка runner
+    // РћС‚РєСЂС‹РІР°РµРј РІРєР»Р°РґРєСѓ runner С‡РµСЂРµР· callback, РµСЃР»Рё РѕРЅ РµСЃС‚СЊ
+    // Р’ ParserBuilder СЌС‚Рѕ РѕР±СЂР°Р±РѕС‚Р°РµС‚СЃСЏ Рё РѕС‚РєСЂРѕРµС‚СЃСЏ РІРєР»Р°РґРєР° runner
     if (onTestParser) {
-      // onTestParser может быть функцией, которая открывает runner вкладку
-      // Вызываем её, но не ждем результата, так как запуск парсера должен происходить в ParserRunner
+      // onTestParser РјРѕР¶РµС‚ Р±С‹С‚СЊ С„СѓРЅРєС†РёРµР№, РєРѕС‚РѕСЂР°СЏ РѕС‚РєСЂС‹РІР°РµС‚ runner РІРєР»Р°РґРєСѓ
+      // Р’С‹Р·С‹РІР°РµРј РµС‘, РЅРѕ РЅРµ Р¶РґРµРј СЂРµР·СѓР»СЊС‚Р°С‚Р°, С‚Р°Рє РєР°Рє Р·Р°РїСѓСЃРє РїР°СЂСЃРµСЂР° РґРѕР»Р¶РµРЅ РїСЂРѕРёСЃС…РѕРґРёС‚СЊ РІ ParserRunner
       onTestParser().catch((error: unknown) => {
         console.error('Error in onTestParser:', error);
         if (addAIMessage) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          addAIMessage(`❌ Ошибка: ${errorMessage}`);
+          addAIMessage(`вќЊ РћС€РёР±РєР°: ${errorMessage}`);
         }
       });
     } else {
       if (addAIMessage) {
-        addAIMessage('ℹ️ Перейдите во вкладку "Запуск парсера" в нижней панели для запуска.');
+        addAIMessage('в„№пёЏ РџРµСЂРµР№РґРёС‚Рµ РІРѕ РІРєР»Р°РґРєСѓ "Р—Р°РїСѓСЃРє РїР°СЂСЃРµСЂР°" РІ РЅРёР¶РЅРµР№ РїР°РЅРµР»Рё РґР»СЏ Р·Р°РїСѓСЃРєР°.');
       }
     }
   }
 
-  // Инициализация - только один раз при монтировании
+  // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ - С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р· РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
   let initialized = $state(false);
 
   $effect(() => {
@@ -597,12 +598,12 @@
     }
   });
 
-  // Обновление сообщений при изменении текущего чата
+  // РћР±РЅРѕРІР»РµРЅРёРµ СЃРѕРѕР±С‰РµРЅРёР№ РїСЂРё РёР·РјРµРЅРµРЅРёРё С‚РµРєСѓС‰РµРіРѕ С‡Р°С‚Р°
   $effect(() => {
     updateMessagesFromChat();
   });
 
-  // Прокрутка вниз при новых сообщениях
+  // РџСЂРѕРєСЂСѓС‚РєР° РІРЅРёР· РїСЂРё РЅРѕРІС‹С… СЃРѕРѕР±С‰РµРЅРёСЏС…
   $effect(() => {
     if (chatContainer && messages.length > 0) {
       const timeoutId = setTimeout(() => {
@@ -612,10 +613,10 @@
     }
   });
 
-  // Автоматическое прикрепление элемента при его выборе (только если не открыт список чатов)
+  // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРµ РїСЂРёРєСЂРµРїР»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р° РїСЂРё РµРіРѕ РІС‹Р±РѕСЂРµ (С‚РѕР»СЊРєРѕ РµСЃР»Рё РЅРµ РѕС‚РєСЂС‹С‚ СЃРїРёСЃРѕРє С‡Р°С‚РѕРІ)
   $effect(() => {
     if (selectedElementInfo && !showChatList && !attachedElement) {
-      // Автоматически прикрепляем элемент, если он выбран
+      // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїСЂРёРєСЂРµРїР»СЏРµРј СЌР»РµРјРµРЅС‚, РµСЃР»Рё РѕРЅ РІС‹Р±СЂР°РЅ
       attachElement();
     }
   });
@@ -631,17 +632,17 @@
       role: 'user',
       content:
         inputMessage.trim() ||
-        (attachedElement ? `Прикреплен элемент: ${attachedElement.tagName}` : ''),
+        (attachedElement ? `РџСЂРёРєСЂРµРїР»РµРЅ СЌР»РµРјРµРЅС‚: ${attachedElement.tagName}` : ''),
       timestamp: new Date(),
       attachedElement: attachedElement || undefined,
     };
 
-    // Добавляем сообщение в чат
+    // Р”РѕР±Р°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РІ С‡Р°С‚
     updateChat(currentChatId, chat => ({
       ...chat,
       messages: [...chat.messages, userMessage],
       title:
-        chat.messages.length === 1 ? inputMessage.trim().slice(0, 30) || 'Новый чат' : chat.title,
+        chat.messages.length === 1 ? inputMessage.trim().slice(0, 30) || 'РќРѕРІС‹Р№ С‡Р°С‚' : chat.title,
     }));
 
     const messageText = inputMessage.trim();
@@ -651,14 +652,14 @@
     isSending = true;
 
     try {
-      // Формируем историю сообщений для AI
+      // Р¤РѕСЂРјРёСЂСѓРµРј РёСЃС‚РѕСЂРёСЋ СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ AI
       const currentChat = chats.find(c => c.id === currentChatId);
       const messageHistory: [string, string][] = [
         ['system', systemPrompt],
         ...(currentChat?.messages.slice(0, -1) || []).map(m => {
           let content = m.content;
           if (m.attachedElement) {
-            content += `\n\n[Прикреплен HTML элемент]\nСелектор: ${m.attachedElement.selector}\nТег: ${m.attachedElement.tagName}\nТекст: ${m.attachedElement.text}\nАтрибуты: ${JSON.stringify(m.attachedElement.attributes)}`;
+            content += `\n\n[РџСЂРёРєСЂРµРїР»РµРЅ HTML СЌР»РµРјРµРЅС‚]\nРЎРµР»РµРєС‚РѕСЂ: ${m.attachedElement.selector}\nРўРµРі: ${m.attachedElement.tagName}\nРўРµРєСЃС‚: ${m.attachedElement.text}\nРђС‚СЂРёР±СѓС‚С‹: ${JSON.stringify(m.attachedElement.attributes)}`;
           }
           return [m.role, content] as [string, string];
         }),
@@ -666,12 +667,12 @@
           'user',
           messageText +
             (elementInfo
-              ? `\n\n[Прикреплен HTML элемент]\nСелектор: ${elementInfo.selector}\nТег: ${elementInfo.tagName}\nТекст: ${elementInfo.text}\nАтрибуты: ${JSON.stringify(elementInfo.attributes)}`
+              ? `\n\n[РџСЂРёРєСЂРµРїР»РµРЅ HTML СЌР»РµРјРµРЅС‚]\nРЎРµР»РµРєС‚РѕСЂ: ${elementInfo.selector}\nРўРµРі: ${elementInfo.tagName}\nРўРµРєСЃС‚: ${elementInfo.text}\nРђС‚СЂРёР±СѓС‚С‹: ${JSON.stringify(elementInfo.attributes)}`
               : ''),
         ],
       ];
 
-      // Отправляем запрос к AI
+      // РћС‚РїСЂР°РІР»СЏРµРј Р·Р°РїСЂРѕСЃ Рє AI
       let ollamaUrl = aiOllamaUrl;
       if (aiModelType === 'ollama' && ollamaUrl && !ollamaUrl.includes('/api/')) {
         ollamaUrl = `${ollamaUrl}/api/generate`;
@@ -685,20 +686,20 @@
         ollamaUrl: ollamaUrl || null,
       });
 
-      // Пытаемся извлечь JSON из ответа (несколько стратегий)
+      // РџС‹С‚Р°РµРјСЃСЏ РёР·РІР»РµС‡СЊ JSON РёР· РѕС‚РІРµС‚Р° (РЅРµСЃРєРѕР»СЊРєРѕ СЃС‚СЂР°С‚РµРіРёР№)
       let config: ParserConfig | null = null;
 
-      // Стратегия 1: Прямой парсинг, если ответ - чистый JSON
+      // РЎС‚СЂР°С‚РµРіРёСЏ 1: РџСЂСЏРјРѕР№ РїР°СЂСЃРёРЅРі, РµСЃР»Рё РѕС‚РІРµС‚ - С‡РёСЃС‚С‹Р№ JSON
       try {
         config = JSON.parse(response.trim());
       } catch {
-        // Стратегия 2: Поиск JSON блока между ```json и ```
+        // РЎС‚СЂР°С‚РµРіРёСЏ 2: РџРѕРёСЃРє JSON Р±Р»РѕРєР° РјРµР¶РґСѓ ```json Рё ```
         const jsonBlockMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
         if (jsonBlockMatch) {
           try {
             config = JSON.parse(jsonBlockMatch[1].trim());
           } catch {
-            // Стратегия 3: Поиск первого JSON объекта
+            // РЎС‚СЂР°С‚РµРіРёСЏ 3: РџРѕРёСЃРє РїРµСЂРІРѕРіРѕ JSON РѕР±СЉРµРєС‚Р°
             const jsonMatch = response.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
               try {
@@ -709,7 +710,7 @@
             }
           }
         } else {
-          // Стратегия 4: Поиск JSON объекта без блоков кода
+          // РЎС‚СЂР°С‚РµРіРёСЏ 4: РџРѕРёСЃРє JSON РѕР±СЉРµРєС‚Р° Р±РµР· Р±Р»РѕРєРѕРІ РєРѕРґР°
           const jsonMatch = response.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             try {
@@ -722,15 +723,15 @@
       }
 
       if (config && typeof config === 'object' && config.list_selector) {
-        // Успешно распарсили JSON с list_selector
+        // РЈСЃРїРµС€РЅРѕ СЂР°СЃРїР°СЂСЃРёР»Рё JSON СЃ list_selector
         try {
-          // Создаем узлы из конфигурации
+          // РЎРѕР·РґР°РµРј СѓР·Р»С‹ РёР· РєРѕРЅС„РёРіСѓСЂР°С†РёРё
           onCreateNodes(config);
 
           const assistantMessage: ChatMessage = {
             id: `msg-${Date.now()}`,
             role: 'assistant',
-            content: `✅ Парсер создан! Я создал конфигурацию с селекторами.\n\nНоды созданы на графе. Теперь можно протестировать парсер.`,
+            content: `вњ… РџР°СЂСЃРµСЂ СЃРѕР·РґР°РЅ! РЇ СЃРѕР·РґР°Р» РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ СЃ СЃРµР»РµРєС‚РѕСЂР°РјРё.\n\nРќРѕРґС‹ СЃРѕР·РґР°РЅС‹ РЅР° РіСЂР°С„Рµ. РўРµРїРµСЂСЊ РјРѕР¶РЅРѕ РїСЂРѕС‚РµСЃС‚РёСЂРѕРІР°С‚СЊ РїР°СЂСЃРµСЂ.`,
             timestamp: new Date(),
           };
 
@@ -745,7 +746,7 @@
           const assistantMessage: ChatMessage = {
             id: `msg-${Date.now()}`,
             role: 'assistant',
-            content: `✅ Конфигурация получена.\n\n⚠️ Ошибка при создании нод: ${errorMessage}`,
+            content: `вњ… РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РїРѕР»СѓС‡РµРЅР°.\n\nвљ пёЏ РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РЅРѕРґ: ${errorMessage}`,
             timestamp: new Date(),
           };
 
@@ -755,11 +756,11 @@
           }));
         }
       } else {
-        // Не удалось распарсить JSON или нет list_selector
+        // РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїР°СЂСЃРёС‚СЊ JSON РёР»Рё РЅРµС‚ list_selector
         const assistantMessage: ChatMessage = {
           id: `msg-${Date.now()}`,
           role: 'assistant',
-          content: `⚠️ Не удалось распарсить ответ как JSON конфигурацию.\n\nОтвет AI:\n${response}\n\nПопробуйте переформулировать запрос или убедитесь, что AI возвращает JSON в правильном формате.`,
+          content: `вљ пёЏ РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃРїР°СЂСЃРёС‚СЊ РѕС‚РІРµС‚ РєР°Рє JSON РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ.\n\nРћС‚РІРµС‚ AI:\n${response}\n\nРџРѕРїСЂРѕР±СѓР№С‚Рµ РїРµСЂРµС„РѕСЂРјСѓР»РёСЂРѕРІР°С‚СЊ Р·Р°РїСЂРѕСЃ РёР»Рё СѓР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ AI РІРѕР·РІСЂР°С‰Р°РµС‚ JSON РІ РїСЂР°РІРёР»СЊРЅРѕРј С„РѕСЂРјР°С‚Рµ.`,
           timestamp: new Date(),
         };
 
@@ -779,7 +780,7 @@
           {
             id: `msg-${Date.now()}`,
             role: 'assistant',
-            content: `❌ Ошибка: ${errorMessage}`,
+            content: `вќЊ РћС€РёР±РєР°: ${errorMessage}`,
             timestamp: new Date(),
           },
         ],
@@ -789,12 +790,6 @@
     }
   }
 
-  function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  }
 
   function clearChat() {
     if (!currentChatId) {
@@ -806,7 +801,7 @@
         {
           id: `msg-${Date.now()}`,
           role: 'assistant',
-          content: 'Чат очищен. Чем могу помочь?',
+          content: 'Р§Р°С‚ РѕС‡РёС‰РµРЅ. Р§РµРј РјРѕРіСѓ РїРѕРјРѕС‡СЊ?',
           timestamp: new Date(),
         },
       ],
@@ -815,290 +810,57 @@
 </script>
 
 <div class="ai-chat">
-  <div class="chat-header">
-    <div class="chat-header-left">
-      <button
-        class="btn-chat-list"
-        onclick={() => (showChatList = !showChatList)}
-        title="Список чатов"
-      >
-        💬
-      </button>
-      <h3>{chats.find(c => c.id === currentChatId)?.title || 'AI Помощник'}</h3>
-    </div>
-    <div class="chat-header-right">
-      <button class="btn-clear" onclick={clearChat} title="Очистить чат"> 🗑️ </button>
-    </div>
-  </div>
+  <ChatHeader
+    title={chats.find(c => c.id === currentChatId)?.title || 'AI РџРѕРјРѕС‰РЅРёРє'}
+    onToggleChatList={() => (showChatList = !showChatList)}
+    onClear={clearChat}
+  />
 
   {#if showChatList}
-    <div class="chat-list-panel">
-      <div class="chat-list-header">
-        <h4>Чаты</h4>
-        <button class="btn-new-chat" onclick={createNewChat} title="Новый чат"> ➕ </button>
-      </div>
-      <div class="chat-list">
-        {#each chats as chat (chat.id)}
-          <div
-            class="chat-item"
-            class:active={chat.id === currentChatId}
-            onclick={() => {
-              currentChatId = chat.id;
-              updateMessagesFromChat();
-              showChatList = false;
-            }}
-            onkeydown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                currentChatId = chat.id;
-                updateMessagesFromChat();
-                showChatList = false;
-              }
-            }}
-            role="button"
-            tabindex="0"
-            aria-label={`Выбрать чат: ${chat.title}`}
-          >
-            <div class="chat-item-title">{chat.title}</div>
-            <div class="chat-item-meta">
-              {chat.messages.length} сообщений • {new Date(chat.updatedAt).toLocaleDateString(
-                'ru-RU'
-              )}
-            </div>
-            <button
-              class="btn-delete-chat"
-              onclick={e => {
-                e.stopPropagation();
-                deleteChat(chat.id);
-              }}
-              title="Удалить чат"
-            >
-              ×
-            </button>
-          </div>
-        {/each}
-      </div>
-    </div>
+    <ChatList
+      {chats}
+      currentChatId={currentChatId}
+      onSelectChat={(chatId) => {
+        currentChatId = chatId;
+        updateMessagesFromChat();
+        showChatList = false;
+      }}
+      onDeleteChat={deleteChat}
+      onCreateNew={createNewChat}
+    />
   {/if}
 
-  <!-- Код теперь показывается только в нижней панели, не в чате -->
+  <!-- РљРѕРґ С‚РµРїРµСЂСЊ РїРѕРєР°Р·С‹РІР°РµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ РЅРёР¶РЅРµР№ РїР°РЅРµР»Рё, РЅРµ РІ С‡Р°С‚Рµ -->
 
-  <div class="chat-messages" bind:this={chatContainer}>
-    {#each messages as message (message.id)}
-      <div class="message message-{message.role}">
-        <div class="message-header">
-          <div class="message-actions">
-            {#if message.role === 'assistant'}
-              {@const hasJsonConfig = extractJSONConfigFromMessage(message.content)}
-              {@const hasCode =
-                message.content.includes('```') || message.content.includes('<code>')}
-              {@const hasParserMention =
-                message.content.includes('Парсер') ||
-                message.content.includes('парсер') ||
-                message.content.includes('конфигурацию') ||
-                message.content.includes('селектор')}
-              {#if hasCode}
-                <button
-                  class="btn-message-action"
-                  onclick={() => applyCodeFix(message.id)}
-                  title="Применить исправление кода"
-                >
-                  ✅ Применить код
-                </button>
-              {/if}
-              {#if hasJsonConfig || hasParserMention}
-                {#if hasJsonConfig}
-                  <button
-                    class="btn-message-action"
-                    onclick={() => restoreConfigFromMessage(message.id)}
-                    title="Восстановить конфигурацию парсера из этого сообщения (создаст узлы и код)"
-                  >
-                    🔄 Восстановить конфигурацию
-                  </button>
-                  <button
-                    class="btn-message-action"
-                    onclick={() => generateCodeFromMessage(message.id)}
-                    title="Сгенерировать код из этого сообщения (создаст узлы и код, как при 'повтори')"
-                  >
-                    📄 Генерировать код
-                  </button>
-                {/if}
-                <button
-                  class="btn-message-action"
-                  onclick={runParserFromChat}
-                  title="Запустить парсер"
-                  disabled={nodes.length === 0 || !currentUrl}
-                >
-                  ▶️ Запустить парсер
-                </button>
-              {/if}
-            {/if}
-            <button
-              class="btn-message-action"
-              onclick={() => copyMessageContent(message.id)}
-              title="Копировать сообщение"
-            >
-              📋 Копировать
-            </button>
-            <button
-              class="btn-message-action"
-              onclick={() => copyMessageText(message.id)}
-              title="Копировать текст сообщения в буфер обмена"
-            >
-              📄 Копировать текст
-            </button>
-            <button
-              class="btn-delete-message"
-              onclick={() => deleteMessage(message.id)}
-              title="Удалить сообщение"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-        <div class="message-content">
-          {#if message.attachedElement}
-            <div class="attached-element">
-              <div class="attached-element-header">
-                <span class="attached-icon">📎</span>
-                <span class="attached-label">Прикреплен элемент</span>
-              </div>
-              <div class="attached-element-info">
-                <div class="attached-info-row">
-                  <strong>Селектор:</strong> <code>{message.attachedElement.selector}</code>
-                </div>
-                <div class="attached-info-row">
-                  <strong>Тег:</strong>
-                  <span class="tag-badge">{message.attachedElement.tagName}</span>
-                </div>
-                {#if message.attachedElement.text}
-                  <div class="attached-info-row">
-                    <strong>Текст:</strong>
-                    <span class="text-preview">{message.attachedElement.text.slice(0, 100)}</span>
-                  </div>
-                {/if}
-              </div>
-            </div>
-          {/if}
+  <ChatMessages
+    {messages}
+    hasJsonConfig={extractJSONConfigFromMessage}
+    canRunParser={nodes.length > 0 && !!currentUrl}
+    onApplyCode={applyCodeFix}
+    onRestoreConfig={restoreConfigFromMessage}
+    onGenerateCode={generateCodeFromMessage}
+    onRunParser={runParserFromChat}
+    onCopy={copyMessageContent}
+    onCopyText={copyMessageText}
+    onDelete={deleteMessage}
+  />
 
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-          {@html message.content
-            .replace(
-              /```(?:rust|rs|json)?\s*([\s\S]*?)\s*```/g,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /\{[\s\S]*?"list_selector"[\s\S]*?\}/g,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /<pre[^>]*>[\s\S]*?<\/pre>/gi,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /<code[^>]*>[\s\S]*?<\/code>/gi,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /<div[^>]*class="code-header"[^>]*>[\s\S]*?<\/div>/gi,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /<div[^>]*class="code-content"[^>]*>[\s\S]*?<\/div>/gi,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(
-              /<h3[^>]*>Код<\/h3>/gi,
-              '<div class="code-reference">[Код сгенерирован и доступен в нижней панели]</div>'
-            )
-            .replace(/<button[^>]*>Проверить AI<\/button>/gi, '')
-            .replace(/<button[^>]*>Редактировать<\/button>/gi, '')
-            .replace(/<button[^>]*>Копировать<\/button>/gi, '')
-            .replace(/\n/g, '<br>')}
-        </div>
-        <div class="message-time">
-          {message.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-      </div>
-    {/each}
-
-    {#if isSending}
-      <div class="message message-assistant">
-        <div class="message-content">
-          <span class="typing-indicator">...</span>
-        </div>
-      </div>
-    {/if}
-  </div>
-
-  <div class="chat-input">
-    {#if attachedElement}
-      <div class="attached-element-preview">
-        <div class="attached-preview-header">
-          <span class="attached-icon">📎</span>
-          <span>Элемент: {attachedElement.tagName} ({attachedElement.selector})</span>
-          <button class="btn-remove-attachment" onclick={removeAttachedElement} title="Убрать">
-            ×
-          </button>
-        </div>
-      </div>
-    {/if}
-
-    {#if selectedElementInfo && !attachedElement}
-      <div class="attach-element-hint">
-        <button class="btn-attach" onclick={attachElement} title="Прикрепить выделенный элемент">
-          📎 Прикрепить элемент
-        </button>
-      </div>
-    {/if}
-
-    <div class="chat-input-actions">
-      <button
-        class="btn-chat-action"
-        onclick={() => onGenerateCode()}
-        disabled={nodes.length === 0}
-        title="Генерировать код парсера"
-      >
-        📄 Код
-      </button>
-      <button
-        class="btn-chat-action"
-        onclick={checkGeneration}
-        disabled={!generatedCode}
-        title="Проверить код с помощью AI"
-      >
-        🤖 Проверить
-      </button>
-      <button
-        class="btn-chat-action"
-        onclick={runParserFromChat}
-        disabled={nodes.length === 0 || !currentUrl}
-        title="Запустить парсер"
-      >
-        ▶️ Тест
-      </button>
-    </div>
-    <div class="chat-input-row">
-      <textarea
-        bind:value={inputMessage}
-        onkeydown={handleKeyPress}
-        placeholder="Опиши, какие данные нужно извлечь с сайта..."
-        rows="2"
-        disabled={isSending}
-      ></textarea>
-      <button
-        class="btn-send"
-        onclick={sendMessage}
-        disabled={isSending || (!inputMessage.trim() && !attachedElement)}
-      >
-        {#if isSending}
-          ⏳
-        {:else}
-          ➤
-        {/if}
-      </button>
-    </div>
-  </div>
+  <ChatInput
+    inputMessage={inputMessage}
+    isSending={isSending}
+    attachedElement={attachedElement}
+    selectedElementInfo={selectedElementInfo}
+    nodesCount={nodes.length}
+    hasGeneratedCode={!!generatedCode}
+    hasCurrentUrl={!!currentUrl}
+    onInputChange={(value) => inputMessage = value}
+    onSend={sendMessage}
+    onAttachElement={attachElement}
+    onRemoveAttachment={removeAttachedElement}
+    onGenerateCode={() => onGenerateCode()}
+    onCheckCode={checkGeneration}
+    onRunParser={runParserFromChat}
+  />
 </div>
 
 <style>
@@ -1109,609 +871,5 @@
     background: #1e293b;
     border-left: 1px solid #334155;
     position: relative;
-  }
-
-  .chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: clamp(0.75rem, 1.5vh, 1rem) clamp(1rem, 2vw, 1.25rem);
-    border-bottom: 1px solid #334155;
-    background: #0f172a;
-  }
-
-  .chat-header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .btn-chat-list {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
-  }
-
-  .btn-chat-list:hover {
-    background: #334155;
-  }
-
-  .chat-header h3 {
-    margin: 0;
-    font-size: clamp(0.875rem, 1.1vw, 1rem);
-    color: #e2e8f0;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .chat-header-right {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .btn-clear {
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-clear:hover {
-    background: #334155;
-  }
-
-  /* Список чатов */
-  .chat-list-panel {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #1e293b;
-    border-bottom: 1px solid #334155;
-    z-index: 100;
-    max-height: 400px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .chat-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: clamp(0.75rem, 1.5vh, 1rem);
-    border-bottom: 1px solid #334155;
-  }
-
-  .chat-list-header h4 {
-    margin: 0;
-    font-size: clamp(0.875rem, 1.1vw, 1rem);
-    color: #e2e8f0;
-  }
-
-  .btn-new-chat {
-    background: #0ea5e9;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-new-chat:hover {
-    background: #0284c7;
-  }
-
-  .chat-list {
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .chat-item {
-    padding: clamp(0.75rem, 1.5vh, 1rem);
-    border-bottom: 1px solid #334155;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    position: relative;
-  }
-
-  .chat-item:hover {
-    background: #334155;
-  }
-
-  .chat-item.active {
-    background: #0ea5e9;
-  }
-
-  .chat-item-title {
-    font-weight: 600;
-    color: #e2e8f0;
-    font-size: clamp(0.875rem, 1.1vw, 1rem);
-    margin-bottom: 0.25rem;
-  }
-
-  .chat-item.active .chat-item-title {
-    color: white;
-  }
-
-  .chat-item-meta {
-    font-size: clamp(0.625rem, 0.8vw, 0.75rem);
-    color: #64748b;
-  }
-
-  .chat-item.active .chat-item-meta {
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  .btn-delete-chat {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background: transparent;
-    border: none;
-    color: #cbd5e1;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 1.25rem;
-    line-height: 1;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-    opacity: 0;
-  }
-
-  .chat-item:hover .btn-delete-chat {
-    opacity: 1;
-  }
-
-  .btn-delete-chat:hover {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-  }
-
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: clamp(0.75rem, 1.5vh, 1rem);
-    display: flex;
-    flex-direction: column;
-    gap: clamp(0.75rem, 1.5vh, 1rem);
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    max-width: 85%;
-    animation: messageFadeIn 0.3s ease-out;
-    position: relative;
-  }
-
-  @keyframes messageFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .message-header {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.25rem;
-  }
-
-  .message-actions {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .message:hover .message-actions {
-    opacity: 1;
-  }
-
-  .btn-message-action {
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    color: #0ea5e9;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    line-height: 1;
-    transition: all 0.2s ease;
-  }
-
-  .btn-message-action:hover {
-    background: rgba(14, 165, 233, 0.2);
-    border-color: #0ea5e9;
-  }
-
-  .btn-delete-message {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    line-height: 1;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-  }
-
-  .btn-delete-message:hover {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-  }
-
-  .chat-input-actions {
-    display: flex;
-    gap: 0.375rem;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-  }
-
-  .btn-chat-action {
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    color: #0ea5e9;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.6875rem;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .btn-chat-action:hover:not(:disabled) {
-    background: rgba(14, 165, 233, 0.2);
-    border-color: #0ea5e9;
-  }
-
-  .btn-chat-action:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .message-user {
-    align-self: flex-end;
-  }
-
-  .message-assistant {
-    align-self: flex-start;
-  }
-
-  .message-content {
-    padding: clamp(0.625rem, 1.25vh, 0.75rem) clamp(0.875rem, 1.75vw, 1rem);
-    border-radius: 0.75rem;
-    font-size: clamp(0.875rem, 1.1vw, 1rem);
-    line-height: 1.5;
-    word-wrap: break-word;
-  }
-
-  .message-user .message-content {
-    background: #0ea5e9;
-    color: white;
-    border-bottom-right-radius: 0.25rem;
-  }
-
-  .message-assistant .message-content {
-    background: #334155;
-    color: #e2e8f0;
-    border-bottom-left-radius: 0.25rem;
-  }
-
-  .attached-element {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.5rem;
-    padding: clamp(0.5rem, 1vh, 0.75rem);
-    margin-bottom: 0.75rem;
-  }
-
-  .attached-element-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-  }
-
-  .attached-icon {
-    font-size: 1rem;
-  }
-
-  .attached-label {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .attached-element-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-    font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-  }
-
-  .attached-info-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-  }
-
-  .attached-info-row strong {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .attached-info-row code {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-family: 'Courier New', monospace;
-    font-size: 0.875em;
-    color: #10b981;
-  }
-
-  .tag-badge {
-    background: rgba(14, 165, 233, 0.2);
-    color: #0ea5e9;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-    font-weight: 600;
-  }
-
-  .text-preview {
-    color: rgba(255, 255, 255, 0.8);
-    font-style: italic;
-  }
-
-  /* Скрываем все блоки кода в сообщениях - код теперь только в нижней панели */
-  .message-content pre,
-  .message-content pre code,
-  .message-content code:not(.attached-info-row code) {
-    display: none !important;
-  }
-
-  /* JSON конфигурация уже заменяется на ссылку в обработке сообщений */
-
-  /* Показываем только селекторы в прикрепленных элементах */
-  .attached-info-row code {
-    display: inline !important;
-    font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-    color: #10b981;
-  }
-
-  .code-reference {
-    padding: 0.5rem;
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    border-radius: 0.375rem;
-    color: #0ea5e9;
-    font-size: 0.875rem;
-    margin: 0.5rem 0;
-    font-style: italic;
-  }
-
-  /* Скрываем любые панели с кодом внутри чата - код теперь только в нижней панели */
-  .code-panel-in-chat {
-    display: none !important;
-  }
-
-  /* Скрываем все элементы с кодом внутри чата, кроме селекторов в прикрепленных элементах */
-  .ai-chat .code-header,
-  .ai-chat .code-content,
-  .ai-chat .code-panel,
-  .ai-chat pre:not(.attached-info-row pre),
-  .ai-chat code:not(.attached-info-row code) {
-    display: none !important;
-  }
-
-  /* Скрываем все заголовки h3 внутри чата (включая "Код") */
-  .ai-chat h3:not(.chat-header h3) {
-    display: none !important;
-  }
-
-  /* Скрываем все элементы с классом code-header или code-content */
-  .ai-chat .code-header,
-  .ai-chat .code-content,
-  .ai-chat .code-panel {
-    display: none !important;
-  }
-
-  /* Скрываем все элементы, которые содержат JSON конфигурацию */
-  .ai-chat pre:not(.attached-info-row pre),
-  .ai-chat code:not(.attached-info-row code),
-  .ai-chat button[title*='Проверить AI'],
-  .ai-chat button[title*='Редактировать'],
-  .ai-chat button[title*='Копировать'] {
-    display: none !important;
-  }
-
-  /* Показываем только селекторы в прикрепленных элементах */
-  .attached-info-row code {
-    display: inline !important;
-  }
-
-  /* JSON конфигурация уже заменяется на ссылку в обработке сообщений */
-
-  .message-time {
-    font-size: clamp(0.625rem, 0.8vw, 0.75rem);
-    color: #64748b;
-    margin-top: 0.25rem;
-    padding: 0 0.5rem;
-  }
-
-  .message-user .message-time {
-    text-align: right;
-  }
-
-  .typing-indicator {
-    display: inline-block;
-    animation: typing 1.4s infinite;
-  }
-
-  @keyframes typing {
-    0%,
-    60%,
-    100% {
-      opacity: 0.3;
-    }
-    30% {
-      opacity: 1;
-    }
-  }
-
-  .chat-input {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: clamp(0.75rem, 1.5vh, 1rem);
-    border-top: 1px solid #334155;
-    background: #0f172a;
-  }
-
-  .attached-element-preview {
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    border-radius: 0.5rem;
-    padding: clamp(0.5rem, 1vh, 0.75rem);
-  }
-
-  .attached-preview-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-    color: #0ea5e9;
-  }
-
-  .btn-remove-attachment {
-    background: transparent;
-    border: none;
-    color: #0ea5e9;
-    cursor: pointer;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 1rem;
-    line-height: 1;
-    margin-left: auto;
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-remove-attachment:hover {
-    background: rgba(14, 165, 233, 0.2);
-  }
-
-  .attach-element-hint {
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .btn-attach {
-    background: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    color: #0ea5e9;
-    cursor: pointer;
-    padding: clamp(0.375rem, 0.75vh, 0.5rem) clamp(0.75rem, 1.5vw, 1rem);
-    border-radius: 0.5rem;
-    font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-    transition: background-color 0.2s ease;
-  }
-
-  .btn-attach:hover {
-    background: rgba(14, 165, 233, 0.2);
-  }
-
-  .chat-input-row {
-    display: flex;
-    gap: 0.375rem;
-    align-items: flex-start;
-  }
-
-  .chat-input textarea {
-    flex: 1;
-    padding: clamp(0.625rem, 1.25vh, 0.75rem) clamp(0.875rem, 1.75vw, 1rem);
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 0.375rem;
-    color: #e2e8f0;
-    font-size: clamp(0.8125rem, 1vw, 0.9375rem);
-    font-family: inherit;
-    resize: vertical;
-    min-height: 3rem;
-    max-height: 8rem;
-    line-height: 1.5;
-  }
-
-  .chat-input textarea:focus {
-    outline: none;
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-  }
-
-  .chat-input textarea:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .btn-send {
-    padding: clamp(0.5rem, 1vh, 0.625rem) clamp(0.875rem, 1.75vw, 1rem);
-    background: #0ea5e9;
-    border: none;
-    border-radius: 0.375rem;
-    color: white;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-    min-width: 2.5rem;
-    align-self: flex-start;
-  }
-
-  .btn-send:hover:not(:disabled) {
-    background: #0284c7;
-  }
-
-  .btn-send:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 768px) {
-    .message {
-      max-width: 95%;
-    }
-
-    .chat-header,
-    .chat-input {
-      padding: clamp(0.5rem, 1vh, 0.75rem);
-    }
   }
 </style>

@@ -13,3 +13,6 @@ export * from './useRecentUrls.svelte.ts';
 export * from './useSelection.svelte.ts';
 export * from './useSites';
 export * from './useUI';
+
+// Re-export types
+export type { Message } from '../types';

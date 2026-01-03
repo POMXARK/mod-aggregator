@@ -67,6 +67,9 @@ export interface Chat {
   updatedAt: Date;
 }
 
+// Alias for backward compatibility
+export type Message = ChatMessage;
+
 // AI настройки
 export interface AIModelConfig {
   type: 'ollama' | 'openai' | 'anthropic' | 'google';

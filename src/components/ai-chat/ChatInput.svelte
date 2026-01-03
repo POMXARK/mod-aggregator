@@ -210,8 +210,9 @@
   }
 
   .btn-chat-action:disabled {
-    opacity: 0.5;
+    opacity: 0.7;
     cursor: not-allowed;
+    filter: grayscale(50%);
   }
 
   .chat-input-row {

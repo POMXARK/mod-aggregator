@@ -270,4 +270,8 @@
   .message-user .message-time {
     text-align: right;
   }
+
+  .message:hover .message-actions {
+    opacity: 1;
+  }
 </style>

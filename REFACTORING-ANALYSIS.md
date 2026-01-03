@@ -2,218 +2,81 @@
 
 **Дата генерации:** 03.01.2026
 
-## 🚨 Критические кандидаты (>2000 строк)
+## 📋 СРЕДНИЙ ПРИОРИТЕТ (500-1000 строк)
 
-1. **src-tauri\src\main.rs** - 2284 строк
+Рассмотреть рефакторинг при следующей модификации:
 
-## ⚠️ Высокий приоритет (1000-2000 строк)
+1. **tauri-plugin-mcp\guest-js\index.ts** - 986 строк
+2. **src\lib\tauri-mock.ts** - 948 строк
+3. **src\components\Parser\UI\constructor\GeneratedCodePanel.svelte** - 942 строк
+4. **src\components\AIChat.svelte** - 936 строк
+5. **src\components\Sidebar.svelte** - 853 строк
+6. **src-tauri\src\ai_parser.rs** - 794 строк
+7. **src-tauri\src\database\modules\collections.rs** - 768 строк
+8. **src-tauri\src\commands\batch_operations.rs** - 762 строк
+9. **src\components\collections\CollectionLogicBuilder.svelte** - 761 строк
+10. **src\components\collections\UI\collections\CollectionLogicBuilder.svelte** - 761 строк
+11. **src\lib\utils\selection-script.ts** - 724 строк
+12. **src\components\files\FileForm.svelte** - 657 строк
+13. **src\components\files\UI\files\FileForm.svelte** - 657 строк
+14. **src-tauri\src\handlers\resources.rs** - 648 строк
+15. **src\components\files\BatchOperations.svelte** - 632 строк
 
-1. **src-tauri\src\database.rs** - 1726 строк
-2. **src\components\AIChat.svelte** - 1718 строк
-3. **src-tauri\src\commands\collections.rs** - 1176 строк
+**Рекомендации:**
+- Мониторить рост файла
+- Рассмотреть извлечение утилитарных функций
+- Проверить single responsibility principle
 
-## 📊 Общая статистика
+## 📈 Статистика по языкам
 
-- **Всего файлов:** 343
-- **Всего строк кода:** 63 927
-- **Средний размер файла:** 186 строк
+### Svelte
+- **Файлов:** 134
+- **Всего строк:** 26,242
+- **Средний размер:** 196 строк
+- **Крупных файлов (>500 строк):** 15
 
-## 📈 Распределение по языкам
+**Крупные файлы:**
+- src\components\Parser\UI\constructor\GeneratedCodePanel.svelte (942 строк)
+- src\components\AIChat.svelte (936 строк)
+- src\components\Sidebar.svelte (853 строк)
+- src\components\collections\CollectionLogicBuilder.svelte (761 строк)
+- src\components\collections\UI\collections\CollectionLogicBuilder.svelte (761 строк)
 
-- .svelte: 27 024 строк (42.3%)
-- .ts: 16 970 строк (26.5%)
-- .rs: 15 936 строк (24.9%)
-- .js: 3 885 строк (6.1%)
-- .tsx: 112 строк (0.2%)
+### Rust
+- **Файлов:** 85
+- **Всего строк:** 18,442
+- **Средний размер:** 217 строк
+- **Крупных файлов (>500 строк):** 11
 
----
+**Крупные файлы:**
+- src-tauri\src\ai_parser.rs (794 строк)
+- src-tauri\src\database\modules\collections.rs (768 строк)
+- src-tauri\src\commands\batch_operations.rs (762 строк)
+- src-tauri\src\handlers\resources.rs (648 строк)
+- src-tauri\src\commands\import_export.rs (618 строк)
 
-# 🧪 План тестирования main.rs методов
+### TypeScript
+- **Файлов:** 110
+- **Всего строк:** 16,976
+- **Средний размер:** 154 строк
+- **Крупных файлов (>500 строк):** 6
 
-## Группы функциональности и методы для тестирования
+**Крупные файлы:**
+- tauri-plugin-mcp\guest-js\index.ts (986 строк)
+- src\lib\tauri-mock.ts (948 строк)
+- src\lib\utils\selection-script.ts (724 строк)
+- src\components\Parser\UI\ParserBuilder\composables\useUIState.ts (560 строк)
+- src\lib\collections\__tests__\collection-logic.property.test.ts (532 строк)
 
-### 1. Утилиты URL (высокий приоритет)
-- `extract_data_base_url()` - ✅ Готово
-- `normalize_url_for_comparison()` - ✅ Готово
+### JavaScript
+- **Файлов:** 40
+- **Всего строк:** 3,885
+- **Средний размер:** 97 строк
+- **Крупных файлов (>500 строк):** 0
 
-### 2. Команды сайтов (средний приоритет)
-- `get_sites()` - требуется тестирование
-- `add_site()` - требуется тестирование
-- `update_site()` - требуется тестирование
-- `delete_site()` - требуется тестирование
+### TSX
+- **Файлов:** 1
+- **Всего строк:** 112
+- **Средний размер:** 112 строк
+- **Крупных файлов (>500 строк):** 0
 
-### 3. Команды модов (высокий приоритет)
-- `get_mods()` - требуется тестирование
-- `check_updates()` - требуется тестирование
-
-### 4. Парсинг (высокий приоритет)
-- `build_parser()` - требуется тестирование
-- `test_parser_from_nodes()` - требуется тестирование
-- `test_parser()` - требуется тестирование
-
-### 5. Работа с страницами (высокий приоритет)
-- `fetch_page()` - требуется тестирование
-- `save_page_local()` - требуется тестирование
-- `get_saved_page_for_site()` - требуется тестирование
-- `get_saved_page_versions()` - требуется тестирование
-
-### 6. Кеширование (высокий приоритет)
-- `get_cached_page()` - требуется тестирование
-- `list_cached_pages()` - требуется тестирование
-- `clear_page_cache()` - требуется тестирование
-- `get_cache_folder_for_url()` - требуется тестирование
-
-### 7. Ресурсы (средний приоритет)
-- `save_resource()` - требуется тестирование
-- `get_cached_resource()` - требуется тестирование
-- `fetch_resource()` - требуется тестирование
-
-### 8. AI функции (высокий приоритет)
-- `ai_generate_parser()` - требуется тестирование
-- `ai_chat()` - требуется тестирование
-- `ai_check_ollama()` - требуется тестирование
-
-### 9. Уведомления (низкий приоритет)
-- `get_notifications()` - требуется тестирование
-- `mark_notification_read()` - требуется тестирование
-
-## Стратегия тестирования
-
-### Unit тесты (в модулях)
-```rust
-#[cfg(test)]
-mod tests {
-    // Тесты для каждой функции
-}
-```
-
-### Integration тесты (в tests/)
-```rust
-// tests/command_handlers_tests.rs
-#[test]
-fn test_site_commands() { ... }
-```
-
-### Mock объекты
-- База данных: использовать тестовую БД SQLite в памяти
-- HTTP клиент: mock reqwest responses
-- Файловая система: временные директории
-- AI сервисы: mock ответы
-
----
-
-# 🏗️ План рефакторинга main.rs
-
-## Цели рефакторинга
-
-1. **Разделение ответственности** - каждый модуль отвечает за свою функциональность
-2. **Улучшение тестируемости** - модули легче тестировать изолированно
-3. **Уменьшение размера файла** - main.rs станет управляемым
-4. **Повышение читаемости** - логика группируется по назначению
-
-## Новая структура модулей
-
-```
-src-tauri/src/
-├── main.rs              # Точка входа, инициализация
-├── handlers/            # Группа обработчиков команд
-│   ├── mod.rs          # Объявление модулей
-│   ├── utils.rs        # Утилиты URL
-│   ├── sites.rs        # Команды сайтов
-│   ├── mods.rs         # Команды модов
-│   ├── parsers.rs      # Парсинг
-│   ├── pages.rs        # Работа со страницами
-│   ├── cache.rs        # Кеширование
-│   ├── resources.rs    # Ресурсы
-│   ├── ai.rs           # AI функции
-│   └── notifications.rs # Уведомления
-└── ...
-```
-
-## Принципы рефакторинга
-
-### SOLID принципы
-- **S** (Single Responsibility): Каждый модуль отвечает за одну функциональность
-- **O** (Open/Closed): Модули открыты для расширения, закрыты для модификации
-- **L** (Liskov Substitution): Интерфейсы модулей взаимозаменяемы
-- **I** (Interface Segregation): Минимальные интерфейсы для каждого модуля
-- **D** (Dependency Inversion): Зависимости от абстракций, не от конкретных реализаций
-
-### Дополнительные принципы
-- **DRY** (Don't Repeat Yourself): Избегать дублирования кода
-- **KISS** (Keep It Simple, Stupid): Простые решения
-- **YAGNI** (You Ain't Gonna Need It): Не добавлять лишнее
-- **Composition over Inheritance**: Предпочитать композицию наследованию
-
-## Порядок выполнения рефакторинга
-
-1. ✅ Анализ структуры и создание плана
-2. ✅ Создание структуры модулей (handlers/)
-3. ✅ Извлечение утилит (utils.rs)
-4. ✅ Извлечение обработчиков по группам
-5. ✅ Обновление main.rs
-6. ✅ Создание тестов
-7. ✅ Верификация компиляции
-8. ✅ Рефакторинг database.rs - модуляризация
-
-## Результаты рефакторинга
-
-### ✅ Выполненные задачи:
-
-1. **Анализ структуры** - определены 9 функциональных групп в main.rs
-2. **Создание модульной структуры** - создана директория `handlers/` с 9 модулями
-3. **Извлечение кода** - все функции main.rs распределены по специализированным модулям
-4. **Обновление main.rs** - сокращен с 2284 строк до ~350 строк
-5. **Рефакторинг database.rs** - создана модульная структура с 9 модулями
-6. **Добавление тестов** - созданы unit тесты для всех модулей (80+ тестов проходят)
-7. **Компиляция** - проект компилируется без ошибок
-
-### 📊 Статистика рефакторинга:
-
-- **main.rs сокращение**: 85% (2284 → 350 строк)
-- **database.rs модуляризация**: 9 модулей с полной функциональностью
-- **Всего создано модулей**: 18 (9 handlers + 9 database)
-- **Test coverage**: 80+ unit тестов проходят
-- **Время выполнения**: ~4 часа total
-
-### 🏗️ Новая структура:
-
-```
-src-tauri/src/
-├── main.rs              # Точка входа, инициализация (~350 строк)
-├── handlers/            # Обработчики команд (9 модулей)
-│   ├── utils.rs        # URL утилиты
-│   ├── sites.rs        # CRUD сайтов
-│   ├── mods.rs         # Управление модами
-│   ├── parsers.rs      # Парсинг
-│   ├── cache.rs        # Кеширование
-│   ├── resources.rs    # Работа с ресурсами
-│   ├── ai.rs           # AI интеграция
-│   └── notifications.rs # Уведомления
-└── database/           # Операции с БД (9 модулей)
-    ├── modules/
-    │   ├── base.rs     # Ядро БД
-    │   ├── sites.rs    # Операции с сайтами
-    │   ├── mods.rs     # Операции с модами
-    │   ├── files.rs    # Управление файлами
-    │   ├── dependencies.rs # Зависимости
-    │   ├── collections.rs # Коллекции
-    │   └── session.rs  # Сессия пользователя
-    └── migrations/     # Миграции схемы
-```
-
-### 🎯 Достигнутые принципы:
-
-- **SOLID**: Каждый модуль имеет единственную ответственность
-- **DRY**: Устранено дублирование кода
-- **KISS**: Простая и понятная структура
-- **Тестируемость**: Все модули покрыты unit тестами
-- **Поддерживаемость**: Код легко расширять и модифицировать
-
-### 📈 Коммиты рефакторинга:
-
-1. **`74a6a8d`** - Major refactoring: Extract handlers from main.rs
-2. **`16c201c`** - Database refactoring: Create modular structure with handlers
-3. **`5849a02`** - Database refactoring: Create modular structure
-
-**Total: 18 модулей, 80+ тестов, 85% сокращение main.rs** 🎉

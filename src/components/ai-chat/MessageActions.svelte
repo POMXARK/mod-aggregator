@@ -32,8 +32,8 @@
   }: Props = $props();
 </script>
 
-{#if message.role === 'assistant'}
-  <div class="message-actions">
+<div class="message-actions">
+  {#if message.role === 'assistant'}
     {#if hasCode}
       <button class="btn-message-action" onclick={onApplyCode} title="Применить исправление кода">
         ✅ Применить код
@@ -65,28 +65,28 @@
         ▶️ Запустить парсер
       </button>
     {/if}
-    <button class="btn-message-action" onclick={onCopy} title="Копировать сообщение">
-      📋 Копировать
-    </button>
-    <button class="btn-message-action" onclick={onCopyText} title="Копировать текст сообщения в буфер обмена">
-      📄 Копировать текст
-    </button>
-    <button class="btn-delete-message" onclick={onDelete} title="Удалить сообщение"> × </button>
-  </div>
-{/if}
+  {/if}
+  <button class="btn-message-action" onclick={onCopy} title="Копировать сообщение">
+    📋 Копировать
+  </button>
+  <button class="btn-message-action" onclick={onCopyText} title="Копировать текст сообщения в буфер обмена">
+    📄 Копировать текст
+  </button>
+  <button class="btn-delete-message" onclick={onDelete} title="Удалить сообщение"> × </button>
+</div>
 
 <style>
   .message-actions {
     display: flex;
     gap: 0.25rem;
     align-items: center;
-    opacity: 0;
+    opacity: 0.6;
     transition: opacity 0.2s ease;
+    padding: 0.125rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
   }
 
-  .message:hover .message-actions {
-    opacity: 1;
-  }
 
   .btn-message-action {
     background: rgba(14, 165, 233, 0.1);
