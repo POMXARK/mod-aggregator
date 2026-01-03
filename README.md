@@ -56,29 +56,29 @@ import MyButton from '../ui/MyButton.svelte';
 ## Статистика кода
 
 ### Общая статистика
-- **Всего файлов**: 342
-- **Всего строк кода**: 63,656
+- **Всего файлов**: 370
+- **Всего строк кода**: 65,657
 
 ### Распределение по языкам
 | Язык | Строк кода | Процент |
 |------|------------|---------|
-| Svelte | 27,024 | 42.5% |
-| TypeScript | 16,970 | 26.7% |
-| Rust | 15,936 | 25.0% |
-| JavaScript | 3,614 | 5.7% |
-| TSX | 112 | 0.1% |
+| Svelte | 26,242 | 40.0% |
+| Rust | 18,442 | 28.1% |
+| TypeScript | 16,976 | 25.9% |
+| JavaScript | 3,885 | 5.9% |
+| TSX | 112 | 0.2% |
 
 ### Крупнейшие файлы
 | Файл | Строк | Язык |
 |------|-------|------|
-| `src-tauri/src/main.rs` | 2,284 | Rust |
-| `src-tauri/src/database.rs` | 1,726 | Rust |
-| `src/components/AIChat.svelte` | 1,718 | Svelte |
-| `src-tauri/src/commands/collections.rs` | 1,176 | Rust |
 | `tauri-plugin-mcp/guest-js/index.ts` | 986 | TypeScript |
 | `src/lib/tauri-mock.ts` | 948 | TypeScript |
+| `src/components/Parser/UI/constructor/GeneratedCodePanel.svelte` | 942 | Svelte |
+| `src/components/AIChat.svelte` | 936 | Svelte |
+| `src/components/Sidebar.svelte` | 853 | Svelte |
+| `src-tauri/src/ai_parser.rs` | 794 | Rust |
 
-*Статистика обновлена автоматически. Последнее обновление: 2026-01-02*
+*Статистика обновлена автоматически. Последнее обновление: 2026-01-03*
 
 ### 📋 Анализ рефакторинга
 
