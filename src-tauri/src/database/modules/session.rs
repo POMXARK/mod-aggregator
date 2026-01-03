@@ -143,12 +143,15 @@ pub async fn add_recent_action(db: &Database, action: &serde_json::Value) -> Res
 ///
 /// # Параметры
 /// * `db` - подключение к базе данных
+/// * `limit` - максимальное количество действий
 ///
 /// # Возвращает
 /// Вектор недавних действий или ошибку
-pub async fn get_recent_actions(db: &Database) -> Result<Vec<serde_json::Value>, sqlx::Error> {
+pub async fn get_recent_actions(db: &Database, limit: usize) -> Result<Vec<serde_json::Value>, sqlx::Error> {
     let state = get_session_state(db).await?;
-    Ok(serde_json::from_value(state["recent_actions"].clone()).unwrap_or_default())
+    let mut actions: Vec<serde_json::Value> = serde_json::from_value(state["recent_actions"].clone()).unwrap_or_default();
+    actions.truncate(limit);
+    Ok(actions)
 }
 
 /// Очистить недавние действия в сессии

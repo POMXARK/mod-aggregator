@@ -107,6 +107,40 @@ pub async fn create_collection(db: &Database, collection: &Collection) -> Result
     Ok(Collection { id, ..collection.clone() })
 }
 
+/// Создать новую коллекцию (упрощенная версия)
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `name` - имя коллекции
+/// * `description` - описание коллекции (опционально)
+///
+/// # Возвращает
+/// Созданная коллекция с присвоенным ID или ошибку
+pub async fn create_collection_simple(db: &Database, name: &str, description: Option<&str>) -> Result<Collection, sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO collections (name, description, created_at, updated_at) VALUES (?, ?, ?, ?)",
+    )
+    .bind(name)
+    .bind(description)
+    .bind(chrono::Utc::now())
+    .bind(chrono::Utc::now())
+    .execute(&db.pool)
+    .await?;
+
+    let id = sqlx::query("SELECT last_insert_rowid()")
+        .fetch_one(&db.pool)
+        .await?
+        .get(0);
+
+    Ok(Collection {
+        id,
+        name: name.to_string(),
+        description: description.map(|s| s.to_string()),
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+    })
+}
+
 /// Обновить коллекцию
 ///
 /// # Параметры
@@ -123,6 +157,34 @@ pub async fn update_collection(db: &Database, collection: &Collection) -> Result
     .bind(&collection.description)
     .bind(collection.updated_at)
     .bind(collection.id)
+    .execute(&db.pool)
+    .await?;
+    Ok(())
+}
+
+/// Обновить коллекцию (упрощенная версия)
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `id` - ID коллекции
+/// * `name` - новое имя коллекции (опционально)
+/// * `description` - новое описание коллекции (опционально)
+///
+/// # Возвращает
+/// Пустой результат при успехе или ошибку
+pub async fn update_collection_simple(
+    db: &Database,
+    id: i64,
+    name: Option<&str>,
+    description: Option<&str>,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE collections SET name = COALESCE(?, name), description = COALESCE(?, description), updated_at = ? WHERE id = ?",
+    )
+    .bind(name)
+    .bind(description)
+    .bind(chrono::Utc::now())
+    .bind(id)
     .execute(&db.pool)
     .await?;
     Ok(())
@@ -529,10 +591,178 @@ pub async fn file_in_collection(db: &Database, collection_id: i64, file_id: i64)
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::database::modules::files::create_file_simple;
+    use sqlx::sqlite::SqlitePool;
+
+    // Helper function to create an in-memory database for testing
+    async fn create_test_db() -> Result<Database, sqlx::Error> {
+        // Use in-memory SQLite database for tests
+        let pool = SqlitePool::connect("sqlite::memory:").await?;
+
+        let db = Database { pool };
+
+        // Initialize schema
+        db.init().await?;
+        db.run_migrations().await?;
+
+        Ok(db)
+    }
 
     #[tokio::test]
-    async fn test_collections_operations() {
-        let result = Database::new().await;
-        assert!(result.is_ok() || result.is_err());
+    async fn test_create_collection_simple() {
+        let db = create_test_db().await.unwrap();
+
+        let collection = create_collection_simple(&db, "Test Collection", Some("A test collection")).await.unwrap();
+
+        assert_eq!(collection.name, "Test Collection");
+        assert_eq!(collection.description, Some("A test collection".to_string()));
+    }
+
+    #[tokio::test]
+    async fn test_get_collection_by_name() {
+        let db = create_test_db().await.unwrap();
+
+        let collection = create_collection_simple(&db, "Unique Collection", None).await.unwrap();
+
+        let retrieved = get_collection_by_name(&db, "Unique Collection").await.unwrap().unwrap();
+
+        assert_eq!(retrieved.id, collection.id);
+        assert_eq!(retrieved.name, "Unique Collection");
+    }
+
+    #[tokio::test]
+    async fn test_get_collections() {
+        let db = create_test_db().await.unwrap();
+
+        let _col1 = create_collection_simple(&db, "Collection 1", None).await.unwrap();
+        let _col2 = create_collection_simple(&db, "Collection 2", None).await.unwrap();
+        let _col3 = create_collection_simple(&db, "Collection 3", None).await.unwrap();
+
+        let collections = get_collections(&db).await.unwrap();
+        assert_eq!(collections.len(), 3);
+    }
+
+    #[tokio::test]
+    async fn test_update_collection_simple() {
+        let db = create_test_db().await.unwrap();
+
+        let collection = create_collection_simple(&db, "Old Name", Some("Old description")).await.unwrap();
+
+        update_collection_simple(&db, collection.id, Some("New Name"), Some("New description")).await.unwrap();
+
+        let updated = get_collection(&db, collection.id).await.unwrap().unwrap();
+        assert_eq!(updated.name, "New Name");
+        assert_eq!(updated.description, Some("New description".to_string()));
+    }
+
+    #[tokio::test]
+    async fn test_delete_collection() {
+        let db = create_test_db().await.unwrap();
+
+        let collection = create_collection_simple(&db, "To Delete", None).await.unwrap();
+
+        delete_collection(&db, collection.id).await.unwrap();
+
+        let result = get_collection(&db, collection.id).await.unwrap();
+        assert!(result.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_add_and_remove_file_from_collection() {
+        let db = create_test_db().await.unwrap();
+
+        // Create collection and file
+        let collection = create_collection_simple(&db, "Test Collection", None).await.unwrap();
+        let file = create_file_simple(&db, "test-file", "1.0.0", None, None).await.unwrap();
+
+        // Add file to collection
+        add_file_to_collection(&db, collection.id, file.id, None).await.unwrap();
+
+        // Verify file is in collection
+        let is_in_collection = file_in_collection(&db, collection.id, file.id).await.unwrap();
+        assert!(is_in_collection);
+
+        // Get collection files
+        let files = get_collection_files(&db, collection.id).await.unwrap();
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].0.id, file.id);
+
+        // Remove file from collection
+        remove_file_from_collection(&db, collection.id, file.id).await.unwrap();
+
+        // Verify file is no longer in collection
+        let is_in_collection = file_in_collection(&db, collection.id, file.id).await.unwrap();
+        assert!(!is_in_collection);
+    }
+
+    #[tokio::test]
+    async fn test_reorder_collection_files() {
+        let db = create_test_db().await.unwrap();
+
+        // Create collection and files
+        let collection = create_collection_simple(&db, "Ordered Collection", None).await.unwrap();
+        let file1 = create_file_simple(&db, "file1", "1.0.0", None, None).await.unwrap();
+        let file2 = create_file_simple(&db, "file2", "1.0.0", None, None).await.unwrap();
+        let file3 = create_file_simple(&db, "file3", "1.0.0", None, None).await.unwrap();
+
+        // Add files to collection
+        add_file_to_collection(&db, collection.id, file1.id, None).await.unwrap();
+        add_file_to_collection(&db, collection.id, file2.id, None).await.unwrap();
+        add_file_to_collection(&db, collection.id, file3.id, None).await.unwrap();
+
+        // Reorder files
+        let new_order = vec![(file3.id, 1), (file1.id, 2), (file2.id, 3)];
+        reorder_collection_files(&db, collection.id, &new_order).await.unwrap();
+
+        // Verify new order
+        let files = get_collection_files(&db, collection.id).await.unwrap();
+        assert_eq!(files.len(), 3);
+        assert_eq!(files[0].0.id, file3.id); // order_index 1
+        assert_eq!(files[1].0.id, file1.id); // order_index 2
+        assert_eq!(files[2].0.id, file2.id); // order_index 3
+    }
+
+    #[tokio::test]
+    async fn test_collection_logic_rules() {
+        let db = create_test_db().await.unwrap();
+
+        let collection = create_collection_simple(&db, "Logic Collection", None).await.unwrap();
+
+        let rule = CollectionLogicRule {
+            id: 0, // Will be set by database
+            collection_id: collection.id,
+            name: "Test Rule".to_string(),
+            condition_type: crate::models::collection_logic::ConditionType::Boolean,
+            condition_params: serde_json::json!({"value": true}),
+            action: crate::models::collection_logic::Action::Enable,
+            created_at: chrono::Utc::now(),
+        };
+
+        let created_rule = create_collection_logic_rule(&db, &rule).await.unwrap();
+        assert_eq!(created_rule.name, "Test Rule");
+        assert_eq!(created_rule.collection_id, collection.id);
+
+        // Get rules for collection
+        let rules = get_collection_logic_rules(&db, collection.id).await.unwrap();
+        assert_eq!(rules.len(), 1);
+        assert_eq!(rules[0].id, created_rule.id);
+
+        // Get specific rule
+        let retrieved_rule = get_collection_logic_rule(&db, created_rule.id).await.unwrap().unwrap();
+        assert_eq!(retrieved_rule.name, "Test Rule");
+
+        // Update rule
+        let mut updated_rule = created_rule.clone();
+        updated_rule.name = "Updated Rule".to_string();
+        update_collection_logic_rule(&db, &updated_rule).await.unwrap();
+
+        let retrieved_updated = get_collection_logic_rule(&db, created_rule.id).await.unwrap().unwrap();
+        assert_eq!(retrieved_updated.name, "Updated Rule");
+
+        // Delete rule
+        delete_collection_logic_rule(&db, created_rule.id).await.unwrap();
+
+        let result = get_collection_logic_rule(&db, created_rule.id).await.unwrap();
+        assert!(result.is_none());
     }
 }

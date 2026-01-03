@@ -369,7 +369,7 @@ async fn test_session_operations() {
     session::add_recent_action(&db, &action).await.expect("Failed to add recent action");
 
     // Получаем недавние действия
-    let recent_actions = session::get_recent_actions(&db).await.expect("Failed to get recent actions");
+    let recent_actions = session::get_recent_actions(&db, 50).await.expect("Failed to get recent actions");
     assert!(!recent_actions.is_empty());
 
     // Обновляем текущую страницу
@@ -382,7 +382,7 @@ async fn test_session_operations() {
     session::clear_recent_actions(&db).await.expect("Failed to clear recent actions");
 
     // Проверяем, что действия очищены
-    let cleared_actions = session::get_recent_actions(&db).await.expect("Failed to get cleared actions");
+    let cleared_actions = session::get_recent_actions(&db, 50).await.expect("Failed to get cleared actions");
     assert!(cleared_actions.is_empty());
 
     // Сбрасываем состояние сессии

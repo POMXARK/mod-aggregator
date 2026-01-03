@@ -77,6 +77,56 @@ pub async fn add_file_dependency(
     Ok(crate::models::FileDependency { id, ..dependency.clone() })
 }
 
+/// Добавить зависимость файла (упрощенная версия)
+///
+/// # Параметры
+/// * `db` - подключение к базе данных
+/// * `source_file_id` - ID исходного файла
+/// * `target_file_name` - имя целевого файла
+/// * `target_file_version` - версия целевого файла (опционально)
+/// * `dependency_type` - тип зависимости
+///
+/// # Возвращает
+/// Созданная зависимость с присвоенным ID или ошибку
+pub async fn add_file_dependency_simple(
+    db: &Database,
+    source_file_id: i64,
+    target_file_name: &str,
+    target_file_version: Option<&str>,
+    dependency_type: DependencyType,
+) -> Result<crate::models::FileDependency, sqlx::Error> {
+    let dep_type_str = match dependency_type {
+        DependencyType::Required => "required",
+        DependencyType::Optional => "optional",
+        DependencyType::Peer => "peer",
+    };
+
+    sqlx::query(
+        "INSERT INTO file_dependencies (source_file_id, target_file_name, target_file_version, dependency_type, created_at) VALUES (?, ?, ?, ?, ?)",
+    )
+    .bind(source_file_id)
+    .bind(target_file_name)
+    .bind(target_file_version)
+    .bind(dep_type_str)
+    .bind(chrono::Utc::now())
+    .execute(&db.pool)
+    .await?;
+
+    let id = sqlx::query("SELECT last_insert_rowid()")
+        .fetch_one(&db.pool)
+        .await?
+        .get(0);
+
+    Ok(crate::models::FileDependency {
+        id,
+        source_file_id,
+        target_file_name: target_file_name.to_string(),
+        target_file_version: target_file_version.map(|s| s.to_string()),
+        dependency_type,
+        created_at: chrono::Utc::now(),
+    })
+}
+
 /// Удалить зависимость файла
 ///
 /// # Параметры

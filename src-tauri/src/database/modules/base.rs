@@ -45,7 +45,7 @@ impl Database {
     ///
     /// # Возвращает
     /// Пустой результат при успехе или ошибку
-    async fn init(&self) -> Result<(), sqlx::Error> {
+    pub async fn init(&self) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS sites (
